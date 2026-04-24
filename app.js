@@ -132,12 +132,12 @@ function render() {
   els.roleSubtitle.textContent =
     activeRole === "hospital"
       ? "Severe Level 4/5 incidents and ambulance response updates."
-      : "All impact levels, technician support, and case progress updates.";
+      : "All impact levels, EV driver activity, technician support, and case progress updates.";
   els.feedTitle.textContent = `${roleLabel} Notifications`;
   els.feedSummary.textContent =
     activeRole === "hospital"
       ? "Hospital only receives Level 4 and Level 5 cases."
-      : "Insurance receives every impact level from Level 1 upward.";
+      : "Insurance receives every impact level and all related case updates.";
 
   const visible = visibleAlerts();
   const updates = visibleNotifications();
@@ -194,7 +194,7 @@ function visibleNotifications() {
       if (activeRole === "hospital") {
         return audience === "hospital" || audience === "emergency_contact";
       }
-      return audience === "insurance";
+      return true;
     })
     .sort((a, b) => parseDate(b.timestamp) - parseDate(a.timestamp));
 }
