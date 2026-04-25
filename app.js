@@ -31,6 +31,7 @@ let reportBannerTimer = null;
 let reportConfidenceScore = 94;
 let selangorMap = null;
 let zoneLayers = new Map();
+const chartDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const reportZones = {
   "shah-alam": {
     title: "Shah Alam",
@@ -193,6 +194,72 @@ const reportZones = {
       "Sepang remains lower risk overall, but long-distance EV travel routes suggest keeping one clear dispatch route open for charging-related roadside support.",
     spark: [1, 1, 2, 2, 3, 3, 4],
   },
+  "kuala-selangor": {
+    title: "Kuala Selangor",
+    riskText: "Stable / monitor",
+    riskClass: "low-text",
+    incidentsCount: 4,
+    criticalPct: 11,
+    action: "Maintain coastal coverage",
+    window: "12 PM - 3 PM",
+    level: "low",
+    center: [3.3395, 101.2497],
+    polygon: [
+      [3.47, 101.08],
+      [3.47, 101.28],
+      [3.38, 101.33],
+      [3.25, 101.3],
+      [3.22, 101.15],
+      [3.31, 101.05],
+    ],
+    narrative:
+      "Kuala Selangor remains calmer overall, but coastal highway response coverage should stay open for scattered roadside cases.",
+    spark: [1, 2, 2, 3, 2, 3, 4],
+  },
+  rawang: {
+    title: "Rawang",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 6,
+    criticalPct: 17,
+    action: "Keep one standby route northbound",
+    window: "6 AM - 9 AM",
+    level: "medium",
+    center: [3.3213, 101.5767],
+    polygon: [
+      [3.4, 101.47],
+      [3.43, 101.61],
+      [3.34, 101.67],
+      [3.25, 101.63],
+      [3.24, 101.5],
+      [3.31, 101.45],
+    ],
+    narrative:
+      "Rawang is showing moderate commuter-risk buildup, especially on northbound connectors, so dispatch timing should be watched closely.",
+    spark: [2, 3, 4, 4, 5, 5, 6],
+  },
+  "hulu-langat": {
+    title: "Hulu Langat",
+    riskText: "Stable / monitor",
+    riskClass: "low-text",
+    incidentsCount: 5,
+    criticalPct: 13,
+    action: "Maintain hillside access readiness",
+    window: "3 PM - 6 PM",
+    level: "low",
+    center: [3.1234, 101.8602],
+    polygon: [
+      [3.22, 101.75],
+      [3.24, 101.93],
+      [3.14, 101.99],
+      [3.03, 101.94],
+      [3.03, 101.79],
+      [3.11, 101.73],
+    ],
+    narrative:
+      "Hulu Langat remains mostly stable, but narrower access roads mean slower ambulance routing during late-day incidents.",
+    spark: [1, 2, 3, 3, 4, 4, 5],
+  },
 };
 let activeZone = "shah-alam";
 
@@ -216,6 +283,7 @@ const els = {
   selectAllBtn: document.querySelector("#selectAllBtn"),
   deleteBtn: document.querySelector("#deleteBtn"),
   updatesPanel: document.querySelector("#updatesPanel"),
+  feedPanel: document.querySelector("#feedPanel"),
   reportPanel: document.querySelector("#reportPanel"),
   reportUpdated: document.querySelector("#reportUpdated"),
   zoneTitle: document.querySelector("#zoneTitle"),
@@ -226,6 +294,7 @@ const els = {
   zoneAction: document.querySelector("#zoneAction"),
   zoneWindow: document.querySelector("#zoneWindow"),
   trendCards: document.querySelector("#trendCards"),
+  trendChart: document.querySelector("#trendChart"),
   generateStatus: document.querySelector("#generateStatus"),
   reportBanner: document.querySelector("#reportBanner"),
   reportBannerText: document.querySelector("#reportBannerText"),
@@ -234,6 +303,8 @@ const els = {
   mapOverlayTitle: document.querySelector("#mapOverlayTitle"),
   mapOverlayText: document.querySelector("#mapOverlayText"),
   mapOverlayRisk: document.querySelector("#mapOverlayRisk"),
+  regionalSummary: document.querySelector("#regionalSummary"),
+  riskDistribution: document.querySelector("#riskDistribution"),
 };
 
 document.querySelectorAll(".role-btn").forEach((button) => {
@@ -328,6 +399,7 @@ function render() {
   });
 
   const reportMode = activeRole === "report";
+  els.feedPanel.classList.toggle("hidden", reportMode);
   els.updatesPanel.classList.toggle("hidden", reportMode);
   els.reportPanel.classList.toggle("hidden", !reportMode);
   els.generateReportBtn.classList.toggle("hidden", !reportMode);
@@ -438,6 +510,8 @@ function renderReportZone() {
     : "Updated --:--";
   els.trendCards.innerHTML = trendCardsMarkup();
   els.regionChips.innerHTML = regionChipsMarkup();
+  els.regionalSummary.textContent = buildRegionalSummary();
+  els.riskDistribution.innerHTML = riskDistributionMarkup();
   els.generateStatus.textContent = reportGeneratedAt
     ? `Last generated at ${formatTime(reportGeneratedAt)}`
     : "Ready to generate";
@@ -446,6 +520,7 @@ function renderReportZone() {
   els.mapOverlayRisk.textContent = zone.riskText;
   els.mapOverlayRisk.className = `map-overlay-risk ${zone.riskClass}`;
   bindRegionChips();
+  renderTrendChart();
   updateMapVisuals();
 }
 
@@ -488,6 +563,22 @@ function regionChipsMarkup() {
         </button>
       `;
     })
+    .join("");
+}
+
+function riskDistributionMarkup() {
+  const zones = Object.values(reportZones)
+    .slice()
+    .sort((a, b) => b.incidentsCount - a.incidentsCount);
+  return zones
+    .map(
+      (zone) => `
+        <div class="risk-pill ${zone.level}">
+          <span>${escapeHtml(zone.title)}</span>
+          <strong>${escapeHtml(`${zone.incidentsCount} cases`)}</strong>
+        </div>
+      `,
+    )
     .join("");
 }
 
@@ -585,6 +676,9 @@ function summaryForRole(item) {
     const parts = [
       item.ambulance_eta_minutes ? `ETA ${item.ambulance_eta_minutes} min` : "",
       item.ambulance_unit ? `Unit ${item.ambulance_unit}` : "",
+      item.assigned_driver_location
+        ? `Coming from ${item.assigned_driver_location}`
+        : "",
       item.ambulance_contact ? `Contact ${item.ambulance_contact}` : "",
       item.ambulance_team_size ? `Team ${item.ambulance_team_size}` : "",
       item.number_of_people ? `${item.number_of_people} patient(s)` : "",
@@ -621,6 +715,9 @@ function actionText(item) {
 function accountLine(item) {
   return [
     item.assigned_driver_name ? `Responder: ${item.assigned_driver_name}` : "",
+    item.assigned_driver_location
+      ? `Ambulance start: ${item.assigned_driver_location}`
+      : "",
     item.driver_dispatch_status ? `Dispatch: ${item.driver_dispatch_status}` : "",
     item.ambulance_eta_minutes ? `ETA: ${item.ambulance_eta_minutes} min` : "",
     item.ambulance_unit ? `Unit: ${item.ambulance_unit}` : "",
@@ -769,6 +866,85 @@ function randomizeReportData(forceBump = false) {
     });
 
   reportConfidenceScore = clamp(reportConfidenceScore + randomInt(-2, 2), 91, 97);
+}
+
+function buildRegionalSummary() {
+  const ranked = Object.values(reportZones)
+    .slice()
+    .sort((a, b) => b.criticalPct - a.criticalPct);
+  const highest = ranked[0];
+  const second = ranked[1];
+  const calmer = ranked
+    .slice()
+    .reverse()
+    .slice(0, 2)
+    .map((zone) => zone.title)
+    .join(" and ");
+  return `Regional EV accident concentration is currently strongest around ${highest.title} and ${second.title}, while ${calmer} remain comparatively calmer and suitable for lighter standby coverage.`;
+}
+
+function renderTrendChart() {
+  const svg = els.trendChart;
+  if (!svg) {
+    return;
+  }
+
+  const selected = reportZones[activeZone] || reportZones["shah-alam"];
+  const bars = selected.spark;
+  const maxValue = Math.max(...bars, selected.criticalPct / 4, 6);
+  const width = 420;
+  const height = 250;
+  const padding = { top: 20, right: 16, bottom: 34, left: 38 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+  const stepX = chartWidth / bars.length;
+
+  const gridLines = [0.25, 0.5, 0.75, 1].map((fraction) => {
+    const y = padding.top + chartHeight * fraction;
+    return `<line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" class="chart-grid" />`;
+  }).join("");
+
+  const barsMarkup = bars.map((value, index) => {
+    const barHeight = (value / maxValue) * chartHeight;
+    const x = padding.left + index * stepX + 10;
+    const y = padding.top + chartHeight - barHeight;
+    return `<rect x="${x}" y="${y}" width="${stepX - 18}" height="${barHeight}" rx="10" class="chart-bar" />`;
+  }).join("");
+
+  const points = bars.map((value, index) => {
+    const x = padding.left + index * stepX + stepX / 2;
+    const severityValue = value * (selected.criticalPct / 22);
+    const y = padding.top + chartHeight - (severityValue / maxValue) * chartHeight;
+    return `${x},${y}`;
+  });
+  const polyline = `<polyline points="${points.join(" ")}" class="chart-line" />`;
+  const pointMarkup = points
+    .map((point) => {
+      const [x, y] = point.split(",");
+      return `<circle cx="${x}" cy="${y}" r="4.5" class="chart-point" />`;
+    })
+    .join("");
+
+  const labels = chartDays.map((day, index) => {
+    const x = padding.left + index * stepX + stepX / 2;
+    return `<text x="${x}" y="${height - 10}" text-anchor="middle" class="chart-label">${day}</text>`;
+  }).join("");
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="chartBarGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#43a047" />
+        <stop offset="100%" stop-color="#1b5e20" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="${width}" height="${height}" rx="22" class="chart-bg" />
+    ${gridLines}
+    <line x1="${padding.left}" y1="${padding.top + chartHeight}" x2="${width - padding.right}" y2="${padding.top + chartHeight}" class="chart-axis" />
+    ${barsMarkup}
+    ${polyline}
+    ${pointMarkup}
+    ${labels}
+  `;
 }
 
 function initializeSelangorMap() {

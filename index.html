@@ -79,7 +79,7 @@
         </article>
       </section>
 
-      <section class="panel">
+      <section id="feedPanel" class="panel">
         <div class="panel-head">
           <div>
             <h2 id="feedTitle">Hospital Notifications</h2>
@@ -153,14 +153,29 @@
           </article>
 
           <article class="report-summary-card">
-            <div class="mini-kicker">AI Summary</div>
-            <h3 id="zoneTitle">Shah Alam</h3>
-            <p id="zoneRiskText" class="zone-risk high-text">High alert zone</p>
-            <p id="zoneNarrative">
-              Frequent severe alerts are clustering around Shah Alam, so ambulance units
-              should keep standby coverage closer to Persiaran Kayangan and nearby access roads.
-            </p>
-            <div class="report-facts">
+            <div class="trend-head">
+              <div>
+                <div class="mini-kicker">AI Trend Panel</div>
+                <h3>AI Hotspot Trend Analysis (Past 7 Days)</h3>
+                <p>Regional incident pressure and severity trend for Selangor EV emergency planning.</p>
+              </div>
+              <span class="trend-live-pill">Live</span>
+            </div>
+            <div class="chart-legend">
+              <span><i class="legend-swatch bar"></i> Incident volume</span>
+              <span><i class="legend-swatch line"></i> Severity trend</span>
+            </div>
+            <svg id="trendChart" class="trend-chart" viewBox="0 0 420 250" aria-label="Regional hotspot bar chart"></svg>
+            <div class="chart-focus-card">
+              <div class="mini-kicker">Focused Region</div>
+              <h4 id="zoneTitle">Shah Alam</h4>
+              <p id="zoneRiskText" class="zone-risk high-text">High alert zone</p>
+              <p id="zoneNarrative">
+                Frequent severe alerts are clustering around Shah Alam, so ambulance units
+                should keep standby coverage closer to Persiaran Kayangan and nearby access roads.
+              </p>
+            </div>
+            <div class="report-facts compact">
               <div>
                 <span>Past 7 days</span>
                 <strong id="zoneIncidents">14 incidents</strong>
@@ -178,22 +193,18 @@
                 <strong id="zoneWindow">5 PM - 8 PM</strong>
               </div>
             </div>
+            <p id="regionalSummary" class="regional-summary">
+              Regional EV accident clusters are currently highest around Shah Alam and Klang, while Petaling Jaya and Subang Jaya remain active but manageable with local standby optimization.
+            </p>
+            <div class="risk-distribution" id="riskDistribution"></div>
             <div class="report-generate-footer">
               <span id="generateStatus" class="generate-status">Ready to generate</span>
             </div>
+          </div>
           </article>
         </div>
 
-        <div class="trend-section">
-          <div class="trend-head">
-            <div>
-              <h3>Regional AI Hotspot Trend Analysis</h3>
-              <p>Past 7-day severity pattern used to suggest ambulance standby and patrol coverage.</p>
-            </div>
-            <span class="trend-live-pill">Live</span>
-          </div>
-          <div id="trendCards" class="trend-grid"></div>
-        </div>
+        <div id="trendCards" class="trend-grid"></div>
       </section>
     </main>
 
