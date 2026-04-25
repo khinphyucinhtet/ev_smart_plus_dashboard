@@ -26,6 +26,10 @@
         <span>Insurance</span>
         <small>All impact/support logs</small>
       </button>
+      <button class="role-btn" data-role="report">
+        <span>Accidents Report</span>
+        <small>AI-generated hotspot view</small>
+      </button>
 
       <div class="note">
         Static HTML dashboard. Host this folder directly on GitHub Pages,
@@ -79,7 +83,7 @@
         <div id="alertFeed" class="feed"></div>
       </section>
 
-      <section class="panel">
+      <section id="updatesPanel" class="panel">
         <div class="panel-head">
           <div>
             <h2>Realtime Updates</h2>
@@ -87,6 +91,76 @@
           </div>
         </div>
         <div id="notificationFeed" class="feed compact"></div>
+      </section>
+
+      <section id="reportPanel" class="panel hidden">
+        <div class="panel-head">
+          <div>
+            <h2>AI Generated Accident Hotspots</h2>
+            <p>
+              Presentation-ready regional trend view for ambulance standby planning,
+              patrol focus, and alert readiness.
+            </p>
+          </div>
+          <span id="reportUpdated" class="status-pill">Updated --:--</span>
+        </div>
+
+        <div class="report-layout">
+          <article class="report-map-card">
+            <div class="report-map-head">
+              <div>
+                <h3>Klang Valley Risk Overview</h3>
+                <p>Simulated multi-day accident concentration based on EVSmart+ incident patterns.</p>
+              </div>
+              <div class="risk-legend">
+                <span><i class="dot low"></i> Low</span>
+                <span><i class="dot medium"></i> Medium</span>
+                <span><i class="dot high"></i> High</span>
+              </div>
+            </div>
+            <div class="report-map">
+              <div class="map-backdrop"></div>
+              <button class="zone zone-shah-alam high" type="button" data-zone="shah-alam">
+                <strong>Shah Alam</strong>
+                <span>High risk</span>
+              </button>
+              <button class="zone zone-subang-jaya medium" type="button" data-zone="subang-jaya">
+                <strong>Subang Jaya</strong>
+                <span>Medium risk</span>
+              </button>
+              <button class="zone zone-petaling-jaya medium" type="button" data-zone="petaling-jaya">
+                <strong>Petaling Jaya</strong>
+                <span>Medium risk</span>
+              </button>
+            </div>
+          </article>
+
+          <article class="report-summary-card">
+            <div class="mini-kicker">AI Summary</div>
+            <h3 id="zoneTitle">Shah Alam</h3>
+            <p id="zoneRiskText" class="zone-risk high-text">High alert zone</p>
+            <p id="zoneNarrative">
+              Frequent severe alerts are clustering around Shah Alam, so ambulance units
+              should keep standby coverage closer to Persiaran Kayangan and nearby access roads.
+            </p>
+            <div class="report-facts">
+              <div>
+                <span>Past 7 days</span>
+                <strong id="zoneIncidents">14 incidents</strong>
+              </div>
+              <div>
+                <span>Critical share</span>
+                <strong id="zoneCritical">36% Level 4/5</strong>
+              </div>
+              <div>
+                <span>Recommended action</span>
+                <strong id="zoneAction">Pre-position 1 ambulance unit</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <div id="trendCards" class="trend-grid"></div>
       </section>
     </main>
 

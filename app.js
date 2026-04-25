@@ -21,12 +21,46 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
 let activeRole = new URLSearchParams(location.search).get("role") || "hospital";
-activeRole = activeRole.toLowerCase().includes("insurance")
-  ? "insurance"
-  : "hospital";
+activeRole = normalizeRole(activeRole);
 let alerts = [];
 let notifications = [];
 const selectedIds = new Set();
+const reportZones = {
+  "shah-alam": {
+    title: "Shah Alam",
+    riskText: "High alert zone",
+    riskClass: "high-text",
+    incidents: "14 incidents",
+    critical: "36% Level 4/5",
+    action: "Pre-position 1 ambulance unit",
+    narrative:
+      "Frequent severe alerts are clustering around Shah Alam, so ambulance units should keep standby coverage closer to Persiaran Kayangan and nearby access roads.",
+    spark: [4, 7, 9, 6, 11, 10, 14],
+  },
+  "subang-jaya": {
+    title: "Subang Jaya",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidents: "9 incidents",
+    critical: "22% Level 4/5",
+    action: "Increase patrol check-ins during peak hours",
+    narrative:
+      "Subang Jaya is showing moderate accident frequency, especially during charging-stop and commute periods, so dispatch readiness should stay active around key junctions.",
+    spark: [3, 5, 6, 4, 7, 8, 9],
+  },
+  "petaling-jaya": {
+    title: "Petaling Jaya",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidents: "8 incidents",
+    critical: "18% Level 4/5",
+    action: "Keep rapid-response routing open toward city connectors",
+    narrative:
+      "Petaling Jaya remains a moderate-risk corridor with recurring support activity, so hospital routing and traffic-aware ambulance planning should stay ready.",
+    spark: [2, 4, 5, 6, 5, 7, 8],
+  },
+};
+let activeZone = "shah-alam";
 
 const els = {
   roleTitle: document.querySelector("#roleTitle"),
@@ -42,13 +76,30 @@ const els = {
   connectionState: document.querySelector("#connectionState"),
   selectAllBtn: document.querySelector("#selectAllBtn"),
   deleteBtn: document.querySelector("#deleteBtn"),
+  updatesPanel: document.querySelector("#updatesPanel"),
+  reportPanel: document.querySelector("#reportPanel"),
+  reportUpdated: document.querySelector("#reportUpdated"),
+  zoneTitle: document.querySelector("#zoneTitle"),
+  zoneRiskText: document.querySelector("#zoneRiskText"),
+  zoneNarrative: document.querySelector("#zoneNarrative"),
+  zoneIncidents: document.querySelector("#zoneIncidents"),
+  zoneCritical: document.querySelector("#zoneCritical"),
+  zoneAction: document.querySelector("#zoneAction"),
+  trendCards: document.querySelector("#trendCards"),
 };
 
 document.querySelectorAll(".role-btn").forEach((button) => {
   button.addEventListener("click", () => {
-    activeRole = button.dataset.role;
+    activeRole = normalizeRole(button.dataset.role);
     selectedIds.clear();
     render();
+  });
+});
+
+document.querySelectorAll(".zone").forEach((button) => {
+  button.addEventListener("click", () => {
+    activeZone = button.dataset.zone;
+    renderReportZone();
   });
 });
 
@@ -127,17 +178,34 @@ function render() {
     button.classList.toggle("active", button.dataset.role === activeRole);
   });
 
-  const roleLabel = activeRole === "hospital" ? "Hospital" : "Insurance";
-  els.roleTitle.textContent = `${roleLabel} Dashboard`;
-  els.roleSubtitle.textContent =
-    activeRole === "hospital"
-      ? "Severe Level 4/5 incidents and ambulance response updates."
-      : "All impact levels, EV driver activity, technician support, and case progress updates.";
-  els.feedTitle.textContent = `${roleLabel} Notifications`;
-  els.feedSummary.textContent =
-    activeRole === "hospital"
-      ? "Hospital only receives Level 4 and Level 5 cases."
-      : "Insurance receives every impact level and all related case updates.";
+  const reportMode = activeRole === "report";
+  els.updatesPanel.classList.toggle("hidden", reportMode);
+  els.reportPanel.classList.toggle("hidden", !reportMode);
+  els.selectAllBtn.disabled = reportMode;
+  els.deleteBtn.disabled = reportMode;
+
+  if (activeRole === "hospital") {
+    els.roleTitle.textContent = "Hospital Dashboard";
+    els.roleSubtitle.textContent =
+      "Severe Level 4/5 incidents and ambulance response updates.";
+    els.feedTitle.textContent = "Hospital Notifications";
+    els.feedSummary.textContent =
+      "Hospital only receives Level 4 and Level 5 cases.";
+  } else if (activeRole === "insurance") {
+    els.roleTitle.textContent = "Insurance Dashboard";
+    els.roleSubtitle.textContent =
+      "All impact levels, EV driver activity, technician support, and case progress updates.";
+    els.feedTitle.textContent = "Insurance Notifications";
+    els.feedSummary.textContent =
+      "Insurance receives every impact level and all related case updates.";
+  } else {
+    els.roleTitle.textContent = "Accidents Report";
+    els.roleSubtitle.textContent =
+      "AI-generated hotspot report for ambulance standby planning and higher-risk EV accident regions.";
+    els.feedTitle.textContent = "Regional Risk Summary";
+    els.feedSummary.textContent =
+      "Color zones are simulated planning insights based on recent EVSmart+ accident activity.";
+  }
 
   const visible = visibleAlerts();
   const updates = visibleNotifications();
@@ -151,22 +219,30 @@ function render() {
   els.selectedCount.textContent = selectedIds.size;
   els.updateCount.textContent = updates.length;
   els.lastRefresh.textContent = formatTime(new Date());
-  els.selectAllBtn.textContent =
-    visible.length > 0 && visible.every((item) => selectedIds.has(alertId(item)))
+  els.selectAllBtn.textContent = reportMode
+    ? "Select all"
+    : visible.length > 0 && visible.every((item) => selectedIds.has(alertId(item)))
       ? "Clear visible"
       : "Select all";
 
   els.alertFeed.innerHTML =
-    visible.length === 0
+    reportMode
+      ? emptyState("Open a risk zone to review AI-generated ambulance planning insights.")
+      : visible.length === 0
       ? emptyState("No live notifications yet")
       : visible.map(alertCard).join("");
 
   els.notificationFeed.innerHTML =
-    updates.length === 0
+    reportMode
+      ? ""
+      : updates.length === 0
       ? emptyState("No extra updates yet")
       : updates.slice(0, 8).map(notificationCard).join("");
 
   bindSelection();
+  if (reportMode) {
+    renderReportZone();
+  }
 }
 
 function visibleAlerts() {
@@ -197,6 +273,50 @@ function visibleNotifications() {
       return true;
     })
     .sort((a, b) => parseDate(b.timestamp) - parseDate(a.timestamp));
+}
+
+function renderReportZone() {
+  const zone = reportZones[activeZone] || reportZones["shah-alam"];
+  document.querySelectorAll(".zone").forEach((button) => {
+    button.classList.toggle("active", button.dataset.zone === activeZone);
+  });
+
+  els.zoneTitle.textContent = zone.title;
+  els.zoneRiskText.textContent = zone.riskText;
+  els.zoneRiskText.className = `zone-risk ${zone.riskClass}`;
+  els.zoneNarrative.textContent = zone.narrative;
+  els.zoneIncidents.textContent = zone.incidents;
+  els.zoneCritical.textContent = zone.critical;
+  els.zoneAction.textContent = zone.action;
+  els.reportUpdated.textContent = `Updated ${formatTime(new Date())}`;
+  els.trendCards.innerHTML = trendCardsMarkup();
+}
+
+function trendCardsMarkup() {
+  return Object.entries(reportZones)
+    .map(([id, zone]) => {
+      const active = id === activeZone ? " active" : "";
+      return `
+        <article class="trend-card${active}">
+          <div class="trend-top">
+            <div>
+              <span class="mini-kicker">Risk region</span>
+              <h3>${escapeHtml(zone.title)}</h3>
+            </div>
+            <span class="trend-pill ${escapeHtml(zone.riskClass)}">${escapeHtml(zone.riskText)}</span>
+          </div>
+          <p>${escapeHtml(zone.narrative)}</p>
+          <div class="sparkline" aria-label="${escapeHtml(zone.title)} trend">
+            ${zone.spark.map((value) => `<span style="height:${Math.max(22, value * 7)}px"></span>`).join("")}
+          </div>
+          <div class="trend-meta">
+            <span>${escapeHtml(zone.incidents)}</span>
+            <span>${escapeHtml(zone.critical)}</span>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
 }
 
 function alertCard(item) {
@@ -369,6 +489,17 @@ function showError(message) {
   els.connectionState.textContent = "Firebase error";
   els.connectionState.classList.add("error");
   els.alertFeed.innerHTML = `<div class="empty error">${escapeHtml(message)}</div>`;
+}
+
+function normalizeRole(value) {
+  const text = String(value || "").toLowerCase();
+  if (text.includes("insurance")) {
+    return "insurance";
+  }
+  if (text.includes("report") || text.includes("accident")) {
+    return "report";
+  }
+  return "hospital";
 }
 
 function escapeHtml(value) {
