@@ -25,6 +25,8 @@ activeRole = normalizeRole(activeRole);
 let alerts = [];
 let notifications = [];
 const selectedIds = new Set();
+let reportGeneratedAt = null;
+let reportGenerationTimer = null;
 const reportZones = {
   "shah-alam": {
     title: "Shah Alam",
@@ -69,11 +71,16 @@ const els = {
   feedSummary: document.querySelector("#feedSummary"),
   alertFeed: document.querySelector("#alertFeed"),
   notificationFeed: document.querySelector("#notificationFeed"),
-  visibleCount: document.querySelector("#visibleCount"),
-  selectedCount: document.querySelector("#selectedCount"),
-  updateCount: document.querySelector("#updateCount"),
-  lastRefresh: document.querySelector("#lastRefresh"),
+  metricLabel1: document.querySelector("#metricLabel1"),
+  metricLabel2: document.querySelector("#metricLabel2"),
+  metricLabel3: document.querySelector("#metricLabel3"),
+  metricLabel4: document.querySelector("#metricLabel4"),
+  metricValue1: document.querySelector("#metricValue1"),
+  metricValue2: document.querySelector("#metricValue2"),
+  metricValue3: document.querySelector("#metricValue3"),
+  metricValue4: document.querySelector("#metricValue4"),
   connectionState: document.querySelector("#connectionState"),
+  generateReportBtn: document.querySelector("#generateReportBtn"),
   selectAllBtn: document.querySelector("#selectAllBtn"),
   deleteBtn: document.querySelector("#deleteBtn"),
   updatesPanel: document.querySelector("#updatesPanel"),
@@ -86,12 +93,14 @@ const els = {
   zoneCritical: document.querySelector("#zoneCritical"),
   zoneAction: document.querySelector("#zoneAction"),
   trendCards: document.querySelector("#trendCards"),
+  generateStatus: document.querySelector("#generateStatus"),
 };
 
 document.querySelectorAll(".role-btn").forEach((button) => {
   button.addEventListener("click", () => {
     activeRole = normalizeRole(button.dataset.role);
     selectedIds.clear();
+    syncRoleQuery();
     render();
   });
 });
@@ -105,6 +114,10 @@ document.querySelectorAll(".zone").forEach((button) => {
 
 document.querySelector("#refreshBtn").addEventListener("click", () => {
   render();
+});
+
+els.generateReportBtn.addEventListener("click", () => {
+  generateAiReport();
 });
 
 els.selectAllBtn.addEventListener("click", () => {
@@ -181,6 +194,7 @@ function render() {
   const reportMode = activeRole === "report";
   els.updatesPanel.classList.toggle("hidden", reportMode);
   els.reportPanel.classList.toggle("hidden", !reportMode);
+  els.generateReportBtn.classList.toggle("hidden", !reportMode);
   els.selectAllBtn.disabled = reportMode;
   els.deleteBtn.disabled = reportMode;
 
@@ -215,10 +229,7 @@ function render() {
     }
   });
 
-  els.visibleCount.textContent = visible.length;
-  els.selectedCount.textContent = selectedIds.size;
-  els.updateCount.textContent = updates.length;
-  els.lastRefresh.textContent = formatTime(new Date());
+  renderMetrics(visible, updates, reportMode);
   els.selectAllBtn.textContent = reportMode
     ? "Select all"
     : visible.length > 0 && visible.every((item) => selectedIds.has(alertId(item)))
@@ -288,8 +299,13 @@ function renderReportZone() {
   els.zoneIncidents.textContent = zone.incidents;
   els.zoneCritical.textContent = zone.critical;
   els.zoneAction.textContent = zone.action;
-  els.reportUpdated.textContent = `Updated ${formatTime(new Date())}`;
+  els.reportUpdated.textContent = reportGeneratedAt
+    ? `Updated ${formatTime(reportGeneratedAt)}`
+    : "Updated --:--";
   els.trendCards.innerHTML = trendCardsMarkup();
+  els.generateStatus.textContent = reportGeneratedAt
+    ? `Last generated at ${formatTime(reportGeneratedAt)}`
+    : "Ready to generate";
 }
 
 function trendCardsMarkup() {
@@ -491,6 +507,54 @@ function showError(message) {
   els.alertFeed.innerHTML = `<div class="empty error">${escapeHtml(message)}</div>`;
 }
 
+function renderMetrics(visible, updates, reportMode) {
+  if (reportMode) {
+    const highRiskCount = Object.values(reportZones).filter((zone) =>
+      zone.riskText.toLowerCase().includes("high"),
+    ).length;
+    const updatedText = reportGeneratedAt
+      ? `${minutesAgo(reportGeneratedAt)} min ago`
+      : "Not generated";
+
+    els.metricLabel1.textContent = "Active Hotspots (AI)";
+    els.metricLabel2.textContent = "High-Risk Zones";
+    els.metricLabel3.textContent = "AI Confidence Score";
+    els.metricLabel4.textContent = "AI Data Updated";
+    els.metricValue1.textContent = Object.keys(reportZones).length;
+    els.metricValue2.textContent = highRiskCount;
+    els.metricValue3.textContent = "94%";
+    els.metricValue4.textContent = updatedText;
+    return;
+  }
+
+  els.metricLabel1.textContent = "Visible Notifications";
+  els.metricLabel2.textContent = "Selected";
+  els.metricLabel3.textContent = "Live Updates";
+  els.metricLabel4.textContent = "Last Refresh";
+  els.metricValue1.textContent = visible.length;
+  els.metricValue2.textContent = selectedIds.size;
+  els.metricValue3.textContent = updates.length;
+  els.metricValue4.textContent = formatTime(new Date());
+}
+
+function generateAiReport() {
+  if (reportGenerationTimer) {
+    window.clearTimeout(reportGenerationTimer);
+  }
+  els.generateReportBtn.disabled = true;
+  els.generateReportBtn.textContent = "Generating...";
+  els.generateStatus.textContent = "AI is preparing the latest hotspot summary...";
+  els.reportUpdated.textContent = "Updating...";
+
+  reportGenerationTimer = window.setTimeout(() => {
+    reportGeneratedAt = new Date();
+    els.generateReportBtn.disabled = false;
+    els.generateReportBtn.textContent = "Generate AI Report";
+    renderReportZone();
+    renderMetrics(visibleAlerts(), visibleNotifications(), true);
+  }, 1400);
+}
+
 function normalizeRole(value) {
   const text = String(value || "").toLowerCase();
   if (text.includes("insurance")) {
@@ -502,6 +566,18 @@ function normalizeRole(value) {
   return "hospital";
 }
 
+function syncRoleQuery() {
+  const url = new URL(window.location.href);
+  url.searchParams.set("role", activeRole);
+  window.history.replaceState({}, "", url);
+}
+
+function minutesAgo(date) {
+  const diffMs = Math.max(0, new Date().getTime() - date.getTime());
+  const mins = Math.max(1, Math.round(diffMs / 60000));
+  return mins;
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -511,4 +587,5 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+syncRoleQuery();
 render();

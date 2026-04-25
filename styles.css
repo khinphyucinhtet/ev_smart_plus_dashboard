@@ -102,6 +102,7 @@ button {
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.08);
   line-height: 1.45;
+  display: none;
 }
 
 .main {
@@ -162,6 +163,12 @@ h1 {
 .actions .danger {
   color: white;
   background: var(--danger);
+}
+
+#generateReportBtn {
+  color: white;
+  background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
+  box-shadow: 0 10px 20px rgba(46, 125, 50, 0.18);
 }
 
 .metrics {
@@ -525,6 +532,23 @@ h1 {
 .report-facts strong {
   color: var(--ink);
   font-size: 17px;
+}
+
+.report-generate-footer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.generate-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green-dark);
+  font-weight: 800;
 }
 
 .trend-grid {

@@ -48,6 +48,7 @@
         </div>
         <div class="actions">
           <button id="refreshBtn" type="button">Refresh</button>
+          <button id="generateReportBtn" type="button" class="hidden">Generate AI Report</button>
           <button id="selectAllBtn" type="button">Select all</button>
           <button id="deleteBtn" type="button" class="danger">Delete selected</button>
         </div>
@@ -55,20 +56,20 @@
 
       <section class="metrics">
         <article>
-          <span>Visible Notifications</span>
-          <strong id="visibleCount">0</strong>
+          <span id="metricLabel1">Visible Notifications</span>
+          <strong id="metricValue1">0</strong>
         </article>
         <article>
-          <span>Selected</span>
-          <strong id="selectedCount">0</strong>
+          <span id="metricLabel2">Selected</span>
+          <strong id="metricValue2">0</strong>
         </article>
         <article>
-          <span>Live Updates</span>
-          <strong id="updateCount">0</strong>
+          <span id="metricLabel3">Live Updates</span>
+          <strong id="metricValue3">0</strong>
         </article>
         <article>
-          <span>Last Refresh</span>
-          <strong id="lastRefresh">--:--</strong>
+          <span id="metricLabel4">Last Refresh</span>
+          <strong id="metricValue4">--:--</strong>
         </article>
       </section>
 
@@ -156,6 +157,9 @@
                 <span>Recommended action</span>
                 <strong id="zoneAction">Pre-position 1 ambulance unit</strong>
               </div>
+            </div>
+            <div class="report-generate-footer">
+              <span id="generateStatus" class="generate-status">Ready to generate</span>
             </div>
           </article>
         </div>
