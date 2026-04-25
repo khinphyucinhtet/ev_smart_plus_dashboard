@@ -261,6 +261,50 @@ const reportZones = {
       "Hulu Langat remains mostly stable, but narrower access roads mean slower ambulance routing during late-day incidents.",
     spark: [1, 2, 3, 3, 4, 4, 5],
   },
+  puchong: {
+    title: "Puchong",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 7,
+    criticalPct: 20,
+    action: "Keep one support crew near township exits",
+    window: "5 PM - 8 PM",
+    level: "medium",
+    center: [3.0327, 101.6188],
+    polygon: [
+      [3.09, 101.56],
+      [3.083, 101.658],
+      [3.032, 101.69],
+      [2.988, 101.672],
+      [2.974, 101.602],
+      [3.002, 101.552],
+    ],
+    narrative:
+      "Puchong is building moderate evening congestion risk, especially around township connectors and charging-stop corridors.",
+    spark: [2, 3, 4, 4, 6, 6, 7],
+  },
+  "ampang-jaya": {
+    title: "Ampang Jaya",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 6,
+    criticalPct: 18,
+    action: "Keep hillside access routes clear",
+    window: "4 PM - 7 PM",
+    level: "medium",
+    center: [3.1485, 101.7603],
+    polygon: [
+      [3.2, 101.69],
+      [3.21, 101.8],
+      [3.155, 101.85],
+      [3.108, 101.828],
+      [3.102, 101.73],
+      [3.14, 101.69],
+    ],
+    narrative:
+      "Ampang Jaya stays in the medium-risk band, with slower responder access expected on hilly connectors during peak traffic.",
+    spark: [2, 2, 3, 4, 4, 5, 6],
+  },
 };
 let activeZone = "shah-alam";
 
@@ -871,17 +915,27 @@ function renderTrendChart() {
     return;
   }
 
-  const selected = reportZones[activeZone] || reportZones["shah-alam"];
-  const bars = selected.spark;
-  const maxValue = Math.max(...bars, selected.criticalPct / 4, 6);
+  const shah = reportZones["shah-alam"].spark;
+  const subang = reportZones["subang-jaya"].spark;
+  const pj = reportZones["petaling-jaya"].spark;
+  const bars = chartDays.map((_, index) =>
+    Math.max(
+      shah[index] ?? 0,
+      subang[index] ?? 0,
+      pj[index] ?? 0,
+      4,
+    ) * 0.75,
+  );
+  const allValues = [...bars, ...shah, ...subang, ...pj];
+  const maxValue = Math.max(...allValues, 8);
   const width = 420;
   const height = 250;
-  const padding = { top: 20, right: 16, bottom: 34, left: 38 };
+  const padding = { top: 24, right: 20, bottom: 34, left: 34 };
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
   const stepX = chartWidth / bars.length;
 
-  const gridLines = [0.25, 0.5, 0.75, 1].map((fraction) => {
+  const gridLines = [0.2, 0.4, 0.6, 0.8, 1].map((fraction) => {
     const y = padding.top + chartHeight * fraction;
     return `<line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" class="chart-grid" />`;
   }).join("");
@@ -890,22 +944,30 @@ function renderTrendChart() {
     const barHeight = (value / maxValue) * chartHeight;
     const x = padding.left + index * stepX + 10;
     const y = padding.top + chartHeight - barHeight;
-    return `<rect x="${x}" y="${y}" width="${stepX - 18}" height="${barHeight}" rx="10" class="chart-bar" />`;
+    return `<rect x="${x}" y="${y}" width="${stepX - 18}" height="${barHeight}" rx="10" class="chart-bar dark" />`;
   }).join("");
 
-  const points = bars.map((value, index) => {
-    const x = padding.left + index * stepX + stepX / 2;
-    const severityValue = value * (selected.criticalPct / 22);
-    const y = padding.top + chartHeight - (severityValue / maxValue) * chartHeight;
-    return `${x},${y}`;
-  });
-  const polyline = `<polyline points="${points.join(" ")}" class="chart-line" />`;
-  const pointMarkup = points
-    .map((point) => {
-      const [x, y] = point.split(",");
-      return `<circle cx="${x}" cy="${y}" r="4.5" class="chart-point" />`;
-    })
-    .join("");
+  const lineSeries = [
+    { key: "Shah Alam", values: shah, className: "chart-line red", pointClass: "chart-point red" },
+    { key: "Subang Jaya", values: subang, className: "chart-line yellow", pointClass: "chart-point yellow" },
+    { key: "Petaling Jaya", values: pj, className: "chart-line green", pointClass: "chart-point green" },
+  ];
+
+  const lineMarkup = lineSeries.map((series) => {
+    const points = series.values.map((value, index) => {
+      const x = padding.left + index * stepX + stepX / 2;
+      const y = padding.top + chartHeight - (value / maxValue) * chartHeight;
+      return `${x},${y}`;
+    });
+    const polyline = `<polyline points="${points.join(" ")}" class="${series.className}" />`;
+    const pointMarkup = points
+      .map((point) => {
+        const [x, y] = point.split(",");
+        return `<circle cx="${x}" cy="${y}" r="4.5" class="${series.pointClass}" />`;
+      })
+      .join("");
+    return `${polyline}${pointMarkup}`;
+  }).join("");
 
   const labels = chartDays.map((day, index) => {
     const x = padding.left + index * stepX + stepX / 2;
@@ -923,8 +985,7 @@ function renderTrendChart() {
     ${gridLines}
     <line x1="${padding.left}" y1="${padding.top + chartHeight}" x2="${width - padding.right}" y2="${padding.top + chartHeight}" class="chart-axis" />
     ${barsMarkup}
-    ${polyline}
-    ${pointMarkup}
+    ${lineMarkup}
     ${labels}
   `;
 }
@@ -935,7 +996,7 @@ function initializeSelangorMap() {
   }
 
   selangorMap = window.L.map("selangorMap", {
-    zoomControl: true,
+    zoomControl: false,
     scrollWheelZoom: true,
     minZoom: 8,
     maxZoom: 13,
@@ -953,6 +1014,7 @@ function initializeSelangorMap() {
     [3.42, 101.98],
   ]);
   selangorMap.fitBounds(selangorBounds, { padding: [18, 18] });
+  window.L.control.zoom({ position: "bottomright" }).addTo(selangorMap);
 
   Object.entries(reportZones).forEach(([id, zone]) => {
     const polygon = window.L.polygon(zone.polygon, {
