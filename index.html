@@ -6,6 +6,12 @@
     <meta name="theme-color" content="#2e7d32" />
     <title>EVSmart+ Live Dashboard</title>
     <link rel="icon" href="icon.png" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -106,12 +112,20 @@
           <span id="reportUpdated" class="status-pill">Updated --:--</span>
         </div>
 
+        <div id="reportBanner" class="report-banner hidden">
+          <div>
+            <strong>AI report generated successfully</strong>
+            <span id="reportBannerText">Latest hotspot summary is ready for ambulance planning.</span>
+          </div>
+          <span id="reportBannerTime">Just now</span>
+        </div>
+
         <div class="report-layout">
           <article class="report-map-card">
             <div class="report-map-head">
               <div>
                 <h3>Klang Valley Risk Overview</h3>
-                <p>Simulated multi-day accident concentration based on EVSmart+ incident patterns.</p>
+                <p>Simulated multi-day accident concentration based on EVSmart+ incident patterns and AI hotspot grouping.</p>
               </div>
               <div class="risk-legend">
                 <span><i class="dot low"></i> Low</span>
@@ -120,19 +134,21 @@
               </div>
             </div>
             <div class="report-map">
-              <div class="map-backdrop"></div>
-              <button class="zone zone-shah-alam high" type="button" data-zone="shah-alam">
-                <strong>Shah Alam</strong>
-                <span>High risk</span>
-              </button>
-              <button class="zone zone-subang-jaya medium" type="button" data-zone="subang-jaya">
-                <strong>Subang Jaya</strong>
-                <span>Medium risk</span>
-              </button>
-              <button class="zone zone-petaling-jaya medium" type="button" data-zone="petaling-jaya">
-                <strong>Petaling Jaya</strong>
-                <span>Medium risk</span>
-              </button>
+              <div id="selangorMap" class="leaflet-map" aria-label="Selangor regional hotspot map"></div>
+              <div class="map-overlay-card" id="mapOverlayCard">
+                <div class="map-overlay-header">
+                  <span class="map-overlay-kicker">AI detected focus</span>
+                  <span id="mapOverlayRisk" class="map-overlay-risk high-text">High risk</span>
+                </div>
+                <h4 id="mapOverlayTitle">Shah Alam</h4>
+                <p id="mapOverlayText">
+                  Peak crash clustering near Persiaran Kayangan. Ambulance standby should stay closer to western Shah Alam access roads.
+                </p>
+              </div>
+            </div>
+            <div id="regionChips" class="region-chip-row"></div>
+            <div class="map-footer-note">
+              Zoom and pan the map to inspect Selangor hotspots. Refresh or Generate AI Report to simulate updated regional severity.
             </div>
           </article>
 
@@ -157,6 +173,10 @@
                 <span>Recommended action</span>
                 <strong id="zoneAction">Pre-position 1 ambulance unit</strong>
               </div>
+              <div>
+                <span>Peak risk window</span>
+                <strong id="zoneWindow">5 PM - 8 PM</strong>
+              </div>
             </div>
             <div class="report-generate-footer">
               <span id="generateStatus" class="generate-status">Ready to generate</span>
@@ -164,10 +184,24 @@
           </article>
         </div>
 
-        <div id="trendCards" class="trend-grid"></div>
+        <div class="trend-section">
+          <div class="trend-head">
+            <div>
+              <h3>Regional AI Hotspot Trend Analysis</h3>
+              <p>Past 7-day severity pattern used to suggest ambulance standby and patrol coverage.</p>
+            </div>
+            <span class="trend-live-pill">Live</span>
+          </div>
+          <div id="trendCards" class="trend-grid"></div>
+        </div>
       </section>
     </main>
 
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
     <script type="module" src="app.js"></script>
   </body>
 </html>
