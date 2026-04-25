@@ -31,6 +31,7 @@ let reportBannerTimer = null;
 let reportConfidenceScore = 94;
 let selangorMap = null;
 let zoneLayers = new Map();
+let mapOverlayDismissed = false;
 const chartDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const reportZones = {
   "shah-alam": {
@@ -293,7 +294,8 @@ const els = {
   zoneCritical: document.querySelector("#zoneCritical"),
   zoneAction: document.querySelector("#zoneAction"),
   zoneWindow: document.querySelector("#zoneWindow"),
-  trendCards: document.querySelector("#trendCards"),
+  mapOverlayCard: document.querySelector("#mapOverlayCard"),
+  mapOverlayClose: document.querySelector("#mapOverlayClose"),
   trendChart: document.querySelector("#trendChart"),
   generateStatus: document.querySelector("#generateStatus"),
   reportBanner: document.querySelector("#reportBanner"),
@@ -325,6 +327,11 @@ document.querySelector("#refreshBtn").addEventListener("click", () => {
 
 els.generateReportBtn.addEventListener("click", () => {
   generateAiReport();
+});
+
+els.mapOverlayClose.addEventListener("click", () => {
+  mapOverlayDismissed = true;
+  els.mapOverlayCard.classList.add("hidden");
 });
 
 els.selectAllBtn.addEventListener("click", () => {
@@ -508,13 +515,15 @@ function renderReportZone() {
   els.reportUpdated.textContent = reportGeneratedAt
     ? `Updated ${formatTime(reportGeneratedAt)}`
     : "Updated --:--";
-  els.trendCards.innerHTML = trendCardsMarkup();
   els.regionChips.innerHTML = regionChipsMarkup();
   els.regionalSummary.textContent = buildRegionalSummary();
   els.riskDistribution.innerHTML = riskDistributionMarkup();
   els.generateStatus.textContent = reportGeneratedAt
     ? `Last generated at ${formatTime(reportGeneratedAt)}`
     : "Ready to generate";
+  if (!mapOverlayDismissed) {
+    els.mapOverlayCard.classList.remove("hidden");
+  }
   els.mapOverlayTitle.textContent = zone.title;
   els.mapOverlayText.textContent = zone.narrative;
   els.mapOverlayRisk.textContent = zone.riskText;
@@ -522,34 +531,6 @@ function renderReportZone() {
   bindRegionChips();
   renderTrendChart();
   updateMapVisuals();
-}
-
-function trendCardsMarkup() {
-  return Object.entries(reportZones)
-    .map(([id, zone]) => {
-      const active = id === activeZone ? " active" : "";
-      return `
-        <article class="trend-card${active}">
-          <div class="trend-top">
-            <div>
-              <span class="mini-kicker">Risk region</span>
-              <h3>${escapeHtml(zone.title)}</h3>
-            </div>
-            <span class="trend-pill ${escapeHtml(zone.riskClass)}">${escapeHtml(zone.riskText)}</span>
-          </div>
-          <p>${escapeHtml(zone.narrative)}</p>
-          <div class="sparkline" aria-label="${escapeHtml(zone.title)} trend">
-            ${zone.spark.map((value) => `<span style="height:${Math.max(22, value * 7)}px"></span>`).join("")}
-          </div>
-          <div class="trend-meta">
-            <span>${escapeHtml(`${zone.incidentsCount} incidents`)}</span>
-            <span>${escapeHtml(`${zone.criticalPct}% Level 4/5`)}</span>
-            <span>${escapeHtml(zone.window)}</span>
-          </div>
-        </article>
-      `;
-    })
-    .join("");
 }
 
 function regionChipsMarkup() {
@@ -586,6 +567,7 @@ function bindRegionChips() {
   document.querySelectorAll("[data-zone-chip]").forEach((button) => {
     button.addEventListener("click", () => {
       activeZone = button.dataset.zoneChip;
+      mapOverlayDismissed = false;
       renderReportZone();
     });
   });
@@ -990,6 +972,7 @@ function initializeSelangorMap() {
 
     polygon.on("click", () => {
       activeZone = id;
+      mapOverlayDismissed = false;
       renderReportZone();
     });
 
@@ -1003,6 +986,7 @@ function initializeSelangorMap() {
 
     marker.on("click", () => {
       activeZone = id;
+      mapOverlayDismissed = false;
       renderReportZone();
     });
 

@@ -138,7 +138,10 @@
               <div class="map-overlay-card" id="mapOverlayCard">
                 <div class="map-overlay-header">
                   <span class="map-overlay-kicker">AI detected focus</span>
-                  <span id="mapOverlayRisk" class="map-overlay-risk high-text">High risk</span>
+                  <div class="map-overlay-actions">
+                    <span id="mapOverlayRisk" class="map-overlay-risk high-text">High risk</span>
+                    <button id="mapOverlayClose" class="map-overlay-close" type="button" aria-label="Close focus card">×</button>
+                  </div>
                 </div>
                 <h4 id="mapOverlayTitle">Shah Alam</h4>
                 <p id="mapOverlayText">
@@ -200,11 +203,8 @@
             <div class="report-generate-footer">
               <span id="generateStatus" class="generate-status">Ready to generate</span>
             </div>
-          </div>
           </article>
         </div>
-
-        <div id="trendCards" class="trend-grid"></div>
       </section>
     </main>
 
