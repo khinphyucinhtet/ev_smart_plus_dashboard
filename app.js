@@ -305,6 +305,50 @@ const reportZones = {
       "Ampang Jaya stays in the medium-risk band, with slower responder access expected on hilly connectors during peak traffic.",
     spark: [2, 2, 3, 4, 4, 5, 6],
   },
+  "sungai-buloh": {
+    title: "Sungai Buloh",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 6,
+    criticalPct: 18,
+    action: "Keep one standby crew near northern interchange exits",
+    window: "6 PM - 8 PM",
+    level: "medium",
+    center: [3.2086, 101.5721],
+    polygon: [
+      [3.268, 101.505],
+      [3.278, 101.612],
+      [3.222, 101.654],
+      [3.168, 101.632],
+      [3.153, 101.542],
+      [3.19, 101.495],
+    ],
+    narrative:
+      "Sungai Buloh is showing moderate connector-related accident pressure, so ambulance staging should remain flexible near northern interchange routes.",
+    spark: [2, 3, 3, 4, 5, 5, 6],
+  },
+  cyberjaya: {
+    title: "Cyberjaya",
+    riskText: "Lower risk / monitor",
+    riskClass: "low-text",
+    incidentsCount: 4,
+    criticalPct: 11,
+    action: "Maintain standard coverage near EV campus routes",
+    window: "1 PM - 4 PM",
+    level: "low",
+    center: [2.9213, 101.6559],
+    polygon: [
+      [2.973, 101.608],
+      [2.974, 101.707],
+      [2.926, 101.736],
+      [2.88, 101.715],
+      [2.874, 101.63],
+      [2.912, 101.596],
+    ],
+    narrative:
+      "Cyberjaya remains comparatively stable, but EV commuter and campus traffic still justify maintaining one clear responder route during daytime demand.",
+    spark: [1, 1, 2, 2, 3, 3, 4],
+  },
 };
 let activeZone = "shah-alam";
 
@@ -373,7 +417,9 @@ els.generateReportBtn.addEventListener("click", () => {
   generateAiReport();
 });
 
-els.mapOverlayClose.addEventListener("click", () => {
+els.mapOverlayClose.addEventListener("click", (event) => {
+  event.preventDefault();
+  event.stopPropagation();
   mapOverlayDismissed = true;
   els.mapOverlayCard.classList.add("hidden");
 });
@@ -918,16 +964,16 @@ function renderTrendChart() {
   const shah = reportZones["shah-alam"].spark;
   const subang = reportZones["subang-jaya"].spark;
   const pj = reportZones["petaling-jaya"].spark;
-  const bars = chartDays.map((_, index) =>
-    Math.max(
-      shah[index] ?? 0,
-      subang[index] ?? 0,
-      pj[index] ?? 0,
-      4,
-    ) * 0.75,
-  );
+  const allZoneValues = Object.values(reportZones).map((zone) => zone.spark);
+  const bars = chartDays.map((_, index) => {
+    const dailyTotal = allZoneValues.reduce(
+      (sum, values) => sum + (values[index] ?? 0),
+      0,
+    );
+    return Math.max(4, Math.round(dailyTotal / 4));
+  });
   const allValues = [...bars, ...shah, ...subang, ...pj];
-  const maxValue = Math.max(...allValues, 8);
+  const maxValue = Math.max(...allValues, 10);
   const width = 420;
   const height = 250;
   const padding = { top: 24, right: 20, bottom: 34, left: 34 };
@@ -935,50 +981,100 @@ function renderTrendChart() {
   const chartHeight = height - padding.top - padding.bottom;
   const stepX = chartWidth / bars.length;
 
-  const gridLines = [0.2, 0.4, 0.6, 0.8, 1].map((fraction) => {
-    const y = padding.top + chartHeight * fraction;
-    return `<line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" class="chart-grid" />`;
+  const scaleY = (value) =>
+    padding.top + chartHeight - (value / maxValue) * chartHeight;
+  const xAt = (index) => padding.left + index * stepX + stepX / 2;
+
+  const yTicks = 5;
+  const gridLines = Array.from({ length: yTicks }, (_, index) => {
+    const value = Math.round((maxValue / yTicks) * (yTicks - index));
+    const y = scaleY(value);
+    return `
+      <line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" class="chart-grid" />
+      <text x="${padding.left - 8}" y="${y + 4}" text-anchor="end" class="chart-y-label">${value}</text>
+    `;
   }).join("");
 
-  const barsMarkup = bars.map((value, index) => {
-    const barHeight = (value / maxValue) * chartHeight;
-    const x = padding.left + index * stepX + 10;
-    const y = padding.top + chartHeight - barHeight;
-    return `<rect x="${x}" y="${y}" width="${stepX - 18}" height="${barHeight}" rx="10" class="chart-bar dark" />`;
-  }).join("");
+  const barsMarkup = bars
+    .map((value, index) => {
+      const barHeight = (value / maxValue) * chartHeight;
+      const x = padding.left + index * stepX + 10;
+      const y = padding.top + chartHeight - barHeight;
+      const emphasis = index === 3 ? " emphasis" : "";
+      return `<rect x="${x}" y="${y}" width="${stepX - 18}" height="${barHeight}" rx="12" class="chart-bar${emphasis}" />`;
+    })
+    .join("");
 
   const lineSeries = [
-    { key: "Shah Alam", values: shah, className: "chart-line red", pointClass: "chart-point red" },
-    { key: "Subang Jaya", values: subang, className: "chart-line yellow", pointClass: "chart-point yellow" },
-    { key: "Petaling Jaya", values: pj, className: "chart-line green", pointClass: "chart-point green" },
+    {
+      key: "Shah Alam",
+      values: shah,
+      className: "chart-line red",
+      pointClass: "chart-point red",
+      areaClass: "chart-area red",
+    },
+    {
+      key: "Subang Jaya",
+      values: subang,
+      className: "chart-line yellow",
+      pointClass: "chart-point yellow",
+    },
+    {
+      key: "Petaling Jaya",
+      values: pj,
+      className: "chart-line green",
+      pointClass: "chart-point green",
+    },
   ];
 
-  const lineMarkup = lineSeries.map((series) => {
-    const points = series.values.map((value, index) => {
-      const x = padding.left + index * stepX + stepX / 2;
-      const y = padding.top + chartHeight - (value / maxValue) * chartHeight;
-      return `${x},${y}`;
-    });
-    const polyline = `<polyline points="${points.join(" ")}" class="${series.className}" />`;
-    const pointMarkup = points
-      .map((point) => {
-        const [x, y] = point.split(",");
-        return `<circle cx="${x}" cy="${y}" r="4.5" class="${series.pointClass}" />`;
-      })
-      .join("");
-    return `${polyline}${pointMarkup}`;
-  }).join("");
+  const pathFromValues = (values) =>
+    values
+      .map((value, index) => `${index === 0 ? "M" : "L"} ${xAt(index)} ${scaleY(value)}`)
+      .join(" ");
 
-  const labels = chartDays.map((day, index) => {
-    const x = padding.left + index * stepX + stepX / 2;
-    return `<text x="${x}" y="${height - 10}" text-anchor="middle" class="chart-label">${day}</text>`;
-  }).join("");
+  const areaFromValues = (values) => {
+    const linePath = pathFromValues(values);
+    const bottomY = padding.top + chartHeight;
+    return `${linePath} L ${xAt(values.length - 1)} ${bottomY} L ${xAt(0)} ${bottomY} Z`;
+  };
+
+  const lineMarkup = lineSeries
+    .map((series) => {
+      const path = pathFromValues(series.values);
+      const area = series.areaClass
+        ? `<path d="${areaFromValues(series.values)}" class="${series.areaClass}" />`
+        : "";
+      const points = series.values
+        .map((value, index) => {
+          const x = xAt(index);
+          const y = scaleY(value);
+          return `<circle cx="${x}" cy="${y}" r="4.5" class="${series.pointClass}" />`;
+        })
+        .join("");
+      return `${area}<path d="${path}" class="${series.className}" />${points}`;
+    })
+    .join("");
+
+  const labels = chartDays
+    .map((day, index) => {
+      const x = xAt(index);
+      return `<text x="${x}" y="${height - 10}" text-anchor="middle" class="chart-label">${day}</text>`;
+    })
+    .join("");
 
   svg.innerHTML = `
     <defs>
       <linearGradient id="chartBarGradient" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#43a047" />
-        <stop offset="100%" stop-color="#1b5e20" />
+        <stop offset="0%" stop-color="#36455b" />
+        <stop offset="100%" stop-color="#182334" />
+      </linearGradient>
+      <linearGradient id="chartBarGlow" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#5a6f8c" stop-opacity="0.96" />
+        <stop offset="100%" stop-color="#223349" stop-opacity="0.96" />
+      </linearGradient>
+      <linearGradient id="chartAreaRed" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="rgba(239, 68, 68, 0.42)" />
+        <stop offset="100%" stop-color="rgba(239, 68, 68, 0.02)" />
       </linearGradient>
     </defs>
     <rect x="0" y="0" width="${width}" height="${height}" rx="22" class="chart-bg" />
@@ -1014,7 +1110,7 @@ function initializeSelangorMap() {
     [3.42, 101.98],
   ]);
   selangorMap.fitBounds(selangorBounds, { padding: [18, 18] });
-  window.L.control.zoom({ position: "bottomright" }).addTo(selangorMap);
+  window.L.control.zoom({ position: "topright" }).addTo(selangorMap);
 
   Object.entries(reportZones).forEach(([id, zone]) => {
     const polygon = window.L.polygon(zone.polygon, {
