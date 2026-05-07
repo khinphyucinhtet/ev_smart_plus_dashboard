@@ -13,6 +13,192 @@
       crossorigin=""
     />
     <link rel="stylesheet" href="styles.css" />
+    <style>
+      .report-action-row {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 14px;
+      }
+
+      .view-report-btn {
+        border: 0;
+        border-radius: 12px;
+        padding: 10px 16px;
+        background: #2e7d32;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 800;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow: 0 10px 20px rgba(46, 125, 50, 0.18);
+        transition:
+          transform 0.18s ease,
+          box-shadow 0.18s ease,
+          background 0.18s ease;
+      }
+
+      .view-report-btn:hover {
+        background: #256728;
+        box-shadow: 0 14px 28px rgba(46, 125, 50, 0.24);
+        transform: translateY(-1px);
+      }
+
+      .view-report-btn:focus-visible,
+      .report-modal-close:focus-visible,
+      .report-modal-footer-btn:focus-visible {
+        outline: 3px solid rgba(46, 125, 50, 0.24);
+        outline-offset: 2px;
+      }
+
+      .report-modal-overlay {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(15, 23, 42, 0.62);
+        backdrop-filter: blur(4px);
+        z-index: 1200;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition:
+          opacity 0.22s ease,
+          visibility 0.22s ease;
+      }
+
+      .report-modal-overlay.open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+      }
+
+      .report-modal {
+        width: min(720px, 100%);
+        max-height: min(88vh, 860px);
+        overflow: auto;
+        background: #fff;
+        border-radius: 24px;
+        box-shadow: 0 28px 70px rgba(15, 23, 42, 0.26);
+        transform: translateY(18px) scale(0.98);
+        transition: transform 0.22s ease;
+      }
+
+      .report-modal-overlay.open .report-modal {
+        transform: translateY(0) scale(1);
+      }
+
+      .report-modal-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 22px 24px 18px;
+        background: linear-gradient(135deg, #2e7d32, #1b5e20);
+        color: #fff;
+      }
+
+      .report-modal-header h3 {
+        margin: 0;
+        font-size: 22px;
+      }
+
+      .report-modal-header p {
+        margin: 8px 0 0;
+        color: rgba(255, 255, 255, 0.84);
+        line-height: 1.45;
+      }
+
+      .report-modal-close {
+        width: 38px;
+        height: 38px;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+        color: #fff;
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+        flex: 0 0 auto;
+      }
+
+      .report-modal-body {
+        padding: 22px 24px 24px;
+      }
+
+      .report-modal-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .report-modal-field {
+        padding: 14px 16px;
+        border: 1px solid #dfe7df;
+        border-radius: 18px;
+        background: #f8fbf8;
+      }
+
+      .report-modal-field.full {
+        grid-column: 1 / -1;
+      }
+
+      .report-modal-field span {
+        display: block;
+        margin-bottom: 8px;
+        color: #4f6b52;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .report-modal-field strong,
+      .report-modal-field p {
+        margin: 0;
+        color: #18222d;
+        font-size: 15px;
+        line-height: 1.5;
+      }
+
+      .report-modal-field p {
+        white-space: pre-wrap;
+      }
+
+      .report-modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 18px;
+      }
+
+      .report-modal-footer-btn {
+        min-width: 120px;
+        border: 0;
+        border-radius: 12px;
+        padding: 11px 18px;
+        background: #2e7d32;
+        color: #fff;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      @media (max-width: 640px) {
+        .report-modal-overlay {
+          padding: 14px;
+        }
+
+        .report-modal-header,
+        .report-modal-body {
+          padding-left: 18px;
+          padding-right: 18px;
+        }
+
+        .report-modal-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
   </head>
   <body>
     <aside class="sidebar">
@@ -210,11 +396,287 @@
       </section>
     </main>
 
+    <div id="reportModalOverlay" class="report-modal-overlay" aria-hidden="true">
+      <div class="report-modal" role="dialog" aria-modal="true" aria-labelledby="reportModalTitle">
+        <div class="report-modal-header">
+          <div>
+            <h3 id="reportModalTitle">Ambulance Report Details</h3>
+            <p>Submitted from the ambulance responder workflow and synced live to the hospital dashboard.</p>
+          </div>
+          <button id="reportModalClose" class="report-modal-close" type="button" aria-label="Close report modal">×</button>
+        </div>
+        <div class="report-modal-body">
+          <div id="reportModalGrid" class="report-modal-grid"></div>
+          <div class="report-modal-footer">
+            <button id="reportModalOk" class="report-modal-footer-btn" type="button">OK / Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script
       src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin=""
     ></script>
     <script type="module" src="app.js"></script>
+    <script type="module">
+      import { getApp, getApps, initializeApp } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+      import {
+        getDatabase,
+        onValue,
+        ref,
+      } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDRs1tS9yobBzOtkp-U3mqVfu9swTij1EU",
+        authDomain: "evsmart-2694c.firebaseapp.com",
+        databaseURL:
+          "https://evsmart-2694c-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "evsmart-2694c",
+        storageBucket: "evsmart-2694c.firebasestorage.app",
+        messagingSenderId: "1016507832438",
+        appId: "1:1016507832438:web:8a77cfb51c61b922e26757",
+      };
+
+      const reportApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
+      const database = getDatabase(reportApp);
+      const role = normalizeRole(new URLSearchParams(location.search).get("role") || "hospital");
+      const reportTitle = "Hospital report submitted";
+      const reportState = {
+        alerts: [],
+        notifications: [],
+      };
+
+      const overlay = document.querySelector("#reportModalOverlay");
+      const closeBtn = document.querySelector("#reportModalClose");
+      const okBtn = document.querySelector("#reportModalOk");
+      const modalGrid = document.querySelector("#reportModalGrid");
+      const notificationFeed = document.querySelector("#notificationFeed");
+
+      function normalizeRole(value) {
+        const text = String(value || "").toLowerCase();
+        return text === "insurance" || text === "report" ? text : "hospital";
+      }
+
+      function snapshotToList(snapshot) {
+        if (!snapshot || typeof snapshot !== "object") {
+          return [];
+        }
+
+        return Object.entries(snapshot).map(([id, value]) => ({
+          id,
+          ...(value && typeof value === "object" ? value : {}),
+        }));
+      }
+
+      function parseDate(value) {
+        if (!value) {
+          return 0;
+        }
+        const time = new Date(value).getTime();
+        return Number.isFinite(time) ? time : 0;
+      }
+
+      function visibleNotifications() {
+        return [...reportState.notifications]
+          .filter((item) => {
+            const audience = String(item.audience || "").toLowerCase();
+            if (audience === "all") {
+              return true;
+            }
+            if (role === "hospital") {
+              return audience === "hospital" || audience === "emergency_contact";
+            }
+            return true;
+          })
+          .sort((a, b) => parseDate(b.timestamp) - parseDate(a.timestamp));
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "-")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function severityLabel(level) {
+        const labels = {
+          1: "Level 1 - Minor bump",
+          2: "Level 2 - Light impact",
+          3: "Level 3 - Moderate impact",
+          4: "Level 4 - Serious accident",
+          5: "Level 5 - Critical accident",
+        };
+        return labels[level] || (level ? `Level ${level}` : "-");
+      }
+
+      function formatDate(value) {
+        if (!value) {
+          return "-";
+        }
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+          return String(value);
+        }
+        return date.toLocaleString("en-MY", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
+      }
+
+      function reportFields(notificationItem, alertItem) {
+        const impactLevel = Number(
+          alertItem?.impact_level ?? notificationItem?.impact_level ?? 0,
+        );
+        const etaText = alertItem?.ambulance_eta_minutes
+          ? `ETA ${alertItem.ambulance_eta_minutes} min`
+          : "No ETA recorded";
+        const notes = [
+          alertItem?.responder_note,
+          alertItem?.ambulance_response_note,
+        ]
+          .filter(Boolean)
+          .join("\n\n");
+        const timestamp =
+          alertItem?.report_submitted_at ||
+          notificationItem?.timestamp ||
+          alertItem?.timestamp;
+
+        return [
+          {
+            label: "Responder Name",
+            value:
+              alertItem?.assigned_driver_name ||
+              alertItem?.driver ||
+              "Ambulance Driver",
+          },
+          {
+            label: "Accident Location",
+            value:
+              alertItem?.location_name ||
+              notificationItem?.location_name ||
+              "Location unavailable",
+          },
+          {
+            label: "Patient Count",
+            value: alertItem?.number_of_people ?? "Not provided",
+          },
+          {
+            label: "Patient Condition",
+            value: alertItem?.patient_status || "Not provided",
+          },
+          {
+            label: "Severity Level",
+            value: severityLabel(impactLevel),
+          },
+          {
+            label: "Timestamp",
+            value: formatDate(timestamp),
+          },
+          {
+            label: "ETA / Notes",
+            value: notes ? `${etaText}\n\n${notes}` : etaText,
+            full: true,
+          },
+        ];
+      }
+
+      function openReportModal(notificationItem) {
+        const alertId = String(notificationItem?.alert_id || "");
+        const alertItem = reportState.alerts.find((item) => {
+          const candidate = String(item.alert_id || item.id || "");
+          return candidate && candidate === alertId;
+        });
+
+        modalGrid.innerHTML = reportFields(notificationItem, alertItem)
+          .map(
+            (field) => `
+              <div class="report-modal-field${field.full ? " full" : ""}">
+                <span>${escapeHtml(field.label)}</span>
+                <p>${escapeHtml(field.value)}</p>
+              </div>
+            `,
+          )
+          .join("");
+
+        overlay.classList.add("open");
+        overlay.setAttribute("aria-hidden", "false");
+        closeBtn.focus();
+      }
+
+      function closeReportModal() {
+        overlay.classList.remove("open");
+        overlay.setAttribute("aria-hidden", "true");
+      }
+
+      function attachReportButtons() {
+        if (role !== "hospital" || !notificationFeed) {
+          return;
+        }
+
+        const reportNotifications = visibleNotifications().filter(
+          (item) => String(item.title || "").trim().toLowerCase() === reportTitle.toLowerCase(),
+        );
+
+        let reportIndex = 0;
+        notificationFeed.querySelectorAll(".card").forEach((card) => {
+          card.querySelector(".report-action-row")?.remove();
+          const title = card.querySelector(".card-title strong")?.textContent?.trim() || "";
+          if (title.toLowerCase() !== reportTitle.toLowerCase()) {
+            return;
+          }
+
+          const notificationItem = reportNotifications[reportIndex++];
+          if (!notificationItem) {
+            return;
+          }
+
+          const actionRow = document.createElement("div");
+          actionRow.className = "report-action-row";
+
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "view-report-btn";
+          button.textContent = "View Report";
+          button.addEventListener("click", () => openReportModal(notificationItem));
+
+          actionRow.appendChild(button);
+          card.appendChild(actionRow);
+        });
+      }
+
+      closeBtn.addEventListener("click", closeReportModal);
+      okBtn.addEventListener("click", closeReportModal);
+      overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) {
+          closeReportModal();
+        }
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && overlay.classList.contains("open")) {
+          closeReportModal();
+        }
+      });
+
+      new MutationObserver(() => {
+        attachReportButtons();
+      }).observe(notificationFeed, { childList: true, subtree: true });
+
+      onValue(ref(database, "alerts"), (snapshot) => {
+        reportState.alerts = snapshotToList(snapshot.val());
+        attachReportButtons();
+      });
+
+      onValue(ref(database, "notifications"), (snapshot) => {
+        reportState.notifications = snapshotToList(snapshot.val());
+        attachReportButtons();
+      });
+    </script>
   </body>
 </html>
