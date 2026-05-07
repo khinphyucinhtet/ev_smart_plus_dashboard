@@ -32,6 +32,7 @@ let reportConfidenceScore = 94;
 let selangorMap = null;
 let zoneLayers = new Map();
 let mapOverlayDismissed = false;
+const hospitalReportTitle = "Hospital report submitted";
 const chartDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const reportZones = {
   "shah-alam": {
@@ -395,6 +396,10 @@ const els = {
   mapOverlayRisk: document.querySelector("#mapOverlayRisk"),
   regionalSummary: document.querySelector("#regionalSummary"),
   riskDistribution: document.querySelector("#riskDistribution"),
+  reportModalOverlay: document.querySelector("#reportModalOverlay"),
+  reportModalClose: document.querySelector("#reportModalClose"),
+  reportModalOk: document.querySelector("#reportModalOk"),
+  reportModalGrid: document.querySelector("#reportModalGrid"),
 };
 
 document.querySelectorAll(".role-btn").forEach((button) => {
@@ -422,6 +427,20 @@ els.mapOverlayClose.addEventListener("click", (event) => {
   event.stopPropagation();
   mapOverlayDismissed = true;
   els.mapOverlayCard.classList.add("hidden");
+});
+
+els.reportModalClose.addEventListener("click", closeReportModal);
+els.reportModalOk.addEventListener("click", closeReportModal);
+els.reportModalOverlay.addEventListener("click", (event) => {
+  if (event.target === els.reportModalOverlay) {
+    closeReportModal();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && els.reportModalOverlay.classList.contains("open")) {
+    closeReportModal();
+  }
 });
 
 els.selectAllBtn.addEventListener("click", () => {
@@ -458,6 +477,39 @@ els.deleteBtn.addEventListener("click", async () => {
 
   selectedIds.clear();
   render();
+});
+
+els.alertFeed.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-report-alert-id]");
+  if (!button) {
+    return;
+  }
+
+  const alert = findAlertById(button.dataset.reportAlertId);
+  if (!alert) {
+    return;
+  }
+
+  openReportModal(alert);
+});
+
+els.notificationFeed.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-report-notification-id]");
+  if (!button) {
+    return;
+  }
+
+  const notification = notifications.find(
+    (item) =>
+      String(item.notification_id || item.id || "") ===
+      String(button.dataset.reportNotificationId || ""),
+  );
+  if (!notification) {
+    return;
+  }
+
+  const alert = findAlertById(notification.alert_id);
+  openReportModal(alert, notification);
 });
 
 onValue(
@@ -691,6 +743,7 @@ function alertCard(item) {
       <p class="detail"><b>Summary:</b> ${escapeHtml(summaryForRole(item))}</p>
       <p class="detail"><b>Action:</b> ${escapeHtml(actionText(item))}</p>
       ${account ? `<p class="detail"><b>Account / profile:</b> ${escapeHtml(account)}</p>` : ""}
+      ${reportActionMarkupForAlert(item)}
     </article>
   `;
 }
@@ -706,6 +759,7 @@ function notificationCard(item) {
         <span class="chip">${escapeHtml(item.type || "Notification")}</span>
         <span class="chip">${formatDate(item.timestamp)}</span>
       </div>
+      ${reportActionMarkupForNotification(item)}
     </article>
   `;
 }
@@ -784,6 +838,68 @@ function actionText(item) {
   return item.insurance_status || "Pending insurance review.";
 }
 
+function reportActionMarkupForAlert(item) {
+  if (activeRole !== "hospital" || !isHospitalReportAlert(item)) {
+    return "";
+  }
+
+  return `
+    <div class="report-action-row">
+      <button
+        type="button"
+        class="view-report-btn"
+        data-report-alert-id="${escapeHtml(alertId(item))}"
+      >
+        View Report
+      </button>
+    </div>
+  `;
+}
+
+function reportActionMarkupForNotification(item) {
+  if (activeRole !== "hospital" || !isHospitalReportNotification(item)) {
+    return "";
+  }
+
+  const notificationId = String(item.notification_id || item.id || "");
+  return `
+    <div class="report-action-row">
+      <button
+        type="button"
+        class="view-report-btn"
+        data-report-notification-id="${escapeHtml(notificationId)}"
+      >
+        View Report
+      </button>
+    </div>
+  `;
+}
+
+function isHospitalReportAlert(item) {
+  const status = String(item.status || "").toLowerCase();
+  const feedStatus = String(item.hospital_feed_status || "").toLowerCase();
+  const dispatchStatus = String(item.driver_dispatch_status || "").toLowerCase();
+  return (
+    feedStatus === "report submitted" ||
+    dispatchStatus === "report_submitted" ||
+    status.includes("report submitted")
+  );
+}
+
+function isHospitalReportNotification(item) {
+  return String(item.title || "").trim().toLowerCase() === hospitalReportTitle.toLowerCase();
+}
+
+function findAlertById(value) {
+  const target = String(value || "");
+  if (!target) {
+    return null;
+  }
+  return (
+    alerts.find((item) => String(item.alert_id || item.id || "") === target) || null
+  );
+}
+
 function accountLine(item) {
   return [
     item.assigned_driver_name ? `Responder: ${item.assigned_driver_name}` : "",
@@ -833,6 +949,78 @@ function pad(value) {
 
 function emptyState(text) {
   return `<div class="empty">${escapeHtml(text)}</div>`;
+}
+
+function openReportModal(alertItem, notificationItem = null) {
+  const fields = buildReportFields(alertItem, notificationItem);
+  els.reportModalGrid.innerHTML = fields
+    .map(
+      (field) => `
+        <div class="report-modal-field${field.full ? " full" : ""}">
+          <span>${escapeHtml(field.label)}</span>
+          <p>${escapeHtml(field.value)}</p>
+        </div>
+      `,
+    )
+    .join("");
+
+  els.reportModalOverlay.classList.add("open");
+  els.reportModalOverlay.setAttribute("aria-hidden", "false");
+  els.reportModalClose.focus();
+}
+
+function closeReportModal() {
+  els.reportModalOverlay.classList.remove("open");
+  els.reportModalOverlay.setAttribute("aria-hidden", "true");
+}
+
+function buildReportFields(alertItem, notificationItem) {
+  const item = alertItem || {};
+  const impact = Number(item.impact_level || 0);
+  const etaText = item.ambulance_eta_minutes
+    ? `ETA ${item.ambulance_eta_minutes} min`
+    : "No ETA recorded";
+  const notes = [item.responder_note, item.ambulance_response_note]
+    .filter(Boolean)
+    .join("\n\n");
+  const timestamp =
+    item.report_submitted_at || notificationItem?.timestamp || item.timestamp;
+
+  return [
+    {
+      label: "Responder Name",
+      value:
+        item.assigned_driver_name ||
+        item.driver ||
+        item.driver_name ||
+        "Ambulance Driver",
+    },
+    {
+      label: "Accident Location",
+      value: locationText(item),
+    },
+    {
+      label: "Patient Count",
+      value: item.number_of_people ?? "Not provided",
+    },
+    {
+      label: "Patient Condition",
+      value: item.patient_status || "Not provided",
+    },
+    {
+      label: "Severity Level",
+      value: impact ? severityLabel(impact) : "Not provided",
+    },
+    {
+      label: "Timestamp",
+      value: formatDate(timestamp),
+    },
+    {
+      label: "ETA / Notes",
+      value: notes ? `${etaText}\n\n${notes}` : etaText,
+      full: true,
+    },
+  ];
 }
 
 function showError(message) {
