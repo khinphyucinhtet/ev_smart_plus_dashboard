@@ -34,6 +34,9 @@ let zoneLayers = new Map();
 let mapOverlayDismissed = false;
 let activeInsightAudience = "government";
 let strategicInsightsReady = false;
+let pullRefreshStartY = 0;
+let pullRefreshActive = false;
+let lastPullRefreshAt = 0;
 const hospitalReportTitle = "Hospital report submitted";
 const chartDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const reportZones = {
@@ -468,9 +471,6 @@ const els = {
   metricMeta4: document.querySelector("#metricMeta4"),
   connectionState: document.querySelector("#connectionState"),
   reportUtility: document.querySelector("#reportUtility"),
-  generateReportBtn: document.querySelector("#generateReportBtn"),
-  selectAllBtn: document.querySelector("#selectAllBtn"),
-  deleteBtn: document.querySelector("#deleteBtn"),
   updatesPanel: document.querySelector("#updatesPanel"),
   feedPanel: document.querySelector("#feedPanel"),
   reportPanel: document.querySelector("#reportPanel"),
@@ -527,17 +527,6 @@ document.querySelectorAll(".role-btn").forEach((button) => {
   });
 });
 
-document.querySelector("#refreshBtn").addEventListener("click", () => {
-  if (activeRole === "report") {
-    randomizeReportData();
-  }
-  render();
-});
-
-els.generateReportBtn.addEventListener("click", () => {
-  generateAiReport();
-});
-
 els.strategicAnalysisBtn.addEventListener("click", () => {
   strategicInsightsReady = true;
   renderStrategicInsights();
@@ -573,42 +562,6 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && els.reportModalOverlay.classList.contains("open")) {
     closeReportModal();
   }
-});
-
-els.selectAllBtn.addEventListener("click", () => {
-  const visible = visibleAlerts();
-  const allSelected =
-    visible.length > 0 && visible.every((item) => selectedIds.has(alertId(item)));
-  selectedIds.clear();
-  if (!allSelected) {
-    visible.forEach((item) => selectedIds.add(alertId(item)));
-  }
-  render();
-});
-
-els.deleteBtn.addEventListener("click", async () => {
-  if (selectedIds.size === 0) {
-    return;
-  }
-  const ok = confirm(`Delete ${selectedIds.size} selected alert(s)?`);
-  if (!ok) {
-    return;
-  }
-
-  const ids = Array.from(selectedIds);
-  await Promise.all(ids.map((id) => remove(ref(database, `alerts/${id}`))));
-
-  const linkedNotificationIds = notifications
-    .filter((item) => ids.includes(String(item.alert_id || "")))
-    .map((item) => String(item.notification_id || ""))
-    .filter(Boolean);
-
-  await Promise.all(
-    linkedNotificationIds.map((id) => remove(ref(database, `notifications/${id}`))),
-  );
-
-  selectedIds.clear();
-  render();
 });
 
 els.alertFeed.addEventListener("click", (event) => {
@@ -685,9 +638,6 @@ function render() {
   els.updatesPanel.classList.toggle("hidden", reportMode);
   els.reportPanel.classList.toggle("hidden", !reportMode);
   els.reportUtility.classList.toggle("hidden", !reportMode);
-  els.generateReportBtn.classList.toggle("hidden", !reportMode);
-  els.selectAllBtn.disabled = reportMode;
-  els.deleteBtn.disabled = reportMode;
   els.sidebarMonitor.classList.toggle("hidden", !reportMode);
   els.sidebarTimelineCard.classList.toggle("hidden", !reportMode);
   els.sidebarClockCard.classList.toggle("hidden", !reportMode);
@@ -724,11 +674,6 @@ function render() {
   });
 
   renderMetrics(visible, updates, reportMode);
-  els.selectAllBtn.textContent = reportMode
-    ? "Select all"
-    : visible.length > 0 && visible.every((item) => selectedIds.has(alertId(item)))
-      ? "Clear visible"
-      : "Select all";
 
   els.alertFeed.innerHTML =
     reportMode
@@ -747,7 +692,11 @@ function render() {
   bindSelection();
   if (reportMode) {
     initializeSelangorMap();
-    renderReportZone();
+    if (!reportGeneratedAt) {
+      refreshReportData({ showBanner: false });
+    } else {
+      renderReportZone();
+    }
   }
 }
 
@@ -798,8 +747,8 @@ function renderReportZone() {
   els.regionalSummary.textContent = buildRegionalSummary();
   els.riskDistribution.innerHTML = riskDistributionMarkup();
   els.generateStatus.textContent = reportGeneratedAt
-    ? `Last generated at ${formatTime(reportGeneratedAt)}`
-    : "Ready to generate";
+    ? `Auto-updated at ${formatTime(reportGeneratedAt)}`
+    : "Auto-refresh ready";
   renderTrendMetrics(zone);
   renderSidebarTimeline();
   renderSidebarClock();
@@ -1222,36 +1171,31 @@ function renderMetrics(visible, updates, reportMode) {
   els.metricMeta4.textContent = formatDate(new Date());
 }
 
-function generateAiReport() {
+function refreshReportData({ showBanner = true, forceBump = true } = {}) {
   if (reportGenerationTimer) {
     window.clearTimeout(reportGenerationTimer);
   }
   if (reportBannerTimer) {
     window.clearTimeout(reportBannerTimer);
   }
-  els.generateReportBtn.disabled = true;
-  els.generateReportBtn.textContent = "Generating...";
-  els.generateStatus.textContent = "AI is preparing the latest hotspot summary...";
-  els.reportUpdated.textContent = "Updating...";
-  els.reportBanner.classList.add("hidden");
+  randomizeReportData(forceBump);
+  reportGeneratedAt = new Date();
+  strategicInsightsReady = true;
+  renderReportZone();
+  renderMetrics(visibleAlerts(), visibleNotifications(), true);
 
-  reportGenerationTimer = window.setTimeout(() => {
-    randomizeReportData(true);
-    reportGeneratedAt = new Date();
-    strategicInsightsReady = true;
-    els.generateReportBtn.disabled = false;
-    els.generateReportBtn.textContent = "Generate AI Report";
-    renderReportZone();
-    renderMetrics(visibleAlerts(), visibleNotifications(), true);
-    els.generateStatus.textContent = `AI report generated at ${formatTime(reportGeneratedAt)}`;
-    els.reportBannerText.textContent =
-      `Hotspot prioritisation updated for ${reportZones[activeZone].title}. Ambulance readiness recommendations are refreshed.`;
-    els.reportBannerTime.textContent = formatTime(reportGeneratedAt);
-    els.reportBanner.classList.remove("hidden");
-    reportBannerTimer = window.setTimeout(() => {
-      els.reportBanner.classList.add("hidden");
-    }, 3800);
-  }, 1400);
+  if (!showBanner) {
+    els.reportBanner.classList.add("hidden");
+    return;
+  }
+
+  els.reportBannerText.textContent =
+    `Hotspot prioritisation updated for ${reportZones[activeZone].title}. Ambulance readiness recommendations are refreshed.`;
+  els.reportBannerTime.textContent = formatTime(reportGeneratedAt);
+  els.reportBanner.classList.remove("hidden");
+  reportBannerTimer = window.setTimeout(() => {
+    els.reportBanner.classList.add("hidden");
+  }, 2800);
 }
 
 function randomizeReportData(forceBump = false) {
@@ -1717,6 +1661,42 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+
+window.addEventListener(
+  "touchstart",
+  (event) => {
+    if (window.scrollY <= 0 && event.touches.length === 1) {
+      pullRefreshStartY = event.touches[0].clientY;
+      pullRefreshActive = true;
+    }
+  },
+  { passive: true },
+);
+
+window.addEventListener(
+  "touchmove",
+  (event) => {
+    if (!pullRefreshActive || event.touches.length !== 1 || window.scrollY > 0) {
+      return;
+    }
+    const delta = event.touches[0].clientY - pullRefreshStartY;
+    const now = Date.now();
+    if (delta > 84 && now - lastPullRefreshAt > 1600) {
+      lastPullRefreshAt = now;
+      pullRefreshActive = false;
+      if (activeRole === "report") {
+        refreshReportData();
+      } else {
+        render();
+      }
+    }
+  },
+  { passive: true },
+);
+
+window.addEventListener("touchend", () => {
+  pullRefreshActive = false;
+});
 
 syncRoleQuery();
 render();
