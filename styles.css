@@ -171,6 +171,26 @@ h1 {
   box-shadow: 0 10px 20px rgba(46, 125, 50, 0.18);
 }
 
+body.report-mode .topbar {
+  display: block;
+}
+
+body.report-mode .actions {
+  width: 100%;
+  margin-top: 18px;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+}
+
+body.report-mode .actions button {
+  white-space: nowrap;
+}
+
+body.report-mode .actions .danger {
+  box-shadow: 0 10px 18px rgba(214, 106, 106, 0.18);
+}
+
 .metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(160px, 1fr));

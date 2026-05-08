@@ -548,6 +548,7 @@ function render() {
   });
 
   const reportMode = activeRole === "report";
+  document.body.classList.toggle("report-mode", reportMode);
   els.feedPanel.classList.toggle("hidden", reportMode);
   els.updatesPanel.classList.toggle("hidden", reportMode);
   els.reportPanel.classList.toggle("hidden", !reportMode);
