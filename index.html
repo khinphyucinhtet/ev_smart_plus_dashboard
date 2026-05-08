@@ -342,26 +342,43 @@
               <span><i class="dot high"></i> High</span>
             </div>
           </div>
-          <div class="report-map">
-            <div id="selangorMap" class="leaflet-map" aria-label="Selangor regional hotspot map"></div>
-            <div class="map-overlay-card" id="mapOverlayCard">
-              <div class="map-overlay-header">
-                <span class="map-overlay-kicker">AI detected focus</span>
-                <div class="map-overlay-actions">
-                  <span id="mapOverlayRisk" class="map-overlay-risk high-text">High risk</span>
-                  <button id="mapOverlayClose" class="map-overlay-close" type="button" aria-label="Close focus card">×</button>
+          <div class="report-map-layout">
+            <div class="report-map-stack">
+              <div class="report-map">
+                <div id="selangorMap" class="leaflet-map" aria-label="Selangor regional hotspot map"></div>
+                <div class="map-overlay-card" id="mapOverlayCard">
+                  <div class="map-overlay-header">
+                    <span class="map-overlay-kicker">AI detected focus</span>
+                    <div class="map-overlay-actions">
+                      <span id="mapOverlayRisk" class="map-overlay-risk high-text">High risk</span>
+                      <button id="mapOverlayClose" class="map-overlay-close" type="button" aria-label="Close focus card">×</button>
+                    </div>
+                  </div>
+                  <h4 id="mapOverlayTitle">Shah Alam</h4>
+                  <p id="mapOverlayText">
+                    Peak crash clustering near Persiaran Kayangan. Ambulance standby should stay closer to western Shah Alam access roads.
+                  </p>
                 </div>
               </div>
-              <h4 id="mapOverlayTitle">Shah Alam</h4>
-              <p id="mapOverlayText">
-                Peak crash clustering near Persiaran Kayangan. Ambulance standby should stay closer to western Shah Alam access roads.
-              </p>
+              <div id="regionChips" class="region-chip-row"></div>
             </div>
+            <aside class="top-risk-panel">
+              <div class="top-risk-panel-head">
+                <h4>Top Risk Districts</h4>
+                <p>Ranked by AI-estimated impact and incident concentration</p>
+              </div>
+              <div class="risk-distribution" id="riskDistribution"></div>
+            </aside>
           </div>
           <div class="map-footer-note">
             Zoom and pan the map to inspect Selangor hotspots. Reload the page on desktop or pull down on mobile to refresh the simulated regional severity.
           </div>
-          <div id="regionChips" class="region-chip-row"></div>
+          <div class="map-ai-summary">
+            <div class="mini-kicker">AI Severity Summary</div>
+            <p id="regionalSummary" class="regional-summary">
+              Regional EV accident clusters are currently highest around Shah Alam and Klang, while Petaling Jaya and Subang Jaya remain active but manageable with local standby optimization.
+            </p>
+          </div>
         </article>
 
         <div class="report-bottom-grid">
@@ -441,9 +458,6 @@
                 <strong id="zoneWindow">5 PM - 8 PM</strong>
               </div>
             </div>
-            <p id="regionalSummary" class="regional-summary">
-              Regional EV accident clusters are currently highest around Shah Alam and Klang, while Petaling Jaya and Subang Jaya remain active but manageable with local standby optimization.
-            </p>
           </article>
 
           <article class="report-insights-card">
@@ -467,7 +481,7 @@
             <div class="report-generate-footer report-generate-stack">
               <span id="generateStatus" class="generate-status">Ready to generate</span>
               <div class="mini-kicker">Regional Snapshot</div>
-              <div class="risk-distribution" id="riskDistribution"></div>
+              <p class="regional-snapshot-copy">AI recommendations stay synced with the district rankings and hotspot map focus above.</p>
             </div>
           </article>
         </div>

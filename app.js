@@ -767,13 +767,15 @@ function renderReportZone() {
 
 function regionChipsMarkup() {
   return Object.entries(reportZones)
+    .sort(([, a], [, b]) => b.incidentsCount - a.incidentsCount)
     .map(([id, zone]) => {
       const active = id === activeZone ? " active" : "";
+      const levelTag = `L${severityLevelFromZone(zone)}`;
       return `
         <button type="button" class="region-chip ${zone.level}${active}" data-zone-chip="${escapeHtml(id)}">
           <i class="chip-dot"></i>
           <strong>${escapeHtml(zone.title)}</strong>
-          <span>&bull; ${escapeHtml(`${zone.incidentsCount}`)}</span>
+          <span>${escapeHtml(`${levelTag} | ${zone.incidentsCount} cases`)}</span>
         </button>
       `;
     })
@@ -785,11 +787,27 @@ function riskDistributionMarkup() {
     .slice()
     .sort((a, b) => b.incidentsCount - a.incidentsCount);
   return zones
+    .slice(0, 5)
     .map(
       (zone) => `
         <div class="risk-pill ${zone.level}">
-          <span>${escapeHtml(zone.title)}</span>
-          <strong>${escapeHtml(`${zone.incidentsCount} cases`)}</strong>
+          <div class="risk-pill-top">
+            <span class="risk-rank">#${escapeHtml(String(zones.indexOf(zone) + 1))}</span>
+            <div class="risk-pill-title">
+              <strong>${escapeHtml(zone.title)}</strong>
+              <span>${escapeHtml(`Level ${severityLevelFromZone(zone)}`)}</span>
+            </div>
+          </div>
+          <div class="risk-pill-meta">
+            <div class="risk-pill-meta-row">
+              <span class="risk-pill-meta-label">Cases</span>
+              <span class="risk-pill-meta-value">${escapeHtml(`${zone.incidentsCount} cases`)}</span>
+            </div>
+            <div class="risk-pill-meta-row">
+              <span class="risk-pill-meta-label">Peak</span>
+              <span class="risk-pill-meta-value">${escapeHtml(zone.window)}</span>
+            </div>
+          </div>
         </div>
       `,
     )
@@ -1517,9 +1535,9 @@ function initializeSelangorMap() {
   selangorMap = window.L.map("selangorMap", {
     zoomControl: false,
     scrollWheelZoom: true,
-    minZoom: 8,
+    minZoom: 9,
     maxZoom: 13,
-  }).setView([3.05, 101.55], 9);
+  }).setView([3.1, 101.58], 10);
 
   window.L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
     attribution:
@@ -1528,19 +1546,18 @@ function initializeSelangorMap() {
     maxZoom: 19,
   }).addTo(selangorMap);
 
-  const selangorBounds = window.L.latLngBounds([
-    [2.52, 100.95],
-    [3.92, 101.98],
-  ]);
-  selangorMap.fitBounds(selangorBounds, { padding: [18, 18] });
+  const allPolygonPoints = Object.values(reportZones).flatMap((zone) => zone.polygon);
+  const selangorBounds = window.L.latLngBounds(allPolygonPoints);
+  selangorMap.fitBounds(selangorBounds.pad(0.08), { padding: [20, 20] });
   window.L.control.zoom({ position: "topright" }).addTo(selangorMap);
 
   Object.entries(reportZones).forEach(([id, zone]) => {
     const polygon = window.L.polygon(zone.polygon, {
       color: zoneStroke(zone.level),
       fillColor: zoneFill(zone.level),
-      fillOpacity: 0.42,
+      fillOpacity: 0.28,
       weight: id === activeZone ? 4 : 2,
+      className: `zone-polygon zone-polygon-${zone.level}`,
     }).addTo(selangorMap);
 
     polygon.bindTooltip(
@@ -1557,6 +1574,13 @@ function initializeSelangorMap() {
       renderReportZone();
     });
 
+    const glow = window.L.circleMarker(zone.center, {
+      radius: id === activeZone ? 22 : 16,
+      stroke: false,
+      fillColor: zoneStroke(zone.level),
+      fillOpacity: id === activeZone ? 0.26 : 0.15,
+    }).addTo(selangorMap);
+
     const marker = window.L.circleMarker(zone.center, {
       radius: id === activeZone ? 8 : 6,
       color: "#ffffff",
@@ -1571,7 +1595,7 @@ function initializeSelangorMap() {
       renderReportZone();
     });
 
-    zoneLayers.set(id, { polygon, marker });
+    zoneLayers.set(id, { polygon, marker, glow });
   });
 }
 
@@ -1587,15 +1611,20 @@ function updateMapVisuals() {
     layer.polygon.setStyle({
       color: zoneStroke(zone.level),
       fillColor: zoneFill(zone.level),
-      fillOpacity: id === activeZone ? 0.56 : 0.38,
-      weight: id === activeZone ? 4 : 2,
+      fillOpacity: id === activeZone ? 0.38 : 0.22,
+      weight: id === activeZone ? 4 : 2.4,
+    });
+    layer.glow.setStyle({
+      radius: id === activeZone ? 24 : 16,
+      fillColor: zoneStroke(zone.level),
+      fillOpacity: id === activeZone ? 0.28 : 0.14,
     });
     layer.marker.setStyle({
       radius: id === activeZone ? 8 : 6,
       fillColor: zoneStroke(zone.level),
     });
     if (id === activeZone) {
-      selangorMap.flyTo(zone.center, Math.max(selangorMap.getZoom(), 10), {
+      selangorMap.flyTo(zone.center, Math.max(selangorMap.getZoom(), 10.4), {
         duration: 0.6,
       });
     }
