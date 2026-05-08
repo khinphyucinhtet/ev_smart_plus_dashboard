@@ -32,6 +32,8 @@ let reportConfidenceScore = 94;
 let selangorMap = null;
 let zoneLayers = new Map();
 let mapOverlayDismissed = false;
+let activeInsightAudience = "government";
+let strategicInsightsReady = false;
 const hospitalReportTitle = "Hospital report submitted";
 const chartDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const reportZones = {
@@ -368,13 +370,25 @@ const els = {
   metricValue2: document.querySelector("#metricValue2"),
   metricValue3: document.querySelector("#metricValue3"),
   metricValue4: document.querySelector("#metricValue4"),
+  metricMeta1: document.querySelector("#metricMeta1"),
+  metricMeta2: document.querySelector("#metricMeta2"),
+  metricMeta3: document.querySelector("#metricMeta3"),
+  metricMeta4: document.querySelector("#metricMeta4"),
   connectionState: document.querySelector("#connectionState"),
+  reportUtility: document.querySelector("#reportUtility"),
   generateReportBtn: document.querySelector("#generateReportBtn"),
+  printPdfBtn: document.querySelector("#printPdfBtn"),
   selectAllBtn: document.querySelector("#selectAllBtn"),
   deleteBtn: document.querySelector("#deleteBtn"),
   updatesPanel: document.querySelector("#updatesPanel"),
   feedPanel: document.querySelector("#feedPanel"),
   reportPanel: document.querySelector("#reportPanel"),
+  sidebarMonitor: document.querySelector("#sidebarMonitor"),
+  sidebarTimelineCard: document.querySelector("#sidebarTimelineCard"),
+  sidebarTimeline: document.querySelector("#sidebarTimeline"),
+  sidebarClockCard: document.querySelector("#sidebarClockCard"),
+  sidebarClockTime: document.querySelector("#sidebarClockTime"),
+  sidebarClockDate: document.querySelector("#sidebarClockDate"),
   reportUpdated: document.querySelector("#reportUpdated"),
   zoneTitle: document.querySelector("#zoneTitle"),
   zoneRiskText: document.querySelector("#zoneRiskText"),
@@ -383,6 +397,11 @@ const els = {
   zoneCritical: document.querySelector("#zoneCritical"),
   zoneAction: document.querySelector("#zoneAction"),
   zoneWindow: document.querySelector("#zoneWindow"),
+  avgImpactLevel: document.querySelector("#avgImpactLevel"),
+  peakCrashTime: document.querySelector("#peakCrashTime"),
+  mostSevereArea: document.querySelector("#mostSevereArea"),
+  nightRisk: document.querySelector("#nightRisk"),
+  delayRisk: document.querySelector("#delayRisk"),
   mapOverlayCard: document.querySelector("#mapOverlayCard"),
   mapOverlayClose: document.querySelector("#mapOverlayClose"),
   trendChart: document.querySelector("#trendChart"),
@@ -400,6 +419,12 @@ const els = {
   reportModalClose: document.querySelector("#reportModalClose"),
   reportModalOk: document.querySelector("#reportModalOk"),
   reportModalGrid: document.querySelector("#reportModalGrid"),
+  reportModalTitle: document.querySelector("#reportModalTitle"),
+  reportModalDescription: document.querySelector(".report-modal-header p"),
+  strategicAnalysisBtn: document.querySelector("#strategicAnalysisBtn"),
+  strategicSummary: document.querySelector("#strategicSummary"),
+  strategicRecommendations: document.querySelector("#strategicRecommendations"),
+  viewDetailedReportBtn: document.querySelector("#viewDetailedReportBtn"),
 };
 
 document.querySelectorAll(".role-btn").forEach((button) => {
@@ -420,6 +445,28 @@ document.querySelector("#refreshBtn").addEventListener("click", () => {
 
 els.generateReportBtn.addEventListener("click", () => {
   generateAiReport();
+});
+
+els.printPdfBtn.addEventListener("click", () => {
+  if (activeRole === "report") {
+    window.print();
+  }
+});
+
+els.strategicAnalysisBtn.addEventListener("click", () => {
+  strategicInsightsReady = true;
+  renderStrategicInsights();
+});
+
+els.viewDetailedReportBtn.addEventListener("click", () => {
+  openZoneInsightModal();
+});
+
+document.querySelectorAll("[data-insight-audience]").forEach((button) => {
+  button.addEventListener("click", () => {
+    activeInsightAudience = button.dataset.insightAudience || "government";
+    renderStrategicInsights();
+  });
 });
 
 els.mapOverlayClose.addEventListener("click", (event) => {
@@ -552,9 +599,14 @@ function render() {
   els.feedPanel.classList.toggle("hidden", reportMode);
   els.updatesPanel.classList.toggle("hidden", reportMode);
   els.reportPanel.classList.toggle("hidden", !reportMode);
+  els.reportUtility.classList.toggle("hidden", !reportMode);
   els.generateReportBtn.classList.toggle("hidden", !reportMode);
+  els.printPdfBtn.classList.toggle("hidden", !reportMode);
   els.selectAllBtn.disabled = reportMode;
   els.deleteBtn.disabled = reportMode;
+  els.sidebarMonitor.classList.toggle("hidden", !reportMode);
+  els.sidebarTimelineCard.classList.toggle("hidden", !reportMode);
+  els.sidebarClockCard.classList.toggle("hidden", !reportMode);
 
   if (activeRole === "hospital") {
     els.roleTitle.textContent = "Hospital Dashboard";
@@ -664,6 +716,10 @@ function renderReportZone() {
   els.generateStatus.textContent = reportGeneratedAt
     ? `Last generated at ${formatTime(reportGeneratedAt)}`
     : "Ready to generate";
+  renderTrendMetrics(zone);
+  renderSidebarTimeline();
+  renderSidebarClock();
+  renderStrategicInsights();
   if (!mapOverlayDismissed) {
     els.mapOverlayCard.classList.remove("hidden");
   }
@@ -682,8 +738,9 @@ function regionChipsMarkup() {
       const active = id === activeZone ? " active" : "";
       return `
         <button type="button" class="region-chip ${zone.level}${active}" data-zone-chip="${escapeHtml(id)}">
+          <i class="chip-dot"></i>
           <strong>${escapeHtml(zone.title)}</strong>
-          <span>${escapeHtml(zone.riskText)}</span>
+          <span>&bull; ${escapeHtml(`${zone.incidentsCount}`)}</span>
         </button>
       `;
     })
@@ -954,6 +1011,16 @@ function emptyState(text) {
 
 function openReportModal(alertItem, notificationItem = null) {
   const fields = buildReportFields(alertItem, notificationItem);
+  openCustomReportModal(
+    "Ambulance Report Details",
+    "Submitted from the ambulance responder workflow and synced live to the hospital dashboard.",
+    fields,
+  );
+}
+
+function openCustomReportModal(title, description, fields) {
+  els.reportModalTitle.textContent = title;
+  els.reportModalDescription.textContent = description;
   els.reportModalGrid.innerHTML = fields
     .map(
       (field) => `
@@ -1038,6 +1105,9 @@ function renderMetrics(visible, updates, reportMode) {
     const updatedText = reportGeneratedAt
       ? `${minutesAgo(reportGeneratedAt)} min ago`
       : "Not generated";
+    const strongestZones = topZones(2)
+      .map((zone) => zone.title)
+      .join(" and ");
 
     els.metricLabel1.textContent = "Active Hotspots (AI)";
     els.metricLabel2.textContent = "High-Risk Zones";
@@ -1047,6 +1117,10 @@ function renderMetrics(visible, updates, reportMode) {
     els.metricValue2.textContent = highRiskCount;
     els.metricValue3.textContent = `${reportConfidenceScore}%`;
     els.metricValue4.textContent = updatedText;
+    els.metricMeta1.textContent = `Focus strongest around ${strongestZones}`;
+    els.metricMeta2.textContent = `${highRiskCount === 1 ? "One district" : `${highRiskCount} districts`} require close watch`;
+    els.metricMeta3.textContent = reportConfidenceScore >= 94 ? "High confidence" : "Monitoring confidence";
+    els.metricMeta4.textContent = reportGeneratedAt ? formatDate(reportGeneratedAt) : "Awaiting AI refresh";
     return;
   }
 
@@ -1058,6 +1132,10 @@ function renderMetrics(visible, updates, reportMode) {
   els.metricValue2.textContent = selectedIds.size;
   els.metricValue3.textContent = updates.length;
   els.metricValue4.textContent = formatTime(new Date());
+  els.metricMeta1.textContent = "Realtime alert feed";
+  els.metricMeta2.textContent = "Bulk action queue";
+  els.metricMeta3.textContent = "Responder & support logs";
+  els.metricMeta4.textContent = formatDate(new Date());
 }
 
 function generateAiReport() {
@@ -1076,6 +1154,7 @@ function generateAiReport() {
   reportGenerationTimer = window.setTimeout(() => {
     randomizeReportData(true);
     reportGeneratedAt = new Date();
+    strategicInsightsReady = true;
     els.generateReportBtn.disabled = false;
     els.generateReportBtn.textContent = "Generate AI Report";
     renderReportZone();
@@ -1142,6 +1221,133 @@ function buildRegionalSummary() {
     .map((zone) => zone.title)
     .join(" and ");
   return `Regional EV accident concentration is currently strongest around ${highest.title} and ${second.title}, while ${calmer} remain comparatively calmer and suitable for lighter standby coverage.`;
+}
+
+function renderTrendMetrics(zone) {
+  const highest = topZones(1)[0] || zone;
+  const impactLevel = averageImpactLevel(zone);
+  els.avgImpactLevel.textContent = impactLevel;
+  els.peakCrashTime.textContent = zone.window;
+  els.mostSevereArea.textContent = highest.title;
+  els.nightRisk.textContent = zone.criticalPct >= 28 ? "High" : zone.criticalPct >= 18 ? "Moderate" : "Low";
+  els.delayRisk.textContent = zone.level === "high" ? "Medium" : zone.level === "medium" ? "Moderate" : "Low";
+}
+
+function renderSidebarTimeline() {
+  const items = topZones(5).map((zone, index) => {
+    const levelNumber = severityLevelFromZone(zone);
+    const times = ["2:14 PM", "3:01 PM", "3:47 PM", "4:22 PM", "5:43 PM"];
+    const classes = levelNumber >= 4 ? "high" : levelNumber === 3 ? "medium" : "low";
+    return `
+      <div class="timeline-item ${classes}">
+        <span><b>${times[index] || "6:10 PM"}</b><span>Level ${levelNumber}</span><span>${escapeHtml(zone.title)}</span></span>
+      </div>
+    `;
+  });
+  els.sidebarTimeline.innerHTML = items.join("");
+}
+
+function renderSidebarClock() {
+  const now = reportGeneratedAt || new Date();
+  els.sidebarClockTime.textContent = formatTime(now);
+  els.sidebarClockDate.textContent = now.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function renderStrategicInsights() {
+  const zone = reportZones[activeZone] || reportZones["shah-alam"];
+  document.querySelectorAll("[data-insight-audience]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.insightAudience === activeInsightAudience);
+  });
+
+  if (!strategicInsightsReady) {
+    els.strategicSummary.textContent =
+      "Ready to generate a strategic response brief based on the selected regional hotspot.";
+    els.strategicRecommendations.innerHTML = `
+      <div class="strategic-recommendation">Press Generate Strategic Analysis to build response suggestions from the latest hotspot pattern.</div>
+    `;
+    return;
+  }
+
+  const content = strategicContentFor(zone, activeInsightAudience);
+  els.strategicSummary.textContent = content.summary;
+  els.strategicRecommendations.innerHTML = content.points
+    .map((point) => `<div class="strategic-recommendation">${escapeHtml(point)}</div>`)
+    .join("");
+}
+
+function strategicContentFor(zone, audience) {
+  const highest = topZones(2);
+  const nextZone = highest[1] ? highest[1].title : "nearby support corridors";
+  const base = `Based on the latest EV incident clustering, ${zone.title} currently shows elevated ${severityLabel(severityLevelFromZone(zone))} probability during ${zone.window.toLowerCase()} travel pressure.`;
+  const catalog = {
+    government: [
+      `Deploy standby ambulance coverage nearer to ${zone.title} connectors and keep diversion routing ready toward ${nextZone}.`,
+      `Increase patrol visibility during ${zone.window} peak crash windows.`,
+      `Install temporary warning signage and traffic-calming support at severe intersection clusters.`,
+      `Coordinate inter-agency briefings when Level 4-5 incidents start trending upward.`,
+    ],
+    hospital: [
+      `Prepare surge-readiness at hospitals receiving ${zone.title} referrals during ${zone.window}.`,
+      `Hold trauma bed and triage visibility for likely Level 4/5 spillover from ${zone.title}.`,
+      `Keep ambulance handover lanes clear for faster turnaround on repeat hotspot days.`,
+      `Share readiness alerts with emergency department leads when critical share rises above ${zone.criticalPct}%.`,
+    ],
+    ambulance: [
+      `Pre-position 1 ambulance unit closer to ${zone.title} as the primary focused region.`,
+      `Keep routing alternatives open toward ${nextZone} in case congestion blocks direct access.`,
+      `Prioritize vehicle battery-safe crash handling kits for severe EV incident response.`,
+      `Monitor dispatch timing closely during ${zone.window} because incident density is elevated.`,
+    ],
+    public: [
+      `Advise EV drivers to reduce speed and avoid distraction on ${zone.title} corridors during ${zone.window}.`,
+      `Recommend earlier charging stops to avoid rushed lane changes near hotspot connectors.`,
+      `Push caution notices for wet-weather or low-visibility travel around ${zone.title}.`,
+      `Share alternate routing suggestions when regional pressure spreads toward ${nextZone}.`,
+    ],
+  };
+
+  return {
+    summary: `${base} ${buildRegionalSummary()}`,
+    points: catalog[audience] || catalog.government,
+  };
+}
+
+function openZoneInsightModal() {
+  const zone = reportZones[activeZone] || reportZones["shah-alam"];
+  const fields = [
+    { label: "Focused Region", value: zone.title },
+    { label: "Current Risk", value: zone.riskText },
+    { label: "Average Impact Level", value: averageImpactLevel(zone) },
+    { label: "Peak Crash Time", value: zone.window },
+    { label: "Recent Incidents", value: `${zone.incidentsCount} cases in the past 7 days` },
+    { label: "Critical Share", value: `${zone.criticalPct}% Level 4/5` },
+    { label: "Recommended Action", value: zone.action, full: true },
+    { label: "AI Narrative", value: zone.narrative, full: true },
+  ];
+  openCustomReportModal(
+    "AI Hotspot Detail Report",
+    "Generated from the Accidents Report dashboard using the selected regional hotspot.",
+    fields,
+  );
+}
+
+function averageImpactLevel(zone) {
+  return (2.4 + zone.criticalPct / 25).toFixed(1);
+}
+
+function severityLevelFromZone(zone) {
+  return clamp(Math.round(Number(averageImpactLevel(zone))), 2, 5);
+}
+
+function topZones(limit) {
+  return Object.values(reportZones)
+    .slice()
+    .sort((a, b) => b.incidentsCount - a.incidentsCount)
+    .slice(0, limit);
 }
 
 function renderTrendChart() {
