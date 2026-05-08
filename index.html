@@ -367,17 +367,22 @@
           </div>
         </article>
 
-        <div class="report-bottom-grid">
-          <article class="report-summary-card">
+        <div class="report-bottom-stack">
+          <article class="report-summary-card trend-full-card">
             <div class="trend-head">
               <div>
                 <div class="mini-kicker">AI Trend Panel</div>
-                <h3>AI Hotspot Trend Analysis (Past 7 Days)</h3>
+                <h3>AI Hotspot Trend Analysis</h3>
                 <p>Regional incident pressure and severity trend for Selangor EV emergency planning.</p>
               </div>
               <div class="trend-head-actions">
                 <span class="trend-live-pill">Live</span>
-                <button class="trend-range-btn" type="button">7 Days</button>
+                <div class="trend-filter-group" role="tablist" aria-label="Trend range">
+                  <button class="trend-range-btn active" type="button" data-trend-range="7">7 Days</button>
+                  <button class="trend-range-btn" type="button" data-trend-range="30">30 Days</button>
+                  <button class="trend-range-btn" type="button" data-trend-range="monthly">Monthly</button>
+                  <button class="trend-range-btn" type="button" data-trend-range="yearly">Yearly</button>
+                </div>
               </div>
             </div>
             <div class="trend-grid">
@@ -388,84 +393,147 @@
                   <span><i class="legend-swatch yellow"></i> Subang Jaya</span>
                   <span><i class="legend-swatch green"></i> Petaling Jaya</span>
                 </div>
-                <svg id="trendChart" class="trend-chart" viewBox="0 0 420 250" aria-label="Regional hotspot bar chart"></svg>
+                <svg id="trendChart" class="trend-chart" viewBox="0 0 760 320" aria-label="Regional hotspot bar chart"></svg>
               </div>
               <div class="trend-metrics-panel">
                 <div class="trend-metric">
-                  <span>Avg Impact Level</span>
-                  <strong id="avgImpactLevel">3.8</strong>
+                  <div class="trend-metric-icon">AVG</div>
+                  <div class="trend-metric-copy">
+                    <span>Avg Impact Level</span>
+                    <strong id="avgImpactLevel">3.8</strong>
+                  </div>
                 </div>
                 <div class="trend-metric">
-                  <span>Peak Crash Time</span>
-                  <strong id="peakCrashTime">5 PM - 8 PM</strong>
+                  <div class="trend-metric-icon">TIME</div>
+                  <div class="trend-metric-copy">
+                    <span>Peak Crash Time</span>
+                    <strong id="peakCrashTime">5 PM - 8 PM</strong>
+                  </div>
                 </div>
                 <div class="trend-metric">
-                  <span>Most Severe Area</span>
-                  <strong id="mostSevereArea">Shah Alam</strong>
+                  <div class="trend-metric-icon">AREA</div>
+                  <div class="trend-metric-copy">
+                    <span>Most Severe Area</span>
+                    <strong id="mostSevereArea">Shah Alam</strong>
+                  </div>
                 </div>
                 <div class="trend-metric">
-                  <span>Night Risk</span>
-                  <strong id="nightRisk">High</strong>
+                  <div class="trend-metric-icon">NIGHT</div>
+                  <div class="trend-metric-copy">
+                    <span>Night Risk</span>
+                    <strong id="nightRisk">High</strong>
+                  </div>
                 </div>
                 <div class="trend-metric">
-                  <span>Ambulance Delay Risk</span>
-                  <strong id="delayRisk">Medium</strong>
+                  <div class="trend-metric-icon">ETA</div>
+                  <div class="trend-metric-copy">
+                    <span>Ambulance Delay Risk</span>
+                    <strong id="delayRisk">Medium</strong>
+                  </div>
                 </div>
               </div>
             </div>
             <div class="chart-focus-card focus-highlight">
-              <div class="focus-icon">!</div>
+              <div class="focus-icon">AI</div>
               <div class="focus-copy">
                 <div class="mini-kicker">Focused Region Insight</div>
-                <h4 id="zoneTitle">Shah Alam</h4>
-                <p id="zoneRiskText" class="zone-risk high-text">High alert zone</p>
+                <div class="focus-copy-top">
+                  <h4 id="zoneTitle">Shah Alam</h4>
+                  <p id="zoneRiskText" class="zone-risk high-text">High alert zone</p>
+                </div>
                 <p id="zoneNarrative">
                   Frequent severe alerts are clustering around Shah Alam, so ambulance units
                   should keep standby coverage closer to Persiaran Kayangan and nearby access roads.
                 </p>
+                <div class="focus-facts-grid">
+                  <div class="focus-fact">
+                    <span>Peak Window</span>
+                    <strong id="zoneWindow">5 PM - 8 PM</strong>
+                  </div>
+                  <div class="focus-fact">
+                    <span>Critical Share</span>
+                    <strong id="zoneCritical">36% Level 4/5</strong>
+                  </div>
+                  <div class="focus-fact focus-fact-wide">
+                    <span>Recommended Action</span>
+                    <strong id="zoneAction">Pre-position 1 ambulance unit</strong>
+                  </div>
+                </div>
               </div>
-              <button id="viewDetailedReportBtn" class="focus-report-btn" type="button">View Detailed Report</button>
-            </div>
-            <div class="report-facts compact">
-              <div>
-                <span>Past 7 days</span>
-                <strong id="zoneIncidents">14 incidents</strong>
-              </div>
-              <div>
-                <span>Critical share</span>
-                <strong id="zoneCritical">36% Level 4/5</strong>
-              </div>
-              <div>
-                <span>Recommended action</span>
-                <strong id="zoneAction">Pre-position 1 ambulance unit</strong>
-              </div>
-              <div>
-                <span>Peak risk window</span>
-                <strong id="zoneWindow">5 PM - 8 PM</strong>
+                <div class="focus-side-actions">
+                  <div class="focus-side-stat">
+                    <span>Cases in Range</span>
+                    <strong id="zoneIncidents">14 incidents</strong>
+                  </div>
+                <button id="viewDetailedReportBtn" class="focus-report-btn" type="button">View Detailed Report</button>
               </div>
             </div>
           </article>
 
-          <article class="report-insights-card">
+          <article class="report-insights-card insights-full-card">
             <div class="insights-head">
               <div>
                 <h3>AI Emergency Response Insights</h3>
                 <p>Generated recommendations for government agencies, hospitals, ambulance teams, and the public.</p>
               </div>
             </div>
-            <button id="strategicAnalysisBtn" class="strategic-analysis-btn" type="button">Generate Strategic Analysis</button>
+            <div class="insights-toolbar">
+              <button id="strategicAnalysisBtn" class="strategic-analysis-btn" type="button">
+                <span class="btn-spark">AI</span>
+                <span id="strategicAnalysisBtnText">Generate Strategic Analysis</span>
+              </button>
+              <span id="generateStatus" class="generate-status">Ready to generate</span>
+            </div>
             <div class="insight-tabs" role="tablist" aria-label="Insight audience">
               <button type="button" class="insight-tab active" data-insight-audience="government">Government</button>
               <button type="button" class="insight-tab" data-insight-audience="hospital">Hospital</button>
               <button type="button" class="insight-tab" data-insight-audience="ambulance">Ambulance</button>
               <button type="button" class="insight-tab" data-insight-audience="public">Public</button>
             </div>
-            <div class="insight-panel">
+            <div class="insight-panel insight-panel-expanded">
               <p id="strategicSummary" class="strategic-summary">Ready to generate a strategic response brief based on the selected regional hotspot.</p>
-              <div id="strategicRecommendations" class="strategic-recommendations"></div>
+              <div id="strategicRecommendations" class="strategic-insight-grid"></div>
+              <div class="report-preview-card">
+                <div class="report-preview-head">
+                  <div>
+                    <div class="mini-kicker">Generated Report Preview</div>
+                    <h4>AI Strategic Briefing Draft</h4>
+                  </div>
+                  <span class="report-preview-period">Report Period: <strong id="reportPreviewPeriod">Past 7 Days</strong></span>
+                </div>
+                <div class="report-preview-meta">
+                  <div class="preview-meta-item">
+                    <span>Generated Time</span>
+                    <strong id="reportPreviewTime">Awaiting generation</strong>
+                  </div>
+                  <div class="preview-meta-item">
+                    <span>Risk Prediction</span>
+                    <strong id="reportPrediction">Awaiting AI analysis</strong>
+                  </div>
+                  <div class="preview-meta-item">
+                    <span>Deployment Suggestion</span>
+                    <strong id="reportDeployment">Standby routing will appear here</strong>
+                  </div>
+                </div>
+                <div class="report-preview-grid">
+                  <div class="preview-block">
+                    <span>Key Findings</span>
+                    <ul id="reportKeyFindings"></ul>
+                  </div>
+                  <div class="preview-block">
+                    <span>Recommended Actions</span>
+                    <ul id="reportRecommendedActions"></ul>
+                  </div>
+                </div>
+                <div class="report-action-bar">
+                  <button id="exportPdfBtn" class="report-action-btn primary" type="button">Export PDF</button>
+                  <button id="shareReportBtn" class="report-action-btn" type="button">Share Report</button>
+                  <button id="sendHospitalBtn" class="report-action-btn" type="button">Send to Hospital</button>
+                  <button id="generateBriefingBtn" class="report-action-btn" type="button">Generate Briefing</button>
+                </div>
+              </div>
             </div>
             <div class="report-generate-footer report-generate-stack">
-              <span id="generateStatus" class="generate-status">Ready to generate</span>
               <div class="mini-kicker">Regional Snapshot</div>
               <p class="regional-snapshot-copy">AI recommendations stay synced with the district rankings and hotspot map focus above.</p>
             </div>

@@ -33,6 +33,9 @@ let selangorMap = null;
 let zoneLayers = new Map();
 let activeInsightAudience = "government";
 let strategicInsightsReady = false;
+let strategicInsightsLoading = false;
+let strategicLoadingTimer = null;
+let activeTrendRange = "7";
 let pullRefreshStartY = 0;
 let pullRefreshActive = false;
 let lastPullRefreshAt = 0;
@@ -538,6 +541,7 @@ const els = {
   delayRisk: document.querySelector("#delayRisk"),
   trendChart: document.querySelector("#trendChart"),
   generateStatus: document.querySelector("#generateStatus"),
+  strategicAnalysisBtnText: document.querySelector("#strategicAnalysisBtnText"),
   reportBanner: document.querySelector("#reportBanner"),
   reportBannerText: document.querySelector("#reportBannerText"),
   reportBannerTime: document.querySelector("#reportBannerTime"),
@@ -553,6 +557,16 @@ const els = {
   strategicAnalysisBtn: document.querySelector("#strategicAnalysisBtn"),
   strategicSummary: document.querySelector("#strategicSummary"),
   strategicRecommendations: document.querySelector("#strategicRecommendations"),
+  reportPreviewPeriod: document.querySelector("#reportPreviewPeriod"),
+  reportPreviewTime: document.querySelector("#reportPreviewTime"),
+  reportPrediction: document.querySelector("#reportPrediction"),
+  reportDeployment: document.querySelector("#reportDeployment"),
+  reportKeyFindings: document.querySelector("#reportKeyFindings"),
+  reportRecommendedActions: document.querySelector("#reportRecommendedActions"),
+  exportPdfBtn: document.querySelector("#exportPdfBtn"),
+  shareReportBtn: document.querySelector("#shareReportBtn"),
+  sendHospitalBtn: document.querySelector("#sendHospitalBtn"),
+  generateBriefingBtn: document.querySelector("#generateBriefingBtn"),
   viewDetailedReportBtn: document.querySelector("#viewDetailedReportBtn"),
 };
 
@@ -565,12 +579,33 @@ document.querySelectorAll(".role-btn").forEach((button) => {
   });
 });
 
-els.strategicAnalysisBtn.addEventListener("click", () => {
-  strategicInsightsReady = true;
-  renderStrategicInsights();
+els.strategicAnalysisBtn?.addEventListener("click", () => {
+  if (strategicInsightsLoading) {
+    return;
+  }
+  strategicInsightsLoading = true;
+  els.strategicAnalysisBtn.classList.add("loading");
+  if (els.strategicAnalysisBtnText) {
+    els.strategicAnalysisBtnText.textContent = "Generating...";
+  }
+  if (els.generateStatus) {
+    els.generateStatus.textContent = "Generating AI strategy...";
+  }
+  if (strategicLoadingTimer) {
+    window.clearTimeout(strategicLoadingTimer);
+  }
+  strategicLoadingTimer = window.setTimeout(() => {
+    strategicInsightsLoading = false;
+    strategicInsightsReady = true;
+    els.strategicAnalysisBtn.classList.remove("loading");
+    if (els.strategicAnalysisBtnText) {
+      els.strategicAnalysisBtnText.textContent = "Generate Strategic Analysis";
+    }
+    renderStrategicInsights();
+  }, 700);
 });
 
-els.viewDetailedReportBtn.addEventListener("click", () => {
+els.viewDetailedReportBtn?.addEventListener("click", () => {
   openZoneInsightModal();
 });
 
@@ -580,6 +615,23 @@ document.querySelectorAll("[data-insight-audience]").forEach((button) => {
     renderStrategicInsights();
   });
 });
+
+document.querySelectorAll("[data-trend-range]").forEach((button) => {
+  button.addEventListener("click", () => {
+    activeTrendRange = button.dataset.trendRange || "7";
+    document.querySelectorAll("[data-trend-range]").forEach((item) => {
+      item.classList.toggle("active", item.dataset.trendRange === activeTrendRange);
+    });
+    renderTrendChart();
+    renderTrendMetrics(reportZones[activeZone] || reportZones["shah-alam"]);
+    renderStrategicInsights();
+  });
+});
+
+els.exportPdfBtn?.addEventListener("click", exportStrategicReportPdf);
+els.shareReportBtn?.addEventListener("click", shareStrategicReport);
+els.sendHospitalBtn?.addEventListener("click", sendStrategicReportToHospital);
+els.generateBriefingBtn?.addEventListener("click", generateStrategicBriefing);
 
 els.reportModalClose.addEventListener("click", closeReportModal);
 els.reportModalOk.addEventListener("click", closeReportModal);
@@ -1338,6 +1390,9 @@ function renderTrendMetrics(zone) {
   els.mostSevereArea.textContent = highest.title;
   els.nightRisk.textContent = zone.criticalPct >= 28 ? "High" : zone.criticalPct >= 18 ? "Moderate" : "Low";
   els.delayRisk.textContent = zone.level === "high" ? "Medium" : zone.level === "medium" ? "Moderate" : "Low";
+  if (els.reportPreviewPeriod) {
+    els.reportPreviewPeriod.textContent = trendRangeLabel(activeTrendRange);
+  }
 }
 
 function renderSidebarTimeline() {
@@ -1373,17 +1428,37 @@ function renderStrategicInsights() {
   if (!strategicInsightsReady) {
     els.strategicSummary.textContent =
       "Ready to generate a strategic response brief based on the selected regional hotspot.";
-    els.strategicRecommendations.innerHTML = `
-      <div class="strategic-recommendation">Press Generate Strategic Analysis to build response suggestions from the latest hotspot pattern.</div>
-    `;
+    els.strategicRecommendations.innerHTML = strategicCardsMarkup(
+      strategicPlaceholderCards(),
+    );
+    renderReportPreview({
+      summary: "Awaiting generation",
+      points: [],
+      cards: strategicPlaceholderCards(),
+      findings: [
+        "Generate AI analysis to compile cross-district hotspot signals.",
+        "Chart and district trends will be converted into a briefing draft.",
+      ],
+      actions: [
+        "Strategic standby guidance will appear here after generation.",
+        "Hospital and ambulance routing recommendations will update automatically.",
+      ],
+      prediction: "Awaiting AI analysis",
+      deployment: "Standby routing will appear here",
+    });
+    if (els.generateStatus && !strategicInsightsLoading) {
+      els.generateStatus.textContent = "Ready to generate";
+    }
     return;
   }
 
   const content = strategicContentFor(zone, activeInsightAudience);
   els.strategicSummary.textContent = content.summary;
-  els.strategicRecommendations.innerHTML = content.points
-    .map((point) => `<div class="strategic-recommendation">${escapeHtml(point)}</div>`)
-    .join("");
+  els.strategicRecommendations.innerHTML = strategicCardsMarkup(content.cards);
+  renderReportPreview(content);
+  if (els.generateStatus) {
+    els.generateStatus.textContent = `Generated ${formatTime(reportGeneratedAt || new Date())}`;
+  }
 }
 
 function strategicContentFor(zone, audience) {
@@ -1391,36 +1466,387 @@ function strategicContentFor(zone, audience) {
   const nextZone = highest[1] ? highest[1].title : "nearby support corridors";
   const base = `Based on the latest EV incident clustering, ${zone.title} currently shows elevated ${severityLabel(severityLevelFromZone(zone))} probability during ${zone.window.toLowerCase()} travel pressure.`;
   const catalog = {
-    government: [
-      `Deploy standby ambulance coverage nearer to ${zone.title} connectors and keep diversion routing ready toward ${nextZone}.`,
-      `Increase patrol visibility during ${zone.window} peak crash windows.`,
-      `Install temporary warning signage and traffic-calming support at severe intersection clusters.`,
-      `Coordinate inter-agency briefings when Level 4-5 incidents start trending upward.`,
-    ],
-    hospital: [
-      `Prepare surge-readiness at hospitals receiving ${zone.title} referrals during ${zone.window}.`,
-      `Hold trauma bed and triage visibility for likely Level 4/5 spillover from ${zone.title}.`,
-      `Keep ambulance handover lanes clear for faster turnaround on repeat hotspot days.`,
-      `Share readiness alerts with emergency department leads when critical share rises above ${zone.criticalPct}%.`,
-    ],
-    ambulance: [
-      `Pre-position 1 ambulance unit closer to ${zone.title} as the primary focused region.`,
-      `Keep routing alternatives open toward ${nextZone} in case congestion blocks direct access.`,
-      `Prioritize vehicle battery-safe crash handling kits for severe EV incident response.`,
-      `Monitor dispatch timing closely during ${zone.window} because incident density is elevated.`,
-    ],
-    public: [
-      `Advise EV drivers to reduce speed and avoid distraction on ${zone.title} corridors during ${zone.window}.`,
-      `Recommend earlier charging stops to avoid rushed lane changes near hotspot connectors.`,
-      `Push caution notices for wet-weather or low-visibility travel around ${zone.title}.`,
-      `Share alternate routing suggestions when regional pressure spreads toward ${nextZone}.`,
-    ],
+    government: {
+      cards: [
+        {
+          title: "Critical District",
+          icon: "DIST",
+          severity: "high",
+          text: `${zone.title} remains the priority district with the strongest severe-incident concentration during ${zone.window}.`,
+        },
+        {
+          title: "Ambulance Standby Risk",
+          icon: "AMB",
+          severity: zone.level === "high" ? "high" : "medium",
+          text: `Coverage demand is rising between ${zone.title} and ${nextZone}, so standby positioning should stay tighter than usual.`,
+        },
+        {
+          title: "Traffic Pressure",
+          icon: "FLOW",
+          severity: "medium",
+          text: `Connector congestion is likely to amplify response time risk around the main hotspot corridor during the evening peak.`,
+        },
+        {
+          title: "Public Safety Action",
+          icon: "SAFE",
+          severity: "medium",
+          text: `Use targeted traffic advisories, warning signboards, and visibility patrols to calm high-risk EV travel routes.`,
+        },
+      ],
+      points: [
+        `Deploy standby ambulance coverage nearer to ${zone.title} connectors and keep diversion routing ready toward ${nextZone}.`,
+        `Increase patrol visibility during ${zone.window} peak crash windows.`,
+        `Install temporary warning signage and traffic-calming support at severe intersection clusters.`,
+        `Coordinate inter-agency briefings when Level 4-5 incidents start trending upward.`,
+      ],
+    },
+    hospital: {
+      cards: [
+        {
+          title: "Critical District",
+          icon: "ER",
+          severity: "high",
+          text: `${zone.title} should be treated as the main intake pressure source for higher-severity EV crash referrals.`,
+        },
+        {
+          title: "Ambulance Standby Risk",
+          icon: "ETA",
+          severity: "medium",
+          text: `Turnaround time may slow if incoming ambulance demand overlaps with congestion toward ${nextZone}.`,
+        },
+        {
+          title: "Traffic Pressure",
+          icon: "TRI",
+          severity: "medium",
+          text: `Peak arrival surges are most likely around ${zone.window}, especially if multiple EV incidents cluster back-to-back.`,
+        },
+        {
+          title: "Public Safety Action",
+          icon: "CARE",
+          severity: "low",
+          text: `Prepare trauma bays, triage alerts, and handover lanes so severe arrivals move faster into treatment.`,
+        },
+      ],
+      points: [
+        `Prepare surge-readiness at hospitals receiving ${zone.title} referrals during ${zone.window}.`,
+        `Hold trauma bed and triage visibility for likely Level 4/5 spillover from ${zone.title}.`,
+        `Keep ambulance handover lanes clear for faster turnaround on repeat hotspot days.`,
+        `Share readiness alerts with emergency department leads when critical share rises above ${zone.criticalPct}%.`,
+      ],
+    },
+    ambulance: {
+      cards: [
+        {
+          title: "Critical District",
+          icon: "UNIT",
+          severity: "high",
+          text: `${zone.title} remains the best candidate for focused standby because incident frequency is elevated and recurring.`,
+        },
+        {
+          title: "Ambulance Standby Risk",
+          icon: "ROUTE",
+          severity: "high",
+          text: `Dispatch delay risk increases when crews approach ${zone.title} through heavily loaded connectors near ${nextZone}.`,
+        },
+        {
+          title: "Traffic Pressure",
+          icon: "ROAD",
+          severity: "medium",
+          text: `Peak access pressure is strongest during ${zone.window}, so alternate routing needs to stay ready.`,
+        },
+        {
+          title: "Public Safety Action",
+          icon: "KIT",
+          severity: "low",
+          text: `Keep EV crash handling kits, battery isolation tools, and responder checklists staged with the standby unit.`,
+        },
+      ],
+      points: [
+        `Pre-position 1 ambulance unit closer to ${zone.title} as the primary focused region.`,
+        `Keep routing alternatives open toward ${nextZone} in case congestion blocks direct access.`,
+        `Prioritize vehicle battery-safe crash handling kits for severe EV incident response.`,
+        `Monitor dispatch timing closely during ${zone.window} because incident density is elevated.`,
+      ],
+    },
+    public: {
+      cards: [
+        {
+          title: "Critical District",
+          icon: "ALRT",
+          severity: "high",
+          text: `${zone.title} should be highlighted in public safety advisories because severe incidents are clustering there.`,
+        },
+        {
+          title: "Ambulance Standby Risk",
+          icon: "SLOW",
+          severity: "medium",
+          text: `Road users should expect slower emergency lane clearance around the hotspot window and avoid blocking connector routes.`,
+        },
+        {
+          title: "Traffic Pressure",
+          icon: "DRIVE",
+          severity: "medium",
+          text: `Traffic conflict risk rises during ${zone.window}, especially where charging-stop travel merges into commuter flow.`,
+        },
+        {
+          title: "Public Safety Action",
+          icon: "WARN",
+          severity: "low",
+          text: `Encourage lower speeds, earlier charging stops, and route awareness to reduce EV incident exposure.`,
+        },
+      ],
+      points: [
+        `Advise EV drivers to reduce speed and avoid distraction on ${zone.title} corridors during ${zone.window}.`,
+        `Recommend earlier charging stops to avoid rushed lane changes near hotspot connectors.`,
+        `Push caution notices for wet-weather or low-visibility travel around ${zone.title}.`,
+        `Share alternate routing suggestions when regional pressure spreads toward ${nextZone}.`,
+      ],
+    },
   };
+
+  const selected = catalog[audience] || catalog.government;
+  const findings = [
+    `${zone.title} recorded ${zone.incidentsCount} higher-priority cases in the selected reporting window.`,
+    `${nextZone} remains the next closest pressure corridor for spillover and responder rerouting.`,
+    `Critical-share severity is holding at ${zone.criticalPct}% for Level 4/5 EV incidents.`,
+  ];
+  const actions = selected.points.slice(0, 3);
 
   return {
     summary: `${base} ${buildRegionalSummary()}`,
-    points: catalog[audience] || catalog.government,
+    points: selected.points,
+    cards: selected.cards,
+    findings,
+    actions,
+    prediction: `${zone.title} is likely to remain the highest night-risk cluster over the next 24 hours.`,
+    deployment: `Keep one primary standby unit near ${zone.title} and a support route open toward ${nextZone}.`,
   };
+}
+
+function strategicPlaceholderCards() {
+  return [
+    {
+      title: "Critical District",
+      icon: "DIST",
+      severity: "medium",
+      text: "The highest-priority district summary will appear here after AI generation.",
+    },
+    {
+      title: "Ambulance Standby Risk",
+      icon: "AMB",
+      severity: "medium",
+      text: "Expected standby strain and deployment demand will be summarised here.",
+    },
+    {
+      title: "Traffic Pressure",
+      icon: "FLOW",
+      severity: "low",
+      text: "Traffic conflict and connector congestion findings will populate here.",
+    },
+    {
+      title: "Public Safety Action",
+      icon: "SAFE",
+      severity: "low",
+      text: "Public advisory and prevention actions will appear once analysis is generated.",
+    },
+  ];
+}
+
+function strategicCardsMarkup(cards) {
+  return cards
+    .map(
+      (card) => `
+        <article class="strategic-recommendation">
+          <div class="strategic-recommendation-top">
+            <span class="strategic-recommendation-icon">${escapeHtml(card.icon)}</span>
+            <span class="strategic-recommendation-badge ${escapeHtml(card.severity)}">${escapeHtml(severityWord(card.severity))}</span>
+          </div>
+          <strong>${escapeHtml(card.title)}</strong>
+          <p>${escapeHtml(card.text)}</p>
+        </article>
+      `,
+    )
+    .join("");
+}
+
+function renderReportPreview(content) {
+  if (els.reportPreviewTime) {
+    els.reportPreviewTime.textContent = reportGeneratedAt
+      ? formatDate(reportGeneratedAt)
+      : "Awaiting generation";
+  }
+  if (els.reportPrediction) {
+    els.reportPrediction.textContent = content.prediction;
+  }
+  if (els.reportDeployment) {
+    els.reportDeployment.textContent = content.deployment;
+  }
+  if (els.reportKeyFindings) {
+    els.reportKeyFindings.innerHTML = content.findings
+      .map((item) => `<li>${escapeHtml(item)}</li>`)
+      .join("");
+  }
+  if (els.reportRecommendedActions) {
+    els.reportRecommendedActions.innerHTML = content.actions
+      .map((item) => `<li>${escapeHtml(item)}</li>`)
+      .join("");
+  }
+}
+
+function severityWord(level) {
+  if (level === "high") {
+    return "High";
+  }
+  if (level === "low") {
+    return "Low";
+  }
+  return "Medium";
+}
+
+function buildStrategicReportText() {
+  const zone = reportZones[activeZone] || reportZones["shah-alam"];
+  const content = strategicContentFor(zone, activeInsightAudience);
+  const findings = content.findings.map((item) => `- ${item}`).join("\n");
+  const actions = content.actions.map((item) => `- ${item}`).join("\n");
+  return [
+    "EVSmart+ AI Emergency Response Insights",
+    `Audience: ${activeInsightAudience}`,
+    `Report Period: ${trendRangeLabel(activeTrendRange)}`,
+    `Generated Time: ${formatDate(reportGeneratedAt || new Date())}`,
+    "",
+    `Focused Region: ${zone.title}`,
+    `Risk Level: ${zone.riskText}`,
+    `Peak Window: ${zone.window}`,
+    `Critical Share: ${zone.criticalPct}% Level 4/5`,
+    "",
+    "Key Findings",
+    findings,
+    "",
+    "Recommended Actions",
+    actions,
+    "",
+    `Risk Prediction: ${content.prediction}`,
+    `Deployment Suggestion: ${content.deployment}`,
+  ].join("\n");
+}
+
+function exportStrategicReportPdf() {
+  const zone = reportZones[activeZone] || reportZones["shah-alam"];
+  const content = strategicContentFor(zone, activeInsightAudience);
+  const popup = window.open("", "_blank", "width=980,height=900");
+  if (!popup) {
+    openCustomReportModal(
+      "Export blocked",
+      "Allow popups to print the strategic report as PDF from your browser.",
+      [{ label: "Next step", value: "Enable popups, then press Export PDF again." }],
+    );
+    return;
+  }
+
+  popup.document.write(`<!doctype html>
+  <html>
+    <head>
+      <title>EVSmart+ Strategic Report</title>
+      <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 32px; color: #17212b; }
+        h1,h2,h3,p { margin: 0; }
+        .head { display:flex; justify-content:space-between; gap:24px; margin-bottom:24px; }
+        .brand { color:#166534; font-weight:900; letter-spacing:.04em; text-transform:uppercase; font-size:12px; margin-bottom:10px; }
+        .title { font-size:34px; margin-bottom:8px; }
+        .muted { color:#5b6b7c; line-height:1.55; }
+        .pill { display:inline-block; padding:8px 12px; border-radius:999px; background:#eff8f1; color:#166534; font-weight:800; font-size:12px; }
+        .meta { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:14px; margin:24px 0; }
+        .card { border:1px solid #dfe7e1; border-radius:18px; padding:16px; background:#fff; }
+        .card span { display:block; color:#5b6b7c; font-size:12px; font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:.04em; }
+        .card strong { font-size:18px; }
+        .grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; margin:20px 0; }
+        ul { margin:10px 0 0 20px; padding:0; line-height:1.6; }
+        .section { margin-top:24px; }
+      </style>
+    </head>
+    <body>
+      <div class="head">
+        <div>
+          <div class="brand">EVSmart+ Strategic Briefing</div>
+          <h1 class="title">AI Emergency Response Insights</h1>
+          <p class="muted">${escapeHtml(content.summary)}</p>
+        </div>
+        <div class="pill">${escapeHtml(trendRangeLabel(activeTrendRange))}</div>
+      </div>
+      <div class="meta">
+        <div class="card"><span>Focused Region</span><strong>${escapeHtml(zone.title)}</strong></div>
+        <div class="card"><span>Generated Time</span><strong>${escapeHtml(formatDate(reportGeneratedAt || new Date()))}</strong></div>
+        <div class="card"><span>Audience</span><strong>${escapeHtml(activeInsightAudience)}</strong></div>
+      </div>
+      <div class="grid">
+        <div class="card"><span>Risk Prediction</span><strong>${escapeHtml(content.prediction)}</strong></div>
+        <div class="card"><span>Deployment Suggestion</span><strong>${escapeHtml(content.deployment)}</strong></div>
+      </div>
+      <div class="section card">
+        <span>Key Findings</span>
+        <ul>${content.findings.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </div>
+      <div class="section card">
+        <span>Recommended Actions</span>
+        <ul>${content.actions.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </div>
+    </body>
+  </html>`);
+  popup.document.close();
+  popup.focus();
+  popup.print();
+}
+
+async function shareStrategicReport() {
+  const text = buildStrategicReportText();
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      openCustomReportModal(
+        "Report copied",
+        "The strategic report text is ready to paste into email, chat, or briefing notes.",
+        [{ label: "Copied content", value: "AI report preview copied to clipboard.", full: true }],
+      );
+      return;
+    }
+  } catch (_) {
+    // Fallback below.
+  }
+
+  openCustomReportModal(
+    "Share report",
+    "Clipboard sharing is unavailable in this browser, so the report text is shown below for manual sharing.",
+    [{ label: "Strategic report", value: text, full: true }],
+  );
+}
+
+function sendStrategicReportToHospital() {
+  const zone = reportZones[activeZone] || reportZones["shah-alam"];
+  openCustomReportModal(
+    "Hospital briefing queued",
+    "This simulation prepares a hospital-facing handover summary from the current hotspot analysis.",
+    [
+      { label: "Focused region", value: zone.title },
+      { label: "Audience", value: "Hospital emergency coordination" },
+      { label: "Key handover", value: `Prepare surge-readiness during ${zone.window} and hold visibility for ${zone.criticalPct}% critical-share risk.`, full: true },
+    ],
+  );
+}
+
+function generateStrategicBriefing() {
+  const zone = reportZones[activeZone] || reportZones["shah-alam"];
+  const content = strategicContentFor(zone, activeInsightAudience);
+  openCustomReportModal(
+    "Executive briefing",
+    "A concise briefing view for leadership presentation and FYP demonstration.",
+    [
+      { label: "Region", value: zone.title },
+      { label: "Risk level", value: zone.riskText },
+      { label: "Peak window", value: zone.window },
+      { label: "Prediction", value: content.prediction, full: true },
+      { label: "Deployment", value: content.deployment, full: true },
+    ],
+  );
 }
 
 function openZoneInsightModal() {
@@ -1457,28 +1883,81 @@ function topZones(limit) {
     .slice(0, limit);
 }
 
+function trendRangeLabel(range) {
+  const labels = {
+    "7": "Past 7 Days",
+    "30": "Past 30 Days",
+    monthly: "Monthly Overview",
+    yearly: "Yearly Overview",
+  };
+  return labels[range] || labels["7"];
+}
+
+function trendSeriesForRange(range) {
+  const base = {
+    labels: chartDays,
+    bars: chartDays.map((_, index) =>
+      Math.max(
+        4,
+        Math.round(
+          Object.values(reportZones).reduce(
+            (sum, zone) => sum + (zone.spark[index] ?? 0),
+            0,
+          ) / 4,
+        ),
+      ),
+    ),
+    shah: reportZones["shah-alam"].spark,
+    subang: reportZones["subang-jaya"].spark,
+    pj: reportZones["petaling-jaya"].spark,
+  };
+
+  if (range === "30") {
+    return {
+      labels: ["W1", "W2", "W3", "W4", "W5", "W6"],
+      bars: [18, 24, 28, 25, 31, 34],
+      shah: [10, 12, 14, 13, 16, 18],
+      subang: [7, 8, 10, 9, 11, 12],
+      pj: [6, 7, 8, 8, 9, 10],
+    };
+  }
+
+  if (range === "monthly") {
+    return {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      bars: [44, 47, 42, 50, 56, 61],
+      shah: [19, 20, 18, 22, 24, 26],
+      subang: [12, 13, 11, 14, 15, 16],
+      pj: [10, 10, 9, 11, 12, 13],
+    };
+  }
+
+  if (range === "yearly") {
+    return {
+      labels: ["Q1", "Q2", "Q3", "Q4"],
+      bars: [118, 126, 134, 147],
+      shah: [48, 51, 55, 61],
+      subang: [31, 33, 35, 39],
+      pj: [27, 28, 31, 34],
+    };
+  }
+
+  return base;
+}
+
 function renderTrendChart() {
   const svg = els.trendChart;
   if (!svg) {
     return;
   }
 
-  const shah = reportZones["shah-alam"].spark;
-  const subang = reportZones["subang-jaya"].spark;
-  const pj = reportZones["petaling-jaya"].spark;
-  const allZoneValues = Object.values(reportZones).map((zone) => zone.spark);
-  const bars = chartDays.map((_, index) => {
-    const dailyTotal = allZoneValues.reduce(
-      (sum, values) => sum + (values[index] ?? 0),
-      0,
-    );
-    return Math.max(4, Math.round(dailyTotal / 4));
-  });
+  const seriesData = trendSeriesForRange(activeTrendRange);
+  const { labels, bars, shah, subang, pj } = seriesData;
   const allValues = [...bars, ...shah, ...subang, ...pj];
   const maxValue = Math.max(...allValues, 10);
-  const width = 420;
-  const height = 250;
-  const padding = { top: 24, right: 20, bottom: 34, left: 34 };
+  const width = 760;
+  const height = 320;
+  const padding = { top: 26, right: 28, bottom: 48, left: 48 };
   const chartWidth = width - padding.left - padding.right;
   const chartHeight = height - padding.top - padding.bottom;
   const stepX = chartWidth / bars.length;
@@ -1500,10 +1979,10 @@ function renderTrendChart() {
   const barsMarkup = bars
     .map((value, index) => {
       const barHeight = (value / maxValue) * chartHeight;
-      const x = padding.left + index * stepX + 10;
+      const x = padding.left + index * stepX + 14;
       const y = padding.top + chartHeight - barHeight;
       const emphasis = index === 3 ? " emphasis" : "";
-      return `<rect x="${x}" y="${y}" width="${stepX - 18}" height="${barHeight}" rx="12" class="chart-bar${emphasis}" />`;
+      return `<rect x="${x}" y="${y}" width="${Math.max(24, stepX - 26)}" height="${barHeight}" rx="14" class="chart-bar${emphasis}" />`;
     })
     .join("");
 
@@ -1557,7 +2036,7 @@ function renderTrendChart() {
     })
     .join("");
 
-  const labels = chartDays
+  const labelsMarkup = labels
     .map((day, index) => {
       const x = xAt(index);
       return `<text x="${x}" y="${height - 10}" text-anchor="middle" class="chart-label">${day}</text>`;
@@ -1584,7 +2063,7 @@ function renderTrendChart() {
     <line x1="${padding.left}" y1="${padding.top + chartHeight}" x2="${width - padding.right}" y2="${padding.top + chartHeight}" class="chart-axis" />
     ${barsMarkup}
     ${lineMarkup}
-    ${labels}
+    ${labelsMarkup}
   `;
 }
 
