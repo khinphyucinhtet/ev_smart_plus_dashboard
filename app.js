@@ -68,7 +68,7 @@ const reportZones = {
     title: "Klang",
     riskText: "High alert zone",
     riskClass: "high-text",
-    incidentsCount: 12,
+    incidentsCount: 14,
     criticalPct: 31,
     action: "Increase standby around Klang corridor",
     window: "6 PM - 9 PM",
@@ -92,7 +92,7 @@ const reportZones = {
     title: "Subang Jaya",
     riskText: "Watch closely",
     riskClass: "medium-text",
-    incidentsCount: 9,
+    incidentsCount: 8,
     criticalPct: 22,
     action: "Increase patrol check-ins during peak hours",
     window: "4 PM - 7 PM",
@@ -138,7 +138,7 @@ const reportZones = {
     title: "Gombak",
     riskText: "Watch closely",
     riskClass: "medium-text",
-    incidentsCount: 7,
+    incidentsCount: 9,
     criticalPct: 19,
     action: "Stage one roving crew on standby",
     window: "5 PM - 7 PM",
@@ -785,17 +785,26 @@ function regionChipsMarkup() {
 function riskDistributionMarkup() {
   const zones = Object.values(reportZones)
     .slice()
-    .sort((a, b) => b.incidentsCount - a.incidentsCount);
+    .sort((a, b) => {
+      const severityDiff = severityLevelFromZone(b) - severityLevelFromZone(a);
+      if (severityDiff !== 0) {
+        return severityDiff;
+      }
+      const incidentDiff = b.incidentsCount - a.incidentsCount;
+      if (incidentDiff !== 0) {
+        return incidentDiff;
+      }
+      return b.criticalPct - a.criticalPct;
+    });
   return zones
-    .slice(0, 5)
     .map(
-      (zone) => `
+      (zone, index) => `
         <div class="risk-pill ${zone.level}">
           <div class="risk-pill-top">
-            <span class="risk-rank">#${escapeHtml(String(zones.indexOf(zone) + 1))}</span>
+            <span class="risk-rank">${escapeHtml(String(index + 1))}</span>
             <div class="risk-pill-title">
               <strong>${escapeHtml(zone.title)}</strong>
-              <span>${escapeHtml(`Level ${severityLevelFromZone(zone)}`)}</span>
+              <span class="risk-impact-badge">${escapeHtml(`Most common impact L${severityLevelFromZone(zone)}`)}</span>
             </div>
           </div>
           <div class="risk-pill-meta">
