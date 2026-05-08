@@ -226,6 +226,14 @@ button {
   flex: 1 1 360px;
 }
 
+.topbar-subrow {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
 .eyebrow {
   margin: 0 0 6px;
   color: var(--green);
@@ -250,6 +258,10 @@ h1 {
 .panel-head p {
   color: var(--muted);
   line-height: 1.45;
+}
+
+#roleSubtitle {
+  margin-bottom: 0;
 }
 
 .actions {
@@ -284,20 +296,23 @@ h1 {
 }
 
 body.report-mode .topbar {
-  align-items: center;
+  position: relative;
+  align-items: flex-start;
+  padding-right: 220px;
 }
 
 body.report-mode .actions {
-  width: 100%;
-  margin-top: 4px;
-  justify-content: flex-start;
+  width: auto;
+  margin-top: 0;
+  justify-content: flex-end;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: nowrap;
 }
 
 body.report-mode .actions button {
   white-space: nowrap;
-  padding-inline: 16px;
+  padding-inline: 14px;
 }
 
 body.report-mode .actions .danger {
@@ -305,7 +320,6 @@ body.report-mode .actions .danger {
 }
 
 .report-utility {
-  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -324,24 +338,11 @@ body.report-mode .actions .danger {
   font-weight: 700;
 }
 
-.utility-icon,
-.utility-avatar,
-.utility-chevron {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid var(--line);
-  box-shadow: 0 10px 24px rgba(24, 34, 45, 0.06);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.utility-avatar {
-  background: linear-gradient(135deg, #27ae60 0%, #1b8f4c 100%);
-  color: white;
-  font-weight: 900;
+body.report-mode .report-utility {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin-left: 0;
 }
 
 .metrics {
@@ -1339,6 +1340,10 @@ body.report-mode .actions .danger {
     display: block;
   }
 
+  .topbar-subrow {
+    display: block;
+  }
+
   .actions {
     justify-content: flex-start;
     margin-top: 14px;
@@ -1370,6 +1375,22 @@ body.report-mode .actions .danger {
   .report-utility {
     width: 100%;
     justify-content: flex-start;
+  }
+
+  body.report-mode .topbar {
+    padding-right: 0;
+  }
+
+  body.report-mode .report-utility {
+    position: static;
+    margin-top: 14px;
+  }
+
+  body.report-mode .actions {
+    width: 100%;
+    margin-top: 14px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .focus-report-btn {

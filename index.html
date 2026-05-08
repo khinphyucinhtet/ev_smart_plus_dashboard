@@ -252,25 +252,24 @@
         <div class="topbar-copy">
           <p class="eyebrow">Realtime EV accident response</p>
           <h1 id="roleTitle">Hospital Dashboard</h1>
-          <p id="roleSubtitle">
-            Severe Level 4/5 incidents and ambulance response updates.
-          </p>
+          <div class="topbar-subrow">
+            <p id="roleSubtitle">
+              Severe Level 4/5 incidents and ambulance response updates.
+            </p>
+            <div class="actions">
+              <button id="refreshBtn" type="button">Refresh</button>
+              <button id="generateReportBtn" type="button" class="hidden">Generate AI Report</button>
+              <button id="printPdfBtn" type="button" class="hidden">Print PDF</button>
+              <button id="selectAllBtn" type="button">Select all</button>
+              <button id="deleteBtn" type="button" class="danger">Delete selected</button>
+            </div>
+          </div>
         </div>
         <div id="reportUtility" class="report-utility hidden">
           <div class="report-utility-pill">
             <span class="live-dot"></span>
-            <span>Live AI Monitoring</span>
+            <span>Live Monitoring</span>
           </div>
-          <button class="utility-icon" type="button" aria-label="Notifications">🔔</button>
-          <button class="utility-avatar" type="button" aria-label="Profile">EV</button>
-          <button class="utility-chevron" type="button" aria-label="More options">⌄</button>
-        </div>
-        <div class="actions">
-          <button id="refreshBtn" type="button">Refresh</button>
-          <button id="generateReportBtn" type="button" class="hidden">Generate AI Report</button>
-          <button id="printPdfBtn" type="button" class="hidden">Print PDF</button>
-          <button id="selectAllBtn" type="button">Select all</button>
-          <button id="deleteBtn" type="button" class="danger">Delete selected</button>
         </div>
       </header>
 
