@@ -352,6 +352,98 @@ const reportZones = {
       "Cyberjaya remains comparatively stable, but EV commuter and campus traffic still justify maintaining one clear responder route during daytime demand.",
     spark: [1, 1, 2, 2, 3, 3, 4],
   },
+  "kuala-langat": {
+    title: "Kuala Langat",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 6,
+    criticalPct: 17,
+    action: "Keep southern coastal response route open",
+    window: "4 PM - 7 PM",
+    level: "medium",
+    center: [2.8128, 101.5011],
+    polygon: [
+      [2.93, 101.36],
+      [2.948, 101.58],
+      [2.858, 101.65],
+      [2.742, 101.63],
+      [2.688, 101.49],
+      [2.73, 101.34],
+      [2.84, 101.31],
+    ],
+    narrative:
+      "Kuala Langat is showing moderate pressure along southern commuter and coastal connectors, so one flexible ambulance route should stay ready through the district.",
+    spark: [2, 2, 3, 4, 4, 5, 6],
+  },
+  "hulu-selangor": {
+    title: "Hulu Selangor",
+    riskText: "Stable / monitor",
+    riskClass: "low-text",
+    incidentsCount: 5,
+    criticalPct: 14,
+    action: "Maintain northern hill-access readiness",
+    window: "6 AM - 9 AM",
+    level: "low",
+    center: [3.5654, 101.6384],
+    polygon: [
+      [3.69, 101.47],
+      [3.71, 101.71],
+      [3.61, 101.81],
+      [3.49, 101.78],
+      [3.44, 101.6],
+      [3.5, 101.45],
+      [3.61, 101.42],
+    ],
+    narrative:
+      "Hulu Selangor remains mostly stable, but northern feeder roads and hilly connectors can still slow ambulance access during early-morning incident spikes.",
+    spark: [1, 2, 2, 3, 4, 4, 5],
+  },
+  "sabak-bernam": {
+    title: "Sabak Bernam",
+    riskText: "Lower risk / monitor",
+    riskClass: "low-text",
+    incidentsCount: 4,
+    criticalPct: 10,
+    action: "Maintain rural corridor standby coverage",
+    window: "11 AM - 2 PM",
+    level: "low",
+    center: [3.7697, 100.9879],
+    polygon: [
+      [3.87, 100.86],
+      [3.89, 101.1],
+      [3.81, 101.16],
+      [3.71, 101.14],
+      [3.66, 101.02],
+      [3.69, 100.88],
+      [3.78, 100.83],
+    ],
+    narrative:
+      "Sabak Bernam remains comparatively calmer, but longer rural travel distances mean standby routing should stay prepared for scattered EV roadside emergencies.",
+    spark: [1, 1, 2, 2, 2, 3, 4],
+  },
+  banting: {
+    title: "Banting",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 5,
+    criticalPct: 16,
+    action: "Keep township approach routes clear",
+    window: "3 PM - 6 PM",
+    level: "medium",
+    center: [2.8138, 101.5019],
+    polygon: [
+      [2.89, 101.42],
+      [2.9, 101.57],
+      [2.84, 101.61],
+      [2.77, 101.59],
+      [2.74, 101.5],
+      [2.77, 101.41],
+      [2.83, 101.39],
+    ],
+    narrative:
+      "Banting is showing moderate township traffic risk, especially where EV travel merges into larger district connectors during late-afternoon movement.",
+    spark: [1, 2, 3, 3, 4, 4, 5],
+  },
 };
 let activeZone = "shah-alam";
 
@@ -1502,7 +1594,7 @@ function initializeSelangorMap() {
 
   const selangorBounds = window.L.latLngBounds([
     [2.52, 100.95],
-    [3.42, 101.98],
+    [3.92, 101.98],
   ]);
   selangorMap.fitBounds(selangorBounds, { padding: [18, 18] });
   window.L.control.zoom({ position: "topright" }).addTo(selangorMap);

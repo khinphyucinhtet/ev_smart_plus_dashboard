@@ -301,7 +301,7 @@ body.report-mode .topbar {
   align-items: flex-start;
   padding-right: 190px;
   display: block;
-  min-height: 118px;
+  min-height: 142px;
 }
 
 body.report-mode .topbar-copy {
@@ -310,28 +310,29 @@ body.report-mode .topbar-copy {
 }
 
 body.report-mode .topbar-subrow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  flex-wrap: nowrap;
-  padding-right: 0;
+  position: relative;
+  display: block;
+  min-height: 52px;
+  padding-right: 700px;
 }
 
 body.report-mode .actions {
+  position: absolute;
+  top: 0;
+  right: 0;
   width: auto;
   margin-top: 0;
+  margin-left: 0;
   justify-content: flex-end;
   align-items: center;
   gap: 8px;
   flex-wrap: nowrap;
-  margin-left: auto;
 }
 
 body.report-mode .actions button {
   white-space: nowrap;
-  padding: 10px 13px;
-  font-size: 14px;
+  padding: 10px 12px;
+  font-size: 13px;
 }
 
 body.report-mode .actions .danger {
@@ -339,9 +340,9 @@ body.report-mode .actions .danger {
 }
 
 body.report-mode #roleSubtitle {
-  flex: 1 1 auto;
-  min-width: 0;
-  max-width: none;
+  display: block;
+  max-width: 100%;
+  padding-right: 0;
 }
 
 .report-utility {
@@ -659,7 +660,7 @@ body.report-mode .report-utility {
 }
 
 .report-map {
-  min-height: 300px;
+  min-height: 360px;
   position: relative;
   overflow: hidden;
   border-radius: 24px;
@@ -1407,12 +1408,18 @@ body.report-mode .report-utility {
     min-height: 0;
   }
 
+  body.report-mode .topbar-subrow {
+    min-height: 0;
+    padding-right: 0;
+  }
+
   body.report-mode .report-utility {
     position: static;
     margin-top: 14px;
   }
 
   body.report-mode .actions {
+    position: static;
     width: 100%;
     margin-top: 14px;
     justify-content: flex-start;
@@ -1438,7 +1445,7 @@ body.report-mode .report-utility {
   }
 
   .report-map {
-    min-height: 380px;
+    min-height: 420px;
   }
 
   .map-overlay-card {
