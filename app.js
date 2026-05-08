@@ -43,8 +43,8 @@ const reportZones = {
     title: "Shah Alam",
     riskText: "High alert zone",
     riskClass: "high-text",
-    incidentsCount: 14,
-    criticalPct: 36,
+    incidentsCount: 15,
+    criticalPct: 39,
     action: "Pre-position 1 ambulance unit",
     window: "5 PM - 8 PM",
     level: "high",
@@ -68,7 +68,7 @@ const reportZones = {
     riskText: "High alert zone",
     riskClass: "high-text",
     incidentsCount: 14,
-    criticalPct: 31,
+    criticalPct: 34,
     action: "Increase standby around Klang corridor",
     window: "6 PM - 9 PM",
     level: "high",
@@ -91,8 +91,8 @@ const reportZones = {
     title: "Subang Jaya",
     riskText: "Watch closely",
     riskClass: "medium-text",
-    incidentsCount: 8,
-    criticalPct: 22,
+    incidentsCount: 9,
+    criticalPct: 17,
     action: "Increase patrol check-ins during peak hours",
     window: "4 PM - 7 PM",
     level: "medium",
@@ -114,7 +114,7 @@ const reportZones = {
     title: "Petaling Jaya",
     riskText: "Watch closely",
     riskClass: "medium-text",
-    incidentsCount: 8,
+    incidentsCount: 10,
     criticalPct: 18,
     action: "Keep rapid-response routing open toward city connectors",
     window: "7 AM - 10 AM",
@@ -137,7 +137,7 @@ const reportZones = {
     title: "Gombak",
     riskText: "Watch closely",
     riskClass: "medium-text",
-    incidentsCount: 9,
+    incidentsCount: 10,
     criticalPct: 19,
     action: "Stage one roving crew on standby",
     window: "5 PM - 7 PM",
@@ -157,13 +157,13 @@ const reportZones = {
   },
   kajang: {
     title: "Kajang",
-    riskText: "Lower risk / monitor",
-    riskClass: "low-text",
-    incidentsCount: 5,
-    criticalPct: 12,
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 4,
+    criticalPct: 15,
     action: "Maintain normal patrol readiness",
     window: "2 PM - 5 PM",
-    level: "low",
+    level: "medium",
     center: [2.9935, 101.7874],
     polygon: [
       [3.07, 101.71],
@@ -179,13 +179,13 @@ const reportZones = {
   },
   sepang: {
     title: "Sepang",
-    riskText: "Lower risk / monitor",
-    riskClass: "low-text",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
     incidentsCount: 4,
-    criticalPct: 10,
+    criticalPct: 14,
     action: "Keep airport-link response route available",
     window: "11 AM - 2 PM",
-    level: "low",
+    level: "medium",
     center: [2.6931, 101.7498],
     polygon: [
       [2.83, 101.61],
@@ -202,13 +202,13 @@ const reportZones = {
   },
   "kuala-selangor": {
     title: "Kuala Selangor",
-    riskText: "Stable / monitor",
-    riskClass: "low-text",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
     incidentsCount: 4,
-    criticalPct: 11,
+    criticalPct: 14,
     action: "Maintain coastal coverage",
     window: "12 PM - 3 PM",
-    level: "low",
+    level: "medium",
     center: [3.3395, 101.2497],
     polygon: [
       [3.47, 101.08],
@@ -226,8 +226,8 @@ const reportZones = {
     title: "Rawang",
     riskText: "Watch closely",
     riskClass: "medium-text",
-    incidentsCount: 6,
-    criticalPct: 17,
+    incidentsCount: 8,
+    criticalPct: 16,
     action: "Keep one standby route northbound",
     window: "6 AM - 9 AM",
     level: "medium",
@@ -246,13 +246,13 @@ const reportZones = {
   },
   "hulu-langat": {
     title: "Hulu Langat",
-    riskText: "Stable / monitor",
-    riskClass: "low-text",
-    incidentsCount: 5,
-    criticalPct: 13,
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 7,
+    criticalPct: 16,
     action: "Maintain hillside access readiness",
     window: "3 PM - 6 PM",
-    level: "low",
+    level: "medium",
     center: [3.1234, 101.8602],
     polygon: [
       [3.22, 101.75],
@@ -270,8 +270,8 @@ const reportZones = {
     title: "Puchong",
     riskText: "Watch closely",
     riskClass: "medium-text",
-    incidentsCount: 7,
-    criticalPct: 20,
+    incidentsCount: 6,
+    criticalPct: 15,
     action: "Keep one support crew near township exits",
     window: "5 PM - 8 PM",
     level: "medium",
@@ -292,8 +292,8 @@ const reportZones = {
     title: "Ampang Jaya",
     riskText: "Watch closely",
     riskClass: "medium-text",
-    incidentsCount: 6,
-    criticalPct: 18,
+    incidentsCount: 7,
+    criticalPct: 16,
     action: "Keep hillside access routes clear",
     window: "4 PM - 7 PM",
     level: "medium",
@@ -315,7 +315,7 @@ const reportZones = {
     riskText: "Watch closely",
     riskClass: "medium-text",
     incidentsCount: 6,
-    criticalPct: 18,
+    criticalPct: 15,
     action: "Keep one standby crew near northern interchange exits",
     window: "6 PM - 8 PM",
     level: "medium",
@@ -334,13 +334,13 @@ const reportZones = {
   },
   cyberjaya: {
     title: "Cyberjaya",
-    riskText: "Lower risk / monitor",
-    riskClass: "low-text",
-    incidentsCount: 4,
-    criticalPct: 11,
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 6,
+    criticalPct: 15,
     action: "Maintain standard coverage near EV campus routes",
     window: "1 PM - 4 PM",
-    level: "low",
+    level: "medium",
     center: [2.9213, 101.6559],
     polygon: [
       [2.973, 101.608],
@@ -358,8 +358,8 @@ const reportZones = {
     title: "Kuala Langat",
     riskText: "Watch closely",
     riskClass: "medium-text",
-    incidentsCount: 6,
-    criticalPct: 17,
+    incidentsCount: 7,
+    criticalPct: 16,
     action: "Keep southern coastal response route open",
     window: "4 PM - 7 PM",
     level: "medium",
@@ -379,13 +379,13 @@ const reportZones = {
   },
   "hulu-selangor": {
     title: "Hulu Selangor",
-    riskText: "Stable / monitor",
-    riskClass: "low-text",
-    incidentsCount: 5,
-    criticalPct: 14,
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 7,
+    criticalPct: 16,
     action: "Maintain northern hill-access readiness",
     window: "6 AM - 9 AM",
-    level: "low",
+    level: "medium",
     center: [3.5654, 101.6384],
     polygon: [
       [3.69, 101.47],
@@ -402,13 +402,13 @@ const reportZones = {
   },
   "sabak-bernam": {
     title: "Sabak Bernam",
-    riskText: "Lower risk / monitor",
-    riskClass: "low-text",
-    incidentsCount: 4,
-    criticalPct: 10,
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 3,
+    criticalPct: 14,
     action: "Maintain rural corridor standby coverage",
     window: "11 AM - 2 PM",
-    level: "low",
+    level: "medium",
     center: [3.7697, 100.9879],
     polygon: [
       [3.87, 100.86],
@@ -427,8 +427,8 @@ const reportZones = {
     title: "Banting",
     riskText: "Watch closely",
     riskClass: "medium-text",
-    incidentsCount: 5,
-    criticalPct: 16,
+    incidentsCount: 4,
+    criticalPct: 14,
     action: "Keep township approach routes clear",
     window: "3 PM - 6 PM",
     level: "medium",
@@ -445,6 +445,50 @@ const reportZones = {
     narrative:
       "Banting is showing moderate township traffic risk, especially where EV travel merges into larger district connectors during late-afternoon movement.",
     spark: [1, 2, 3, 3, 4, 4, 5],
+  },
+  selayang: {
+    title: "Selayang",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 5,
+    criticalPct: 15,
+    action: "Keep urban interchange response lanes open",
+    window: "4 PM - 6 PM",
+    level: "medium",
+    center: [3.2374, 101.6897],
+    polygon: [
+      [3.29, 101.61],
+      [3.302, 101.705],
+      [3.255, 101.746],
+      [3.198, 101.724],
+      [3.188, 101.642],
+      [3.226, 101.602],
+    ],
+    narrative:
+      "Selayang is showing moderate connector pressure near urban feeder roads, so rapid ambulance turn-in routes should stay clear during late afternoon movement.",
+    spark: [1, 2, 3, 3, 4, 4, 5],
+  },
+  "batu-caves": {
+    title: "Batu Caves",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 5,
+    criticalPct: 15,
+    action: "Maintain cave-route and ring-road standby coverage",
+    window: "6 PM - 8 PM",
+    level: "medium",
+    center: [3.2379, 101.6831],
+    polygon: [
+      [3.285, 101.69],
+      [3.294, 101.782],
+      [3.242, 101.824],
+      [3.188, 101.807],
+      [3.171, 101.73],
+      [3.204, 101.676],
+    ],
+    narrative:
+      "Batu Caves is showing moderate evening incident clustering near ring-road approaches, so responders should keep one fast entry corridor open during commuter hours.",
+    spark: [1, 2, 2, 3, 4, 4, 5],
   },
 };
 let activeZone = "shah-alam";
@@ -746,9 +790,21 @@ function renderReportZone() {
   updateMapVisuals();
 }
 
+function compareZonesByPriority(a, b) {
+  const severityDiff = severityLevelFromZone(b) - severityLevelFromZone(a);
+  if (severityDiff !== 0) {
+    return severityDiff;
+  }
+  const incidentDiff = b.incidentsCount - a.incidentsCount;
+  if (incidentDiff !== 0) {
+    return incidentDiff;
+  }
+  return b.criticalPct - a.criticalPct;
+}
+
 function regionChipsMarkup() {
   return Object.entries(reportZones)
-    .sort(([, a], [, b]) => b.incidentsCount - a.incidentsCount)
+    .sort(([, a], [, b]) => compareZonesByPriority(a, b))
     .map(([id, zone]) => {
       const active = id === activeZone ? " active" : "";
       const levelTag = `L${severityLevelFromZone(zone)}`;
@@ -766,17 +822,7 @@ function regionChipsMarkup() {
 function riskDistributionMarkup() {
   const zones = Object.values(reportZones)
     .slice()
-    .sort((a, b) => {
-      const severityDiff = severityLevelFromZone(b) - severityLevelFromZone(a);
-      if (severityDiff !== 0) {
-        return severityDiff;
-      }
-      const incidentDiff = b.incidentsCount - a.incidentsCount;
-      if (incidentDiff !== 0) {
-        return incidentDiff;
-      }
-      return b.criticalPct - a.criticalPct;
-    });
+    .sort(compareZonesByPriority);
   return zones
     .map(
       (zone, index) => `
@@ -1398,7 +1444,7 @@ function severityLevelFromZone(zone) {
 function topZones(limit) {
   return Object.values(reportZones)
     .slice()
-    .sort((a, b) => b.incidentsCount - a.incidentsCount)
+    .sort(compareZonesByPriority)
     .slice(0, limit);
 }
 
