@@ -339,7 +339,7 @@ const reportZones = {
     title: "Cyberjaya",
     riskText: "Watch closely",
     riskClass: "medium-text",
-    incidentsCount: 6,
+    incidentsCount: 4,
     criticalPct: 15,
     action: "Maintain standard coverage near EV campus routes",
     window: "1 PM - 4 PM",
@@ -453,8 +453,8 @@ const reportZones = {
     title: "Selayang",
     riskText: "Watch closely",
     riskClass: "medium-text",
-    incidentsCount: 5,
-    criticalPct: 15,
+    incidentsCount: 6,
+    criticalPct: 16,
     action: "Keep urban interchange response lanes open",
     window: "4 PM - 6 PM",
     level: "medium",
@@ -475,8 +475,8 @@ const reportZones = {
     title: "Batu Caves",
     riskText: "Watch closely",
     riskClass: "medium-text",
-    incidentsCount: 5,
-    criticalPct: 15,
+    incidentsCount: 4,
+    criticalPct: 14,
     action: "Maintain cave-route and ring-road standby coverage",
     window: "6 PM - 8 PM",
     level: "medium",
@@ -493,8 +493,32 @@ const reportZones = {
       "Batu Caves is showing moderate evening incident clustering near ring-road approaches, so responders should keep one fast entry corridor open during commuter hours.",
     spark: [1, 2, 2, 3, 4, 4, 5],
   },
+  putrajaya: {
+    title: "Putrajaya",
+    riskText: "Low risk / monitor",
+    riskClass: "low-text",
+    incidentsCount: 3,
+    criticalPct: 15,
+    action: "Maintain civic-center route monitoring with light standby coverage",
+    window: "2 PM - 4 PM",
+    level: "low",
+    center: [2.9264, 101.6964],
+    polygon: [
+      [2.962, 101.653],
+      [2.968, 101.724],
+      [2.93, 101.756],
+      [2.888, 101.739],
+      [2.881, 101.676],
+      [2.912, 101.647],
+    ],
+    narrative:
+      "Putrajaya remains comparatively calm, but civic-center routes should still keep one clear response path open for scattered EV support incidents.",
+    spark: [1, 1, 1, 2, 2, 2, 3],
+  },
 };
 let activeZone = "shah-alam";
+
+syncZoneRiskPresentation();
 
 const els = {
   roleTitle: document.querySelector("#roleTitle"),
@@ -814,6 +838,7 @@ function visibleNotifications() {
 }
 
 function renderReportZone() {
+  syncZoneRiskPresentation();
   const zone = reportZones[activeZone] || reportZones["shah-alam"];
   els.zoneTitle.textContent = zone.title;
   els.zoneRiskText.textContent = zone.riskText;
@@ -843,15 +868,98 @@ function renderReportZone() {
 }
 
 function compareZonesByPriority(a, b) {
-  const severityDiff = severityLevelFromZone(b) - severityLevelFromZone(a);
-  if (severityDiff !== 0) {
-    return severityDiff;
+  const riskDiff = riskPriority(riskBandFromZone(b)) - riskPriority(riskBandFromZone(a));
+  if (riskDiff !== 0) {
+    return riskDiff;
   }
   const incidentDiff = b.incidentsCount - a.incidentsCount;
   if (incidentDiff !== 0) {
     return incidentDiff;
   }
   return b.criticalPct - a.criticalPct;
+}
+
+function riskPriority(level) {
+  if (level === "high") {
+    return 3;
+  }
+  if (level === "medium") {
+    return 2;
+  }
+  return 1;
+}
+
+function riskBandFromZone(zone) {
+  if (zone.incidentsCount >= 13) {
+    return "high";
+  }
+  if (zone.incidentsCount >= 5) {
+    return "medium";
+  }
+  return "low";
+}
+
+function riskLabel(level) {
+  if (level === "high") {
+    return "High";
+  }
+  if (level === "medium") {
+    return "Medium";
+  }
+  return "Low";
+}
+
+function riskTextForLevel(level) {
+  if (level === "high") {
+    return "High alert zone";
+  }
+  if (level === "medium") {
+    return "Watch closely";
+  }
+  return "Low risk / monitor";
+}
+
+function riskClassForLevel(level) {
+  if (level === "high") {
+    return "high-text";
+  }
+  if (level === "medium") {
+    return "medium-text";
+  }
+  return "low-text";
+}
+
+function syncZoneRiskPresentation() {
+  Object.values(reportZones).forEach((zone) => {
+    const level = riskBandFromZone(zone);
+    zone.level = level;
+    zone.riskText = riskTextForLevel(level);
+    zone.riskClass = riskClassForLevel(level);
+  });
+}
+
+function preferredRiskBand(id) {
+  if (["shah-alam", "klang"].includes(id)) {
+    return "high";
+  }
+  if (
+    [
+      "gombak",
+      "petaling-jaya",
+      "subang-jaya",
+      "rawang",
+      "ampang-jaya",
+      "kuala-langat",
+      "hulu-selangor",
+      "puchong",
+      "sungai-buloh",
+      "selayang",
+      "hulu-langat",
+    ].includes(id)
+  ) {
+    return "medium";
+  }
+  return "low";
 }
 
 function regionChipsMarkup() {
@@ -884,11 +992,12 @@ function riskDistributionMarkup() {
     .map(
       (zone, index) => `
         <button type="button" class="risk-pill ${zone.level}${zone.title === (reportZones[activeZone] || reportZones["shah-alam"]).title ? " active" : ""}" data-risk-zone="${escapeHtml(zone.title)}">
-          <div class="risk-pill-top">
-            <span class="risk-rank">${escapeHtml(String(index + 1))}</span>
-            <div class="risk-pill-title">
+          <div class="risk-pill-head">
+            <div class="risk-pill-rankline">
+              <span class="risk-rank-text">${escapeHtml(String(index + 1))}</span>
               <strong>${escapeHtml(zone.title)}</strong>
             </div>
+            <span class="risk-severity-badge ${zone.level}">${escapeHtml(riskLabel(zone.level))}</span>
           </div>
           <div class="risk-pill-meta">
             <div class="risk-pill-meta-row">
@@ -1326,51 +1435,33 @@ function refreshReportData({ showBanner = true, forceBump = false } = {}) {
 }
 
 function randomizeReportData(forceBump = false) {
-  Object.values(reportZones).forEach((zone) => {
+  Object.entries(reportZones).forEach(([id, zone]) => {
     if (forceBump) {
       const incidentDelta = randomInt(-1, 1);
       const pctDelta = randomInt(-1, 2);
-      zone.incidentsCount = Math.max(3, zone.incidentsCount + incidentDelta);
+      const preferredBand = preferredRiskBand(id);
+      const nextCount = zone.incidentsCount + incidentDelta;
+      if (preferredBand === "high") {
+        zone.incidentsCount = clamp(nextCount, 13, 16);
+      } else if (preferredBand === "medium") {
+        zone.incidentsCount = clamp(nextCount, 5, 12);
+      } else {
+        zone.incidentsCount = clamp(nextCount, 2, 4);
+      }
       zone.criticalPct = clamp(zone.criticalPct + pctDelta, 8, 42);
     }
     zone.spark = zone.spark.map((value, index) =>
       Math.max(1, value + randomInt(index === zone.spark.length - 1 ? -1 : -2, 2)),
     );
   });
-
-  if (forceBump) {
-    const hotZones = Object.values(reportZones)
-      .filter((zone) => zone.criticalPct >= 28)
-      .sort((a, b) => b.criticalPct - a.criticalPct);
-
-    hotZones.forEach((zone, index) => {
-      zone.level = index < 2 ? "high" : "medium";
-      zone.riskText = index < 2 ? "High alert zone" : "Watch closely";
-      zone.riskClass = index < 2 ? "high-text" : "medium-text";
-    });
-
-    Object.values(reportZones)
-      .filter((zone) => !hotZones.includes(zone))
-      .forEach((zone) => {
-        if (zone.criticalPct <= 14) {
-          zone.level = "low";
-          zone.riskText = "Lower risk / monitor";
-          zone.riskClass = "low-text";
-        } else {
-          zone.level = "medium";
-          zone.riskText = "Watch closely";
-          zone.riskClass = "medium-text";
-        }
-      });
-  }
-
+  syncZoneRiskPresentation();
   reportConfidenceScore = clamp(reportConfidenceScore + randomInt(-2, 2), 91, 97);
 }
 
 function buildRegionalSummary() {
   const ranked = Object.values(reportZones)
     .slice()
-    .sort((a, b) => b.criticalPct - a.criticalPct);
+    .sort(compareZonesByPriority);
   const highest = ranked[0];
   const second = ranked[1];
   const calmer = ranked
