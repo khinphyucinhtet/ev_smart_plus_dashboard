@@ -31,7 +31,6 @@ let reportBannerTimer = null;
 let reportConfidenceScore = 94;
 let selangorMap = null;
 let zoneLayers = new Map();
-let mapOverlayDismissed = false;
 let activeInsightAudience = "government";
 let strategicInsightsReady = false;
 let pullRefreshStartY = 0;
@@ -493,17 +492,12 @@ const els = {
   mostSevereArea: document.querySelector("#mostSevereArea"),
   nightRisk: document.querySelector("#nightRisk"),
   delayRisk: document.querySelector("#delayRisk"),
-  mapOverlayCard: document.querySelector("#mapOverlayCard"),
-  mapOverlayClose: document.querySelector("#mapOverlayClose"),
   trendChart: document.querySelector("#trendChart"),
   generateStatus: document.querySelector("#generateStatus"),
   reportBanner: document.querySelector("#reportBanner"),
   reportBannerText: document.querySelector("#reportBannerText"),
   reportBannerTime: document.querySelector("#reportBannerTime"),
   regionChips: document.querySelector("#regionChips"),
-  mapOverlayTitle: document.querySelector("#mapOverlayTitle"),
-  mapOverlayText: document.querySelector("#mapOverlayText"),
-  mapOverlayRisk: document.querySelector("#mapOverlayRisk"),
   regionalSummary: document.querySelector("#regionalSummary"),
   riskDistribution: document.querySelector("#riskDistribution"),
   reportModalOverlay: document.querySelector("#reportModalOverlay"),
@@ -541,13 +535,6 @@ document.querySelectorAll("[data-insight-audience]").forEach((button) => {
     activeInsightAudience = button.dataset.insightAudience || "government";
     renderStrategicInsights();
   });
-});
-
-els.mapOverlayClose.addEventListener("click", (event) => {
-  event.preventDefault();
-  event.stopPropagation();
-  mapOverlayDismissed = true;
-  els.mapOverlayCard.classList.add("hidden");
 });
 
 els.reportModalClose.addEventListener("click", closeReportModal);
@@ -753,14 +740,8 @@ function renderReportZone() {
   renderSidebarTimeline();
   renderSidebarClock();
   renderStrategicInsights();
-  if (!mapOverlayDismissed) {
-    els.mapOverlayCard.classList.remove("hidden");
-  }
-  els.mapOverlayTitle.textContent = zone.title;
-  els.mapOverlayText.textContent = zone.narrative;
-  els.mapOverlayRisk.textContent = zone.riskText;
-  els.mapOverlayRisk.className = `map-overlay-risk ${zone.riskClass}`;
   bindRegionChips();
+  bindRiskCards();
   renderTrendChart();
   updateMapVisuals();
 }
@@ -799,25 +780,28 @@ function riskDistributionMarkup() {
   return zones
     .map(
       (zone, index) => `
-        <div class="risk-pill ${zone.level}">
+        <button type="button" class="risk-pill ${zone.level}${zone.title === (reportZones[activeZone] || reportZones["shah-alam"]).title ? " active" : ""}" data-risk-zone="${escapeHtml(zone.title)}">
           <div class="risk-pill-top">
             <span class="risk-rank">${escapeHtml(String(index + 1))}</span>
             <div class="risk-pill-title">
               <strong>${escapeHtml(zone.title)}</strong>
-              <span class="risk-impact-badge">${escapeHtml(`Most common impact L${severityLevelFromZone(zone)}`)}</span>
             </div>
           </div>
           <div class="risk-pill-meta">
             <div class="risk-pill-meta-row">
               <span class="risk-pill-meta-label">Cases</span>
-              <span class="risk-pill-meta-value">${escapeHtml(`${zone.incidentsCount} cases`)}</span>
+              <span class="risk-pill-meta-value accent">${escapeHtml(`${zone.incidentsCount} cases`)}</span>
             </div>
             <div class="risk-pill-meta-row">
               <span class="risk-pill-meta-label">Peak</span>
               <span class="risk-pill-meta-value">${escapeHtml(zone.window)}</span>
             </div>
+            <div class="risk-pill-meta-row">
+              <span class="risk-pill-meta-label">Common Impact</span>
+              <span class="risk-pill-meta-value accent">${escapeHtml(`Level ${severityLevelFromZone(zone)}`)}</span>
+            </div>
           </div>
-        </div>
+        </button>
       `,
     )
     .join("");
@@ -827,7 +811,20 @@ function bindRegionChips() {
   document.querySelectorAll("[data-zone-chip]").forEach((button) => {
     button.addEventListener("click", () => {
       activeZone = button.dataset.zoneChip;
-      mapOverlayDismissed = false;
+      renderReportZone();
+    });
+  });
+}
+
+function bindRiskCards() {
+  document.querySelectorAll("[data-risk-zone]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = button.dataset.riskZone;
+      const match = Object.entries(reportZones).find(([, zone]) => zone.title === target);
+      if (!match) {
+        return;
+      }
+      activeZone = match[0];
       renderReportZone();
     });
   });
@@ -1579,7 +1576,6 @@ function initializeSelangorMap() {
 
     polygon.on("click", () => {
       activeZone = id;
-      mapOverlayDismissed = false;
       renderReportZone();
     });
 
@@ -1600,7 +1596,6 @@ function initializeSelangorMap() {
 
     marker.on("click", () => {
       activeZone = id;
-      mapOverlayDismissed = false;
       renderReportZone();
     });
 
