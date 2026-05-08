@@ -469,7 +469,6 @@ const els = {
   connectionState: document.querySelector("#connectionState"),
   reportUtility: document.querySelector("#reportUtility"),
   generateReportBtn: document.querySelector("#generateReportBtn"),
-  printPdfBtn: document.querySelector("#printPdfBtn"),
   selectAllBtn: document.querySelector("#selectAllBtn"),
   deleteBtn: document.querySelector("#deleteBtn"),
   updatesPanel: document.querySelector("#updatesPanel"),
@@ -537,12 +536,6 @@ document.querySelector("#refreshBtn").addEventListener("click", () => {
 
 els.generateReportBtn.addEventListener("click", () => {
   generateAiReport();
-});
-
-els.printPdfBtn.addEventListener("click", () => {
-  if (activeRole === "report") {
-    window.print();
-  }
 });
 
 els.strategicAnalysisBtn.addEventListener("click", () => {
@@ -693,7 +686,6 @@ function render() {
   els.reportPanel.classList.toggle("hidden", !reportMode);
   els.reportUtility.classList.toggle("hidden", !reportMode);
   els.generateReportBtn.classList.toggle("hidden", !reportMode);
-  els.printPdfBtn.classList.toggle("hidden", !reportMode);
   els.selectAllBtn.disabled = reportMode;
   els.deleteBtn.disabled = reportMode;
   els.sidebarMonitor.classList.toggle("hidden", !reportMode);
