@@ -270,6 +270,7 @@ h1 {
   flex-wrap: wrap;
   justify-content: flex-end;
   align-items: center;
+  flex: 0 0 auto;
 }
 
 .actions button {
@@ -298,7 +299,23 @@ h1 {
 body.report-mode .topbar {
   position: relative;
   align-items: flex-start;
-  padding-right: 220px;
+  padding-right: 190px;
+  display: block;
+  min-height: 118px;
+}
+
+body.report-mode .topbar-copy {
+  max-width: 100%;
+  padding-right: 0;
+}
+
+body.report-mode .topbar-subrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: nowrap;
+  padding-right: 0;
 }
 
 body.report-mode .actions {
@@ -306,17 +323,25 @@ body.report-mode .actions {
   margin-top: 0;
   justify-content: flex-end;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: nowrap;
+  margin-left: auto;
 }
 
 body.report-mode .actions button {
   white-space: nowrap;
-  padding-inline: 14px;
+  padding: 10px 13px;
+  font-size: 14px;
 }
 
 body.report-mode .actions .danger {
   box-shadow: 0 10px 18px rgba(214, 106, 106, 0.18);
+}
+
+body.report-mode #roleSubtitle {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
 }
 
 .report-utility {
@@ -1379,6 +1404,7 @@ body.report-mode .report-utility {
 
   body.report-mode .topbar {
     padding-right: 0;
+    min-height: 0;
   }
 
   body.report-mode .report-utility {
