@@ -805,14 +805,19 @@ function compareZonesByPriority(a, b) {
 function regionChipsMarkup() {
   return Object.entries(reportZones)
     .sort(([, a], [, b]) => compareZonesByPriority(a, b))
-    .map(([id, zone]) => {
+    .map(([id, zone], index) => {
       const active = id === activeZone ? " active" : "";
       const levelTag = `L${severityLevelFromZone(zone)}`;
       return `
         <button type="button" class="region-chip ${zone.level}${active}" data-zone-chip="${escapeHtml(id)}">
-          <i class="chip-dot"></i>
-          <strong>${escapeHtml(zone.title)}</strong>
-          <span>${escapeHtml(`${levelTag} | ${zone.incidentsCount} cases`)}</span>
+          <span class="region-chip-rank">
+            <i class="chip-dot"></i>
+            <span class="chip-rank">${escapeHtml(String(index + 1))}</span>
+          </span>
+          <span class="region-chip-copy">
+            <strong>${escapeHtml(zone.title)}</strong>
+            <span>${escapeHtml(`${levelTag} | ${zone.incidentsCount} cases`)}</span>
+          </span>
         </button>
       `;
     })
@@ -1241,7 +1246,7 @@ function renderMetrics(visible, updates, reportMode) {
   els.metricMeta4.textContent = formatDate(new Date());
 }
 
-function refreshReportData({ showBanner = true, forceBump = true } = {}) {
+function refreshReportData({ showBanner = true, forceBump = false } = {}) {
   if (reportGenerationTimer) {
     window.clearTimeout(reportGenerationTimer);
   }
@@ -1270,38 +1275,42 @@ function refreshReportData({ showBanner = true, forceBump = true } = {}) {
 
 function randomizeReportData(forceBump = false) {
   Object.values(reportZones).forEach((zone) => {
-    const incidentDelta = forceBump ? randomInt(-1, 2) : randomInt(-1, 1);
-    const pctDelta = forceBump ? randomInt(-2, 3) : randomInt(-1, 2);
-    zone.incidentsCount = Math.max(3, zone.incidentsCount + incidentDelta);
-    zone.criticalPct = clamp(zone.criticalPct + pctDelta, 8, 42);
+    if (forceBump) {
+      const incidentDelta = randomInt(-1, 1);
+      const pctDelta = randomInt(-1, 2);
+      zone.incidentsCount = Math.max(3, zone.incidentsCount + incidentDelta);
+      zone.criticalPct = clamp(zone.criticalPct + pctDelta, 8, 42);
+    }
     zone.spark = zone.spark.map((value, index) =>
       Math.max(1, value + randomInt(index === zone.spark.length - 1 ? -1 : -2, 2)),
     );
   });
 
-  const hotZones = Object.values(reportZones)
-    .filter((zone) => zone.criticalPct >= 28)
-    .sort((a, b) => b.criticalPct - a.criticalPct);
+  if (forceBump) {
+    const hotZones = Object.values(reportZones)
+      .filter((zone) => zone.criticalPct >= 28)
+      .sort((a, b) => b.criticalPct - a.criticalPct);
 
-  hotZones.forEach((zone, index) => {
-    zone.level = index < 2 ? "high" : "medium";
-    zone.riskText = index < 2 ? "High alert zone" : "Watch closely";
-    zone.riskClass = index < 2 ? "high-text" : "medium-text";
-  });
-
-  Object.values(reportZones)
-    .filter((zone) => !hotZones.includes(zone))
-    .forEach((zone) => {
-      if (zone.criticalPct <= 14) {
-        zone.level = "low";
-        zone.riskText = "Lower risk / monitor";
-        zone.riskClass = "low-text";
-      } else {
-        zone.level = "medium";
-        zone.riskText = "Watch closely";
-        zone.riskClass = "medium-text";
-      }
+    hotZones.forEach((zone, index) => {
+      zone.level = index < 2 ? "high" : "medium";
+      zone.riskText = index < 2 ? "High alert zone" : "Watch closely";
+      zone.riskClass = index < 2 ? "high-text" : "medium-text";
     });
+
+    Object.values(reportZones)
+      .filter((zone) => !hotZones.includes(zone))
+      .forEach((zone) => {
+        if (zone.criticalPct <= 14) {
+          zone.level = "low";
+          zone.riskText = "Lower risk / monitor";
+          zone.riskClass = "low-text";
+        } else {
+          zone.level = "medium";
+          zone.riskText = "Watch closely";
+          zone.riskClass = "medium-text";
+        }
+      });
+  }
 
   reportConfidenceScore = clamp(reportConfidenceScore + randomInt(-2, 2), 91, 97);
 }
@@ -1598,9 +1607,13 @@ function initializeSelangorMap() {
     maxZoom: 19,
   }).addTo(selangorMap);
 
-  const allPolygonPoints = Object.values(reportZones).flatMap((zone) => zone.polygon);
-  const selangorBounds = window.L.latLngBounds(allPolygonPoints);
-  selangorMap.fitBounds(selangorBounds.pad(0.08), { padding: [20, 20] });
+  const focusBounds = window.L.latLngBounds(
+    [
+      [2.7, 101.22],
+      [3.46, 101.93],
+    ],
+  );
+  selangorMap.fitBounds(focusBounds, { padding: [20, 20] });
   window.L.control.zoom({ position: "topright" }).addTo(selangorMap);
 
   Object.entries(reportZones).forEach(([id, zone]) => {
@@ -1673,8 +1686,11 @@ function updateMapVisuals() {
       radius: id === activeZone ? 8 : 6,
       fillColor: zoneStroke(zone.level),
     });
-    if (id === activeZone) {
-      selangorMap.flyTo(zone.center, Math.max(selangorMap.getZoom(), 10.4), {
+    if (
+      id === activeZone &&
+      !selangorMap.getBounds().pad(-0.08).contains(window.L.latLng(zone.center))
+    ) {
+      selangorMap.flyTo(zone.center, Math.max(selangorMap.getZoom(), 10.8), {
         duration: 0.6,
       });
     }
@@ -1683,10 +1699,10 @@ function updateMapVisuals() {
 
 function zoneStroke(level) {
   if (level === "high") {
-    return "#ef4444";
+    return "#ff4d4f";
   }
   if (level === "medium") {
-    return "#facc15";
+    return "#fbbf24";
   }
   return "#22c55e";
 }
@@ -1696,7 +1712,7 @@ function zoneFill(level) {
     return "#dc2626";
   }
   if (level === "medium") {
-    return "#eab308";
+    return "#d97706";
   }
   return "#16a34a";
 }
