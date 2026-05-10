@@ -1647,8 +1647,9 @@ function renderReportUpdatedBadge() {
   }
   const now = new Date();
   els.reportUpdated.innerHTML = `
+    <span>Live</span>
     <strong>Updated ${formatTime(now)}</strong>
-    <small>${formatDisplayDate(now)}</small>
+    <small>${formatDate(now)}</small>
   `;
 }
 

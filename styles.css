@@ -151,7 +151,8 @@ button {
   flex: 1 1 360px;
 }
 
-.hospital-header-actions {
+.hospital-header-actions,
+.report-header-actions {
   display: grid;
   gap: 10px;
   justify-items: end;
@@ -334,7 +335,7 @@ body.insurance-mode .detail {
 }
 
 body.report-mode h1 {
-  font-size: clamp(34px, 4vw, 46px);
+  font-size: clamp(32px, 3.6vw, 42px);
 }
 
 body.report-mode .panel-head h2,
@@ -436,9 +437,10 @@ body.report-mode #roleSubtitle {
 }
 
 .report-utility {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+  flex: 0 0 auto;
 }
 
 .report-utility-pill {
@@ -466,7 +468,7 @@ body.report-mode #roleSubtitle {
 }
 
 body.report-mode .report-utility {
-  display: none !important;
+  display: grid;
 }
 
 .metrics {
@@ -672,6 +674,13 @@ body.report-mode .report-utility {
   background: linear-gradient(180deg, #ffffff 0%, #f4f8f5 100%);
 }
 
+body.report-mode .report-map-card {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+}
+
 .report-summary-card {
   background: linear-gradient(180deg, #ffffff 0%, #fbfcfb 100%);
   display: flex;
@@ -713,6 +722,10 @@ body.report-mode .report-utility {
   margin-bottom: 16px;
 }
 
+body.report-mode .report-map-head {
+  margin-bottom: 14px;
+}
+
 .report-map-head h3,
 .report-summary-card h3,
 .trend-card h3 {
@@ -730,8 +743,8 @@ body.report-mode .report-utility {
 
 .report-map-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.9fr) minmax(280px, 0.58fr);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1.85fr) minmax(260px, 0.55fr);
+  gap: 16px;
   align-items: stretch;
 }
 
@@ -936,17 +949,17 @@ body.report-mode .report-utility {
 }
 
 .top-risk-panel {
-  padding: 16px 14px 14px;
-  border-radius: 24px;
+  padding: 16px;
+  border-radius: 20px;
   border: 1px solid #dde4eb;
   background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
   box-shadow: 0 16px 30px rgba(24, 34, 45, 0.07);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   height: 100%;
-  min-height: 640px;
-  max-height: 640px;
+  min-height: 0;
+  max-height: none;
   overflow: hidden;
   min-width: 0;
 }
@@ -1365,7 +1378,7 @@ body.report-mode .report-utility {
 .risk-distribution {
   display: grid;
   gap: 10px;
-  max-height: 560px;
+  max-height: 520px;
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
