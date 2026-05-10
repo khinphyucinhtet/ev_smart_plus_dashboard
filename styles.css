@@ -410,10 +410,10 @@ body.insurance-mode #roleSubtitle {
 body.report-mode .topbar {
   position: relative;
   align-items: flex-start;
-  padding-right: 0;
-  display: block;
+  padding-right: 230px;
+  display: flex;
   min-height: 0;
-  margin-bottom: 12px;
+  margin-bottom: 18px;
 }
 
 body.report-mode .topbar-copy {
@@ -471,6 +471,9 @@ body.report-mode .report-utility {
   display: grid;
   align-self: flex-start;
   margin-top: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 
 .metrics {
@@ -726,7 +729,7 @@ body.report-mode .report-map-card {
 }
 
 body.report-mode .report-map-head {
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .report-map-head h3,
@@ -747,7 +750,7 @@ body.report-mode .report-map-head {
 .report-map-layout {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(300px, 0.7fr);
+  grid-template-columns: minmax(0, 2.2fr) minmax(280px, 0.75fr);
   gap: 22px;
   align-items: stretch;
 }
@@ -756,7 +759,7 @@ body.report-mode .report-map-head {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 0;
 }
 
 .risk-legend {
@@ -794,10 +797,10 @@ body.report-mode .report-map-head {
 
 .report-map {
   width: 100%;
-  min-height: 500px;
+  min-height: 430px;
   position: relative;
   overflow: hidden;
-  border-radius: 26px;
+  border-radius: 18px;
   background: linear-gradient(180deg, #102033 0%, #0a1322 100%);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow:
@@ -845,13 +848,14 @@ body.report-mode .report-map-head {
 .region-chip-row {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
   gap: 10px;
+  margin-top: 12px;
 }
 
 .region-chip {
-  padding: 11px 13px;
-  border-radius: 15px;
+  padding: 10px 12px;
+  border-radius: 12px;
   text-align: left;
   background: #ffffff;
   border: 1px solid #dfe6ec;
@@ -873,7 +877,7 @@ body.report-mode .report-map-head {
 }
 
 .region-chip strong {
-  font-size: 13px;
+  font-size: 12px;
   margin: 0;
   color: #0f172a;
   line-height: 1.25;
@@ -958,7 +962,7 @@ body.report-mode .report-map-head {
 
 .top-risk-panel {
   width: 100%;
-  padding: 16px;
+  padding: 18px;
   border-radius: 20px;
   border: 1px solid #dde4eb;
   background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
@@ -1387,7 +1391,7 @@ body.report-mode .report-map-head {
 .risk-distribution {
   display: grid;
   gap: 10px;
-  max-height: 560px;
+  max-height: 610px;
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
@@ -2689,7 +2693,11 @@ body.report-mode .report-insights-card {
 
 body.report-mode #reportPanel {
   max-width: none;
-  width: 100%;
+  width: calc(100% - 48px);
+  margin: 0 auto 28px;
+  padding: 28px;
+  border-radius: 28px;
+  box-shadow: 0 20px 45px rgba(24, 34, 45, 0.08);
 }
 
 body.report-mode .report-map-card,
@@ -3793,5 +3801,239 @@ body.hospital-mode .metrics {
 
   .sample-report-page {
     padding: 20px 18px;
+  }
+}
+
+/* Accidents Report final alignment pass: keep scoped so Hospital/Insurance stay unchanged. */
+body.report-mode .topbar {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  padding-right: 230px;
+  margin-bottom: 18px;
+}
+
+body.report-mode .report-utility {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: grid;
+  align-self: flex-start;
+  margin-top: 0;
+}
+
+body.report-mode #reportPanel {
+  width: calc(100% - 48px);
+  max-width: none;
+  margin: 0 auto 28px;
+  padding: 28px;
+  border-radius: 28px;
+  box-shadow: 0 20px 45px rgba(24, 34, 45, 0.08);
+}
+
+body.report-mode .report-map-card {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+body.report-mode .report-map-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 18px;
+}
+
+body.report-mode .report-map-layout {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(280px, 0.75fr);
+  gap: 22px;
+  align-items: stretch;
+}
+
+body.report-mode .report-map,
+body.report-mode .leaflet-map,
+body.report-mode .region-chip-row,
+body.report-mode .top-risk-panel {
+  width: 100%;
+}
+
+body.report-mode .report-map {
+  min-height: 430px;
+  border-radius: 18px;
+}
+
+body.report-mode .region-chip-row {
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+body.report-mode .region-chip {
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+
+body.report-mode .region-chip strong {
+  font-size: 12px;
+}
+
+body.report-mode .region-chip-copy span {
+  font-size: 11px;
+}
+
+body.report-mode .top-risk-panel {
+  padding: 18px;
+  border-radius: 20px;
+  height: 100%;
+  overflow: hidden;
+}
+
+body.report-mode .risk-distribution {
+  max-height: 610px;
+  overflow-y: auto;
+  display: grid;
+  gap: 10px;
+  padding-right: 8px;
+  align-content: start;
+}
+
+body.report-mode .risk-pill {
+  padding: 10px 12px;
+  border-radius: 14px;
+}
+
+body.report-mode .risk-pill-head {
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+body.report-mode .risk-pill-rankline strong {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+body.report-mode .risk-pill-meta-row {
+  margin-top: 5px;
+}
+
+body.report-mode .risk-pill-meta-label,
+body.report-mode .risk-pill-meta-value {
+  font-size: 12px;
+}
+
+body.report-mode .risk-severity-badge {
+  font-size: 10px;
+  padding: 4px 8px;
+}
+
+body.report-mode .trend-head {
+  align-items: flex-start;
+  gap: 18px;
+}
+
+body.report-mode .trend-head-actions {
+  align-items: center;
+}
+
+body.report-mode .trend-analytics-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+body.report-mode .trend-main-panel,
+body.report-mode .trend-bar-panel,
+body.report-mode .trend-severity-panel,
+body.report-mode .trend-split-panel,
+body.report-mode .trend-heatmap-panel,
+body.report-mode .trend-weekday-panel {
+  grid-column: auto;
+}
+
+body.report-mode .trend-panel {
+  padding: 18px;
+  border-radius: 20px;
+}
+
+body.report-mode .trend-panel-head h4 {
+  font-size: 18px;
+}
+
+body.report-mode .trend-panel-head p {
+  font-size: 13px;
+}
+
+body.report-mode .chart-label,
+body.report-mode .chart-y-label,
+body.report-mode .mini-bar-label,
+body.report-mode .mini-bar-value,
+body.report-mode .chart-bar-value,
+body.report-mode .severity-legend-item,
+body.report-mode .severity-legend-item strong,
+body.report-mode .heatmap-row-label strong,
+body.report-mode .heatmap-row-label span,
+body.report-mode .heatmap-hours,
+body.report-mode .heatmap-row-score {
+  font-size: 11px;
+}
+
+body.report-mode .trend-stat-card {
+  padding: 12px;
+  border-radius: 14px;
+}
+
+body.report-mode .trend-stat-card strong {
+  font-size: 18px;
+}
+
+body.report-mode .trend-action-bar {
+  justify-content: flex-start;
+}
+
+@media (min-width: 769px) and (max-width: 1200px) {
+  body.report-mode .report-map-layout,
+  body.report-mode .trend-analytics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.report-mode .report-map-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  body.report-mode .topbar {
+    display: block;
+    padding-right: 0;
+  }
+
+  body.report-mode .report-utility {
+    position: static;
+    width: 100%;
+    justify-items: start;
+    margin-top: 12px;
+  }
+
+  body.report-mode #reportPanel {
+    width: 100%;
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  body.report-mode .report-map-layout,
+  body.report-mode .trend-analytics-grid,
+  body.report-mode .trend-filter-group,
+  body.report-mode .trend-stat-strip {
+    grid-template-columns: 1fr;
+  }
+
+  body.report-mode .trend-head,
+  body.report-mode .trend-head-actions {
+    display: grid;
+    justify-content: stretch;
   }
 }
