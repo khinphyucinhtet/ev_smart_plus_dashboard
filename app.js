@@ -568,14 +568,8 @@ const els = {
   connectionState: document.querySelector("#connectionState"),
   hospitalHeaderActions: document.querySelector("#hospitalHeaderActions"),
   hospitalUpdatedBadge: document.querySelector("#hospitalUpdatedBadge"),
-  hospitalVisibleCount: document.querySelector("#hospitalVisibleCount"),
-  hospitalSelectedCount: document.querySelector("#hospitalSelectedCount"),
-  hospitalLiveUpdates: document.querySelector("#hospitalLiveUpdates"),
-  hospitalLastRefresh: document.querySelector("#hospitalLastRefresh"),
-  hospitalLastRefreshDate: document.querySelector("#hospitalLastRefreshDate"),
   hospitalSelectAllBtn: document.querySelector("#hospitalSelectAllBtn"),
   hospitalDeleteBtn: document.querySelector("#hospitalDeleteBtn"),
-  hospitalInlineStatus: document.querySelector("#hospitalInlineStatus"),
   reportUtility: document.querySelector("#reportUtility"),
   updatesPanel: document.querySelector("#updatesPanel"),
   feedPanel: document.querySelector("#feedPanel"),
@@ -903,12 +897,11 @@ function render() {
   els.metrics.classList.toggle("hidden", reportMode || hospitalMode);
   els.hospitalHeaderActions?.classList.toggle("hidden", !hospitalMode);
   els.connectionState?.classList.toggle("hidden", hospitalMode);
-  els.hospitalInlineStatus?.classList.toggle("hidden", !hospitalMode);
 
   if (activeRole === "hospital") {
     els.roleTitle.textContent = "Hospital Dashboard";
     els.roleSubtitle.textContent =
-      "Severe Level 4/5 incidents and ambulance response updates.";
+      "Nearest hospital dashboard for Level 4/5 EV accident alerts sent from the driver's current location.";
     els.feedTitle.textContent = "Hospital Notifications";
     els.feedSummary.textContent =
       "Hospital only receives Level 4 and Level 5 cases.";
@@ -1314,33 +1307,10 @@ function updateHospitalHeader(visible = visibleAlerts(), updates = visibleNotifi
   const now = new Date();
   if (els.hospitalUpdatedBadge) {
     els.hospitalUpdatedBadge.innerHTML = `
+      <span>Live</span>
       <strong>Updated ${formatTime(now)}</strong>
-      <small>${formatDisplayDate(now)}</small>
+      <small>${formatDate(now)}</small>
     `;
-  }
-
-  if (els.hospitalInlineStatus && els.connectionState) {
-    els.hospitalInlineStatus.textContent = els.connectionState.textContent || "Connecting";
-    els.hospitalInlineStatus.classList.toggle(
-      "error",
-      els.connectionState.classList.contains("error"),
-    );
-  }
-
-  if (els.hospitalVisibleCount) {
-    els.hospitalVisibleCount.textContent = visible.length;
-  }
-  if (els.hospitalSelectedCount) {
-    els.hospitalSelectedCount.textContent = selectedIds.size;
-  }
-  if (els.hospitalLiveUpdates) {
-    els.hospitalLiveUpdates.textContent = updates.length;
-  }
-  if (els.hospitalLastRefresh) {
-    els.hospitalLastRefresh.textContent = formatTime(now);
-  }
-  if (els.hospitalLastRefreshDate) {
-    els.hospitalLastRefreshDate.textContent = formatDate(now);
   }
 }
 
