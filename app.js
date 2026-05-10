@@ -568,6 +568,11 @@ const els = {
   connectionState: document.querySelector("#connectionState"),
   hospitalHeaderActions: document.querySelector("#hospitalHeaderActions"),
   hospitalUpdatedBadge: document.querySelector("#hospitalUpdatedBadge"),
+  hospitalVisibleCount: document.querySelector("#hospitalVisibleCount"),
+  hospitalSelectedCount: document.querySelector("#hospitalSelectedCount"),
+  hospitalLiveUpdates: document.querySelector("#hospitalLiveUpdates"),
+  hospitalLastRefresh: document.querySelector("#hospitalLastRefresh"),
+  hospitalLastRefreshDate: document.querySelector("#hospitalLastRefreshDate"),
   hospitalSelectAllBtn: document.querySelector("#hospitalSelectAllBtn"),
   hospitalDeleteBtn: document.querySelector("#hospitalDeleteBtn"),
   hospitalInlineStatus: document.querySelector("#hospitalInlineStatus"),
@@ -932,7 +937,7 @@ function render() {
   });
 
   renderMetrics(visible, updates, reportMode);
-  updateHospitalHeader();
+  updateHospitalHeader(visible, updates);
 
   els.alertFeed.innerHTML =
     reportMode
@@ -1301,7 +1306,7 @@ function bindSelection() {
   });
 }
 
-function updateHospitalHeader() {
+function updateHospitalHeader(visible = visibleAlerts(), updates = visibleNotifications()) {
   if (activeRole !== "hospital") {
     return;
   }
@@ -1320,6 +1325,22 @@ function updateHospitalHeader() {
       "error",
       els.connectionState.classList.contains("error"),
     );
+  }
+
+  if (els.hospitalVisibleCount) {
+    els.hospitalVisibleCount.textContent = visible.length;
+  }
+  if (els.hospitalSelectedCount) {
+    els.hospitalSelectedCount.textContent = selectedIds.size;
+  }
+  if (els.hospitalLiveUpdates) {
+    els.hospitalLiveUpdates.textContent = updates.length;
+  }
+  if (els.hospitalLastRefresh) {
+    els.hospitalLastRefresh.textContent = formatTime(now);
+  }
+  if (els.hospitalLastRefreshDate) {
+    els.hospitalLastRefreshDate.textContent = formatDate(now);
   }
 }
 
