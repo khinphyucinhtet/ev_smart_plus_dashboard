@@ -570,7 +570,6 @@ const els = {
   updatesPanel: document.querySelector("#updatesPanel"),
   feedPanel: document.querySelector("#feedPanel"),
   reportPanel: document.querySelector("#reportPanel"),
-  sidebarMonitor: document.querySelector("#sidebarMonitor"),
   reportUpdated: document.querySelector("#reportUpdated"),
   zoneTitle: document.querySelector("#zoneTitle"),
   zoneRiskText: document.querySelector("#zoneRiskText"),
@@ -657,7 +656,7 @@ const els = {
   previewPrintBtn: document.querySelector("#previewPrintBtn"),
 };
 
-document.querySelectorAll(".role-btn").forEach((button) => {
+document.querySelectorAll("[data-role]").forEach((button) => {
   button.addEventListener("click", () => {
     activeRole = normalizeRole(button.dataset.role);
     selectedIds.clear();
@@ -876,7 +875,7 @@ function snapshotToList(value) {
 }
 
 function render() {
-  document.querySelectorAll(".role-btn").forEach((button) => {
+  document.querySelectorAll("[data-role]").forEach((button) => {
     button.classList.toggle("active", button.dataset.role === activeRole);
   });
 
@@ -887,7 +886,6 @@ function render() {
   els.reportPanel.classList.toggle("hidden", !reportMode);
   els.reportUtility.classList.toggle("hidden", !reportMode);
   els.metrics.classList.toggle("hidden", reportMode);
-  els.sidebarMonitor?.classList.add("hidden");
 
   if (activeRole === "hospital") {
     els.roleTitle.textContent = "Hospital Dashboard";

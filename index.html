@@ -201,39 +201,18 @@
     </style>
   </head>
   <body>
-    <aside class="sidebar">
-      <div class="brand">
-        <img src="icon.png" alt="" />
-        <div>
-          <strong>EVSmart+</strong>
-          <span>EV Emergency Analytics</span>
-        </div>
+    <header class="app-header">
+      <div class="header-brand">
+        <img src="icon.png" alt="EVSmart+ logo" />
+        <strong>EVSmart+ Dashboard</strong>
       </div>
 
-      <div id="sidebarMonitor" class="sidebar-monitor hidden">
-        <span class="live-dot"></span>
-        <span>Live AI Monitoring</span>
-        <span class="monitor-wave" aria-hidden="true"></span>
-      </div>
-
-      <button class="role-btn active" data-role="hospital">
-        <span>Hospital</span>
-        <small>Level 4 and 5 only</small>
-      </button>
-      <button class="role-btn" data-role="insurance">
-        <span>Insurance</span>
-        <small>All impact/support logs</small>
-      </button>
-      <button class="role-btn" data-role="report">
-        <span>Accidents Report</span>
-        <small>AI-generated hotspot view</small>
-      </button>
-
-      <div class="note">
-        Static HTML dashboard. Host this folder directly on GitHub Pages,
-        Vercel, Netlify, or any normal web server.
-      </div>
-    </aside>
+      <nav class="header-nav" aria-label="Dashboard role navigation">
+        <button class="nav-role-btn active" data-role="hospital" type="button">Hospital</button>
+        <button class="nav-role-btn" data-role="insurance" type="button">Insurance</button>
+        <button class="nav-role-btn" data-role="report" type="button">Accidents Report</button>
+      </nav>
+    </header>
 
     <main class="main">
       <header class="topbar">
@@ -740,6 +719,11 @@
         </div>
       </section>
     </main>
+
+    <footer class="app-footer">
+      <span>© 2026 EVSmart+. All rights reserved.</span>
+      <span>Contact: evsmartplus@gmail.com | +00 1234 567 890</span>
+    </footer>
 
     <div id="reportModalOverlay" class="report-modal-overlay" aria-hidden="true">
       <div class="report-modal" role="dialog" aria-modal="true" aria-labelledby="reportModalTitle">
