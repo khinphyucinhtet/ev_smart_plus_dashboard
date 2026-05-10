@@ -1181,16 +1181,43 @@ function regionChipsMarkup() {
 }
 
 function riskDistributionMarkup() {
+  const preferredRiskOrder = [
+    "Shah Alam",
+    "Klang",
+    "Gombak",
+    "Petaling Jaya",
+    "Subang Jaya",
+    "Rawang",
+    "Hulu Langat",
+    "Ampang Jaya",
+    "Kuala Langat",
+    "Hulu Selangor",
+    "Selayang",
+    "Puchong",
+    "Sungai Buloh",
+    "Kajang",
+    "Cyberjaya",
+    "Sepang",
+    "Kuala Selangor",
+    "Banting",
+    "Batu Caves",
+    "Putrajaya",
+    "Sabak Bernam",
+  ];
+  const preferredRank = (title) => {
+    const index = preferredRiskOrder.indexOf(title);
+    return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+  };
   const zones = Object.values(reportZones)
     .slice()
     .sort((a, b) => {
+      const rankDiff = preferredRank(a.title) - preferredRank(b.title);
+      if (rankDiff !== 0) {
+        return rankDiff;
+      }
       const incidentDiff = b.incidentsCount - a.incidentsCount;
       if (incidentDiff !== 0) {
         return incidentDiff;
-      }
-      const criticalDiff = b.criticalPct - a.criticalPct;
-      if (criticalDiff !== 0) {
-        return criticalDiff;
       }
       return a.title.localeCompare(b.title);
     });
@@ -2564,26 +2591,26 @@ function strategicPlaceholderCards() {
       points: ["Highest-risk hotspot summary will appear after AI generation."],
     },
     {
-      title: "Potential Causes",
-      icon: "PC",
+      title: "Main Causes",
+      icon: "MC",
       severity: "medium",
       points: ["Likely contributing factors will be identified from trend and severity signals."],
     },
     {
-      title: "Recommended Solutions",
-      icon: "RS",
+      title: "Recommended Actions",
+      icon: "RA",
       severity: "high",
       points: ["Ambulance positioning and responder allocation recommendations will appear here."],
     },
     {
-      title: "Resource Deployment Plan",
-      icon: "RD",
+      title: "Resource Plan",
+      icon: "RP",
       severity: "medium",
       points: ["Patrol and route-cover planning will be generated here."],
     },
     {
-      title: "Risk Prediction (Next 24 Hours)",
-      icon: "RP",
+      title: "Next 24 Hours Prediction",
+      icon: "24",
       severity: "high",
       points: ["Projected night-risk pressure will be shown after AI generation."],
       emphasis: "prediction",
@@ -2606,79 +2633,79 @@ function strategicContentFor(zone) {
     .map((item) => item.title);
   const calmLabel = calmZones.length ? calmZones.join(", ") : "routine lower-risk regions";
   return {
-    summary: `Based on the latest EVSmart+ accident dataset, ${leadZone.title} and ${secondZone.title} show the strongest Level 4 accident concentration during evening peak hours. ${mediumZones.length ? `Medium-risk regions such as ${mediumZones.join(", ")} require active monitoring,` : "This selected region still requires active monitoring,"} while low-risk areas such as ${calmLabel} can remain under normal patrol coverage.`,
+    summary: `${leadZone.title} and ${secondZone.title} show the strongest Level 4 accident concentration. Evening 5 PM - 9 PM remains the main response window, while medium-risk areas need monitoring rather than full emergency deployment.`,
     cards: [
       {
         title: "Key Findings",
         icon: "KF",
         severity: "high",
         points: [
-          `${leadZone.title}${secondZone.title !== leadZone.title ? ` and ${secondZone.title}` : ""} remain the strongest evening crash clusters.`,
-          `${secondZone.title} records ${secondZone.incidentsCount} incidents with ${secondZone.criticalPct}% critical-share severity.`,
-          `${highestZones[2] ? `${highestZones[2].title} continues to sit inside the medium-risk watch band.` : "Cross-district signals remain manageable outside the lead hotspot."}`,
+          `${leadZone.title} and ${secondZone.title} show the strongest Level 4 accident concentration.`,
+          "Evening 5 PM - 9 PM is the highest-risk period.",
+          "Medium-risk areas require monitoring, not full emergency deployment.",
         ],
       },
       {
-        title: "Potential Causes",
+        title: "Main Causes",
         icon: "PC",
         severity: "medium",
         points: [
-          "Evening traffic pressure on primary commuter connectors.",
-          "EV charging-route congestion near busy access roads.",
-          "Peak-hour spillover between medium and high-risk districts.",
+          "Evening commuter congestion.",
+          "EV charging-route traffic buildup.",
+          "Sudden lane changes near busy access roads.",
         ],
       },
       {
-        title: "Recommended Solutions",
+        title: "Recommended Actions",
         icon: "RS",
         severity: "high",
         points: [
-          `Increase standby coverage near ${[leadZone.title, secondZone.title].filter(Boolean).join(" and ")} corridors.`,
-          `Maintain visibility patrols during ${zone.window} peak-risk windows.`,
-          "Coordinate public advisories before the evening rush hour.",
+          `Increase ambulance standby near ${leadZone.title} and ${secondZone.title}.`,
+          "Add warning signage during evening peak hours.",
+          "Send public advisory alerts before 5 PM.",
         ],
       },
       {
-        title: "Resource Deployment Plan",
+        title: "Resource Plan",
         icon: "RD",
         severity: "medium",
         points: [
-          `Pre-position 1 ambulance unit near ${zone.title}.`,
+          `Pre-position one ambulance near the ${leadZone.title}/${secondZone.title} corridor.`,
           `Keep a support route open toward ${secondZone.title}.`,
-          "Assign lighter patrol coverage to lower-risk districts.",
+          "Use lighter patrol coverage for low-risk districts.",
         ],
       },
       {
-        title: "Risk Prediction (Next 24 Hours)",
+        title: "Next 24 Hours Prediction",
         icon: "RP",
         severity: "high",
         points: [
-          `${leadZone.title} is likely to remain the highest night-risk cluster over the next 24 hours if evening congestion persists.`,
+          `${leadZone.title} may remain the highest-risk night cluster if evening congestion continues.`,
         ],
         emphasis: "prediction",
       },
     ],
     findings: [
-      `${leadZone.title}${secondZone.title !== leadZone.title ? ` and ${secondZone.title}` : ""} remain the strongest evening crash clusters.`,
-      `${zone.title} currently records ${zone.incidentsCount} incidents with ${zone.criticalPct}% critical-share severity.`,
-      `${highestZones[2] ? `${highestZones[2].title} continues to sit inside the medium-risk watch band.` : "Cross-district signals remain manageable outside the lead hotspot."}`,
+      `${leadZone.title} and ${secondZone.title} show the strongest Level 4 accident concentration.`,
+      "Evening 5 PM - 9 PM is the highest-risk period.",
+      "Medium-risk areas require monitoring, not full emergency deployment.",
     ],
     causes: [
-      "Evening traffic pressure on primary commuter connectors.",
-      "Charging-route congestion and abrupt lane changes near busy access roads.",
-      "Peak-hour spillover between medium- and high-risk districts.",
+      "Evening commuter congestion.",
+      "EV charging-route traffic buildup.",
+      "Sudden lane changes near busy access roads.",
     ],
     actions: [
-      `Increase standby coverage near ${[leadZone.title, secondZone.title].filter(Boolean).join(" and ")} corridors.`,
-      `Maintain visibility patrols during ${zone.window} peak-risk windows.`,
-      "Coordinate warning signage and public advisories before the evening rush window.",
+      `Increase ambulance standby near ${leadZone.title} and ${secondZone.title}.`,
+      "Add warning signage during evening peak hours.",
+      "Send public advisory alerts before 5 PM.",
     ],
     deploymentPlan: [
-      `Pre-position 1 ambulance unit near ${zone.title}.`,
+      `Pre-position one ambulance near the ${leadZone.title}/${secondZone.title} corridor.`,
       `Keep a support route open toward ${secondZone.title}.`,
-      "Assign lighter routine patrol coverage to the lowest-risk southern and western districts.",
+      "Use lighter patrol coverage for low-risk districts.",
     ],
-    prediction: `${leadZone.title} is likely to remain the highest night-risk cluster over the next 24 hours if evening congestion persists.`,
+    prediction: `${leadZone.title} may remain the highest-risk night cluster if evening congestion continues.`,
   };
 }
 
@@ -2713,9 +2740,9 @@ function strategicInsightProfile(zone) {
   const configs = {
     summary: {
       summary:
-        "AI-generated statistical recommendations based on EVSmart+ accident hotspots, severity levels, peak hours, and regional risk patterns.",
+        "Government-focused action suggestions based on hotspot, severity, peak-hour, and regional risk patterns.",
       executive:
-        "Shah Alam and Klang remain the highest-risk clusters with severe accident concentration during evening peak hours. Immediate response and targeted enforcement can help reduce risk in the next reporting cycle.",
+        "Shah Alam and Klang remain the strongest Level 4 clusters during evening peak hours. A focused standby and public advisory plan can reduce response pressure in the next reporting cycle.",
       findings: content.findings,
       causes: content.causes,
       solutions: content.actions,
@@ -2724,9 +2751,9 @@ function strategicInsightProfile(zone) {
     },
     risk: {
       summary:
-        "Risk intelligence is highlighting the strongest pressure corridors, severity split, and likely escalation windows across the selected reporting range.",
+        "Risk intelligence highlights the strongest pressure corridors, impact severity split, and likely escalation windows.",
       executive:
-        "High-risk EV accident density remains concentrated around Shah Alam and Klang, while Gombak, Petaling Jaya, and Subang Jaya continue to require medium-risk surveillance across commuter corridors.",
+        "High-risk density remains concentrated around Shah Alam and Klang, while medium-risk districts need monitoring rather than full emergency deployment.",
       findings: [
         "High-alert districts continue clustering around the western Selangor commuter belt.",
         "Critical severity remains most visible during the evening 5 PM - 9 PM window.",
@@ -2743,9 +2770,9 @@ function strategicInsightProfile(zone) {
     },
     operations: {
       summary:
-        "Operational planning now emphasizes where patrol attention, warning deployments, and ambulance support should be shifted within the next reporting cycle.",
+        "Operational planning focuses on ambulance standby, warnings, and route coverage for the next reporting cycle.",
       executive:
-        "Operations should focus on rapid evening response handoffs, corridor visibility, and keeping approach roads open near the highest-risk districts.",
+        "Operations should focus on evening response readiness, corridor visibility, and keeping approach roads open near the highest-risk districts.",
       findings: content.findings,
       causes: content.causes,
       solutions: [
@@ -2758,9 +2785,9 @@ function strategicInsightProfile(zone) {
     },
     resources: {
       summary:
-        "Resource allocation guidance is prioritizing ambulance standby, corridor access, and lighter patrol distribution across lower-risk districts.",
+        "Resource planning prioritizes ambulance standby, corridor access, and lighter patrol coverage for low-risk districts.",
       executive:
-        "Ambulance and responder assets should remain concentrated near Shah Alam and Klang, while southern and western low-risk districts retain lighter routine coverage.",
+        "Ambulance assets should stay near Shah Alam and Klang, while low-risk districts retain lighter routine patrol coverage.",
       findings: content.findings,
       causes: content.causes,
       solutions: content.actions,
@@ -2769,9 +2796,9 @@ function strategicInsightProfile(zone) {
     },
     future: {
       summary:
-        "Future prediction uses current severity share, peak-hour concentration, and hotspot stability to estimate next-cycle EV emergency pressure.",
+        "Future prediction uses severity share, peak-hour concentration, and hotspot stability to estimate the next 24 hours.",
       executive:
-        "If current congestion and commuter flow patterns persist, Shah Alam is expected to remain the dominant night-risk cluster while neighboring medium-risk districts continue to absorb spillover pressure.",
+        "If evening congestion continues, Shah Alam may remain the highest-risk night cluster while medium-risk districts absorb spillover pressure.",
       findings: content.findings,
       causes: content.causes,
       solutions: content.actions,
@@ -2780,9 +2807,9 @@ function strategicInsightProfile(zone) {
     },
     policy: {
       summary:
-        "Policy and enhancement recommendations focus on signage, public advisory reach, charging-route improvements, and stronger corridor-level prevention tactics.",
+        "Policy suggestions focus on signage, public advisory reach, charging-route flow, and corridor-level prevention.",
       executive:
-        "Government enhancements should prioritize corridor signage, public advisories, and traffic management near charging-route access roads to reduce repeated evening EV crash concentration.",
+        "Government enhancements should prioritize warning signage, public advisories, and charging-route traffic flow before evening rush hour.",
       findings: content.findings,
       causes: content.causes,
       solutions: [
@@ -2857,7 +2884,7 @@ function suggestionPredictionCardMarkup(profile) {
     <div class="suggestion-card-head">
       <div class="suggestion-card-title">
         <span class="suggestion-card-icon">RP</span>
-        <strong>Risk Prediction (Next 24 Hours)</strong>
+        <strong>Next 24 Hours Prediction</strong>
       </div>
     </div>
     <p class="suggestion-card-copy">${escapeHtml(profile.prediction)}</p>
@@ -2912,24 +2939,24 @@ function renderStrategicInsights() {
   }
   if (els.reportCausesCard) {
     els.reportCausesCard.innerHTML = suggestionListCardMarkup(
-      "Potential Causes",
-      "PC",
+      "Main Causes",
+      "MC",
       profile.causes,
       "medium",
     );
   }
   if (els.reportSolutionsCard) {
     els.reportSolutionsCard.innerHTML = suggestionListCardMarkup(
-      "Recommended Solutions",
-      "RS",
+      "Recommended Actions",
+      "RA",
       profile.solutions,
       "high",
     );
   }
   if (els.reportResourcesCard) {
     els.reportResourcesCard.innerHTML = suggestionListCardMarkup(
-      "Resource Deployment Plan",
-      "RD",
+      "Resource Plan",
+      "RP",
       profile.resources,
       "medium",
     );
@@ -3583,16 +3610,16 @@ function buildStrategicReportText() {
     "Key Findings",
     ...content.findings.map((item) => `- ${item}`),
     "",
-    "Potential Causes",
+    "Main Causes",
     ...content.causes.map((item) => `- ${item}`),
     "",
-    "Recommended Solutions",
+    "Recommended Actions",
     ...content.actions.map((item) => `- ${item}`),
     "",
-    "Resource Deployment Plan",
+    "Resource Plan",
     ...content.deploymentPlan.map((item) => `- ${item}`),
     "",
-    `Risk Prediction: ${content.prediction}`,
+    `Next 24 Hours Prediction: ${content.prediction}`,
   ].join("\n");
 }
 
@@ -3625,12 +3652,12 @@ function exportStrategicReportPdf() {
     <div class="card"><span>Dataset Scope</span><strong>${Object.keys(reportZones).length} regions</strong></div>
   </div>
   <div class="grid">
-    <div class="card"><span>Potential Causes</span><ul>${content.causes.map((item)=>`<li>${escapeHtml(item)}</li>`).join("")}</ul></div>
+    <div class="card"><span>Main Causes</span><ul>${content.causes.map((item)=>`<li>${escapeHtml(item)}</li>`).join("")}</ul></div>
     <div class="card"><span>Risk Prediction</span><strong>${escapeHtml(content.prediction)}</strong></div>
   </div>
   <div class="section card"><span>Key Findings</span><ul>${content.findings.map((item)=>`<li>${escapeHtml(item)}</li>`).join("")}</ul></div>
-  <div class="section card"><span>Recommended Solutions</span><ul>${content.actions.map((item)=>`<li>${escapeHtml(item)}</li>`).join("")}</ul></div>
-  <div class="section card"><span>Resource Deployment Plan</span><ul>${content.deploymentPlan.map((item)=>`<li>${escapeHtml(item)}</li>`).join("")}</ul></div>
+  <div class="section card"><span>Recommended Actions</span><ul>${content.actions.map((item)=>`<li>${escapeHtml(item)}</li>`).join("")}</ul></div>
+  <div class="section card"><span>Resource Plan</span><ul>${content.deploymentPlan.map((item)=>`<li>${escapeHtml(item)}</li>`).join("")}</ul></div>
   </body></html>`);
   popup.document.close();
   popup.focus();

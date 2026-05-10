@@ -392,9 +392,8 @@
           <article class="report-summary-card trend-full-card">
             <div class="trend-head">
               <div>
-                <div class="mini-kicker">AI Trend Panel</div>
                 <h3>AI Hotspot Trend Analysis</h3>
-                <p>Analyze incident trends, severity patterns, and hotspot behavior across all 21 regions.</p>
+                <p>Analyze EV accident frequency, impact severity, peak hours, and district-level hotspot behavior across Selangor.</p>
               </div>
               <div class="trend-head-actions">
                 <div class="trend-filter-group" role="tablist" aria-label="Trend range">
@@ -414,8 +413,8 @@
                 <div class="trend-panel-head">
                   <div class="trend-panel-badge">1</div>
                   <div>
-                    <h4>Incident Trend Over Time</h4>
-                    <p>Total incidents and Level 4/5 pressure across the selected reporting range.</p>
+                    <h4>Incident Trend &amp; Severity Over Time</h4>
+                    <p>Show accident count trend and Level 4/5 pressure over selected period.</p>
                   </div>
                 </div>
                 <div class="chart-legend">
@@ -450,8 +449,8 @@
                 <div class="trend-panel-head">
                   <div class="trend-panel-badge">2</div>
                   <div>
-                    <h4>Top 5 Risk Districts</h4>
-                    <p>Current comparison of the highest-pressure regions by incident count.</p>
+                    <h4>Most Affected Districts</h4>
+                    <p>Show top 5 districts by incident count.</p>
                   </div>
                 </div>
                 <svg id="topRiskChart" class="top-risk-chart" viewBox="0 0 420 240" aria-label="Top five risk districts chart"></svg>
@@ -460,8 +459,8 @@
                 <div class="trend-panel-head">
                   <div class="trend-panel-badge">3</div>
                   <div>
-                    <h4>Severity Level Distribution</h4>
-                    <p>Estimated spread of Level 1 to Level 5 incidents in the selected dataset.</p>
+                    <h4>Impact Level Distribution</h4>
+                    <p>Show which impact level happens most often.</p>
                   </div>
                 </div>
                 <div id="severityDistribution" class="severity-distribution-card"></div>
@@ -470,8 +469,8 @@
                 <div class="trend-panel-head">
                   <div class="trend-panel-badge">4</div>
                   <div>
-                    <h4>Risk Category Split</h4>
-                    <p>Balanced view of low, medium, and high districts based on current case counts.</p>
+                    <h4>Risk Category Summary</h4>
+                    <p>Show low, medium, and high risk district count.</p>
                   </div>
                 </div>
                 <div id="riskSplitStats" class="risk-split-grid"></div>
@@ -480,8 +479,8 @@
                 <div class="trend-panel-head">
                   <div class="trend-panel-badge">5</div>
                   <div>
-                    <h4>Peak Hour Heatmap</h4>
-                    <p>Time-window concentration across Morning, Afternoon, Evening, and Night.</p>
+                    <h4>Peak Accident Time Window</h4>
+                    <p>Show morning, afternoon, evening, and night patterns with 5 PM - 9 PM highlighted.</p>
                   </div>
                 </div>
                 <div id="peakHourHeatmap" class="heatmap-card"></div>
@@ -490,8 +489,8 @@
                 <div class="trend-panel-head">
                   <div class="trend-panel-badge">6</div>
                   <div>
-                    <h4>Day of Week Trend</h4>
-                    <p>Average incident activity by day to surface the strongest operational pressure window.</p>
+                    <h4>Weekly Pressure Pattern</h4>
+                    <p>Show day/week trend and identify strongest operational pressure day.</p>
                   </div>
                 </div>
                 <svg id="weekdayTrendChart" class="weekday-trend-chart" viewBox="0 0 420 240" aria-label="Day of week trend chart"></svg>
@@ -499,8 +498,7 @@
             </div>
             <div class="report-action-bar trend-action-bar">
               <button id="exportPdfBtn" class="report-action-btn primary" type="button">Export PDF</button>
-              <button id="shareReportBtn" class="report-action-btn" type="button">Share Report</button>
-              <button id="generateBriefingBtn" class="report-action-btn" type="button">Generate Briefing</button>
+              <button id="generateBriefingBtn" class="report-action-btn" type="button">Generate Report</button>
             </div>
           </article>
 
@@ -508,7 +506,7 @@
             <div class="insights-head">
               <div>
                 <h3>AI Report &amp; Suggestions</h3>
-                <p>AI-generated action plan and strategic recommendations based on hotspot, severity, peak-hour, and regional risk patterns.</p>
+                <p>Government-focused action suggestions based on hotspot, severity, peak-hour, and regional risk patterns.</p>
               </div>
               <span class="report-preview-period">Report Period: <strong id="reportPreviewPeriod">Past 7 Days</strong></span>
             </div>
@@ -523,12 +521,11 @@
             </div>
 
             <div class="insights-toolbar insights-toolbar-compact">
-              <p id="strategicSummary" class="strategic-summary">AI-generated statistical recommendations based on EVSmart+ accident hotspots, severity levels, peak hours, and regional risk patterns.</p>
+              <p id="strategicSummary" class="strategic-summary">Government-focused action suggestions based on hotspot, severity, peak-hour, and regional risk patterns.</p>
               <span id="generateStatus" class="generate-status">Ready to generate</span>
             </div>
 
             <div id="strategicRecommendations" class="report-suggestions-grid">
-              <article id="reportExecutiveCard" class="suggestion-card suggestion-card-large"></article>
               <article id="reportFindingsCard" class="suggestion-card"></article>
               <article id="reportCausesCard" class="suggestion-card"></article>
               <article id="reportSolutionsCard" class="suggestion-card"></article>
@@ -603,19 +600,19 @@
                   <ul id="reportKeyFindings"></ul>
                 </div>
                 <div class="preview-block">
-                  <span>Potential Causes</span>
+                  <span>Main Causes</span>
                   <ul id="reportPotentialCauses"></ul>
                 </div>
                 <div class="preview-block">
-                  <span>Recommended Solutions</span>
+                  <span>Recommended Actions</span>
                   <ul id="reportRecommendedActions"></ul>
                 </div>
                 <div class="preview-block">
-                  <span>Resource Deployment Plan</span>
+                  <span>Resource Plan</span>
                   <ul id="reportDeploymentPlan"></ul>
                 </div>
                 <div class="preview-block preview-block-wide">
-                  <span>Risk Prediction</span>
+                  <span>Next 24 Hours Prediction</span>
                   <p id="reportPrediction" class="preview-paragraph">Awaiting AI analysis</p>
                 </div>
               </div>
@@ -699,7 +696,6 @@
                   </div>
                   <div class="preview-toolbar-actions">
                     <button id="previewDownloadPdfBtn" class="report-action-btn primary" type="button">Download PDF</button>
-                    <button id="previewShareBtn" class="report-action-btn" type="button">Share Report</button>
                     <button id="previewPrintBtn" class="report-action-btn" type="button">Print Report</button>
                   </div>
                 </div>
