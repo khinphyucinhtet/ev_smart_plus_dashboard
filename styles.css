@@ -146,49 +146,6 @@ button {
   color: white;
 }
 
-.timeline-list {
-  display: grid;
-  gap: 10px;
-}
-
-.timeline-item {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 10px;
-  align-items: center;
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 13px;
-}
-
-.timeline-item::before {
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--danger);
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.06);
-}
-
-.timeline-item.medium::before {
-  background: var(--amber);
-}
-
-.timeline-item.low::before {
-  background: #59c36a;
-}
-
-.timeline-item > span {
-  display: flex;
-  gap: 8px;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  color: rgba(255, 255, 255, 0.84);
-}
-
-.timeline-item b {
-  color: white;
-}
-
 .sidebar-clock {
   display: grid;
   gap: 6px;
@@ -2524,7 +2481,6 @@ body.report-mode .report-utility {
 }
 
 body.report-mode .metrics,
-body.report-mode #sidebarTimelineCard,
 body.report-mode .sidebar .note {
   display: none !important;
 }

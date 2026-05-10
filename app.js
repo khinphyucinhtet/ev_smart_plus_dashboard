@@ -571,8 +571,6 @@ const els = {
   feedPanel: document.querySelector("#feedPanel"),
   reportPanel: document.querySelector("#reportPanel"),
   sidebarMonitor: document.querySelector("#sidebarMonitor"),
-  sidebarTimelineCard: document.querySelector("#sidebarTimelineCard"),
-  sidebarTimeline: document.querySelector("#sidebarTimeline"),
   sidebarClockCard: document.querySelector("#sidebarClockCard"),
   sidebarClockTime: document.querySelector("#sidebarClockTime"),
   sidebarClockDate: document.querySelector("#sidebarClockDate"),
@@ -898,7 +896,6 @@ function render() {
   els.reportUtility.classList.toggle("hidden", !reportMode);
   els.metrics.classList.toggle("hidden", reportMode);
   els.sidebarMonitor.classList.toggle("hidden", !reportMode);
-  els.sidebarTimelineCard.classList.toggle("hidden", reportMode);
   els.sidebarClockCard.classList.toggle("hidden", !reportMode);
 
   if (activeRole === "hospital") {
@@ -1015,7 +1012,6 @@ function renderReportZone() {
     ? `Auto-updated at ${formatTime(reportGeneratedAt)}`
     : "Auto-refresh ready";
   renderTrendMetrics(zone);
-  renderSidebarTimeline();
   renderSidebarClock();
   renderStrategicInsights();
   bindRegionChips();
@@ -1663,20 +1659,6 @@ function buildRegionalSummary() {
     .map((zone) => zone.title)
     .join(" and ");
   return `Regional EV accident concentration is currently strongest around ${highest.title} and ${second.title}, while ${calmer} remain comparatively calmer and suitable for lighter standby coverage.`;
-}
-
-function renderSidebarTimeline() {
-  const items = topZones(5).map((zone, index) => {
-    const levelNumber = severityLevelFromZone(zone);
-    const times = ["2:14 PM", "3:01 PM", "3:47 PM", "4:22 PM", "5:43 PM"];
-    const classes = levelNumber >= 4 ? "high" : levelNumber === 3 ? "medium" : "low";
-    return `
-      <div class="timeline-item ${classes}">
-        <span><b>${times[index] || "6:10 PM"}</b><span>Level ${levelNumber}</span><span>${escapeHtml(zone.title)}</span></span>
-      </div>
-    `;
-  });
-  els.sidebarTimeline.innerHTML = items.join("");
 }
 
 function renderSidebarClock() {
