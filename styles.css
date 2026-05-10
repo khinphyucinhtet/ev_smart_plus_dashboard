@@ -469,6 +469,8 @@ body.report-mode #roleSubtitle {
 
 body.report-mode .report-utility {
   display: grid;
+  align-self: flex-start;
+  margin-top: 0;
 }
 
 .metrics {
@@ -718,8 +720,9 @@ body.report-mode .report-map-card {
   display: flex;
   gap: 14px;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 16px;
+  width: 100%;
 }
 
 body.report-mode .report-map-head {
@@ -742,13 +745,15 @@ body.report-mode .report-map-head {
 }
 
 .report-map-layout {
+  width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1.85fr) minmax(260px, 0.55fr);
-  gap: 16px;
+  grid-template-columns: minmax(0, 2fr) minmax(300px, 0.7fr);
+  gap: 22px;
   align-items: stretch;
 }
 
 .report-map-stack {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -788,7 +793,8 @@ body.report-mode .report-map-head {
 }
 
 .report-map {
-  min-height: 460px;
+  width: 100%;
+  min-height: 500px;
   position: relative;
   overflow: hidden;
   border-radius: 26px;
@@ -800,6 +806,7 @@ body.report-mode .report-map-head {
 }
 
 .leaflet-map {
+  width: 100%;
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -836,6 +843,7 @@ body.report-mode .report-map-head {
 }
 
 .region-chip-row {
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 10px;
@@ -949,6 +957,7 @@ body.report-mode .report-map-head {
 }
 
 .top-risk-panel {
+  width: 100%;
   padding: 16px;
   border-radius: 20px;
   border: 1px solid #dde4eb;
@@ -1378,7 +1387,7 @@ body.report-mode .report-map-head {
 .risk-distribution {
   display: grid;
   gap: 10px;
-  max-height: 520px;
+  max-height: 560px;
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
@@ -2678,6 +2687,18 @@ body.report-mode .report-insights-card {
   margin-right: auto;
 }
 
+body.report-mode #reportPanel {
+  max-width: none;
+  width: 100%;
+}
+
+body.report-mode .report-map-card,
+body.report-mode .report-map-layout,
+body.report-mode .report-map-stack {
+  max-width: none;
+  width: 100%;
+}
+
 body.hospital-mode .metrics {
   display: none !important;
 }
@@ -3694,7 +3715,8 @@ body.hospital-mode .metrics {
 
   body.report-mode .report-utility {
     position: static;
-    margin-top: 14px;
+    align-self: flex-start;
+    margin-top: 0;
   }
 
   body.report-mode .actions {
