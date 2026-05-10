@@ -160,6 +160,7 @@ button {
 
 .insurance-header-actions {
   display: grid;
+  gap: 10px;
   justify-items: end;
   flex: 0 0 auto;
 }
@@ -203,14 +204,16 @@ button {
   font-weight: 700;
 }
 
-.hospital-action-buttons {
+.hospital-action-buttons,
+.insurance-action-buttons {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
 }
 
-.hospital-action-btn {
+.hospital-action-btn,
+.insurance-action-btn {
   padding: 9px 13px;
   border-radius: 12px;
   border: 1px solid rgba(46, 125, 50, 0.24);
@@ -220,7 +223,8 @@ button {
   font-weight: 850;
 }
 
-.hospital-action-btn.danger {
+.hospital-action-btn.danger,
+.insurance-action-btn.danger {
   border-color: rgba(198, 40, 40, 0.24);
   background: #fff5f5;
   color: var(--danger);
@@ -3478,6 +3482,10 @@ body.hospital-mode .metrics {
   }
 
   .hospital-action-buttons {
+    justify-content: flex-start;
+  }
+
+  .insurance-action-buttons {
     justify-content: flex-start;
   }
 

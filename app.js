@@ -572,6 +572,8 @@ const els = {
   hospitalDeleteBtn: document.querySelector("#hospitalDeleteBtn"),
   insuranceHeaderActions: document.querySelector("#insuranceHeaderActions"),
   insuranceUpdatedBadge: document.querySelector("#insuranceUpdatedBadge"),
+  insuranceSelectAllBtn: document.querySelector("#insuranceSelectAllBtn"),
+  insuranceDeleteBtn: document.querySelector("#insuranceDeleteBtn"),
   reportUtility: document.querySelector("#reportUtility"),
   updatesPanel: document.querySelector("#updatesPanel"),
   feedPanel: document.querySelector("#feedPanel"),
@@ -673,6 +675,8 @@ document.querySelectorAll("[data-role]").forEach((button) => {
 
 els.hospitalSelectAllBtn?.addEventListener("click", toggleHospitalSelection);
 els.hospitalDeleteBtn?.addEventListener("click", deleteSelectedHospitalAlerts);
+els.insuranceSelectAllBtn?.addEventListener("click", toggleInsuranceSelection);
+els.insuranceDeleteBtn?.addEventListener("click", deleteSelectedInsuranceAlerts);
 
 els.strategicAnalysisBtn?.addEventListener("click", () => {
   if (strategicInsightsLoading) {
@@ -954,6 +958,7 @@ function render() {
 
   bindSelection();
   updateHospitalControls(visible);
+  updateInsuranceControls(visible);
   if (reportMode) {
     initializeSelangorMap();
     initializeSampleReportControls();
@@ -1349,7 +1354,34 @@ function updateHospitalControls(visible = visibleAlerts()) {
   }
 }
 
+function updateInsuranceControls(visible = visibleAlerts()) {
+  if (activeRole !== "insurance") {
+    return;
+  }
+
+  const visibleIds = visible.map(alertId).filter(Boolean);
+  const allSelected =
+    visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+
+  if (els.insuranceSelectAllBtn) {
+    els.insuranceSelectAllBtn.textContent = allSelected ? "Clear Selection" : "Select All";
+  }
+}
+
 function toggleHospitalSelection() {
+  const visibleIds = visibleAlerts().map(alertId).filter(Boolean);
+  const allSelected =
+    visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+
+  selectedIds.clear();
+  if (!allSelected) {
+    visibleIds.forEach((id) => selectedIds.add(id));
+  }
+
+  render();
+}
+
+function toggleInsuranceSelection() {
   const visibleIds = visibleAlerts().map(alertId).filter(Boolean);
   const allSelected =
     visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
@@ -1371,6 +1403,29 @@ async function deleteSelectedHospitalAlerts() {
   }
 
   if (!window.confirm("Delete selected hospital notifications?")) {
+    return;
+  }
+
+  try {
+    await Promise.all(
+      selectedAlerts.map((item) => remove(ref(database, `alerts/${item.id || alertId(item)}`))),
+    );
+    selectedIds.clear();
+    render();
+  } catch (error) {
+    window.alert(`Unable to delete selected notifications: ${error.message}`);
+  }
+}
+
+async function deleteSelectedInsuranceAlerts() {
+  const selectedAlerts = visibleAlerts().filter((item) => selectedIds.has(alertId(item)));
+
+  if (selectedAlerts.length === 0) {
+    window.alert("Please select at least one notification.");
+    return;
+  }
+
+  if (!window.confirm("Delete selected insurance notifications?")) {
     return;
   }
 
