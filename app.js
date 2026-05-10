@@ -570,6 +570,8 @@ const els = {
   hospitalUpdatedBadge: document.querySelector("#hospitalUpdatedBadge"),
   hospitalSelectAllBtn: document.querySelector("#hospitalSelectAllBtn"),
   hospitalDeleteBtn: document.querySelector("#hospitalDeleteBtn"),
+  insuranceHeaderActions: document.querySelector("#insuranceHeaderActions"),
+  insuranceUpdatedBadge: document.querySelector("#insuranceUpdatedBadge"),
   reportUtility: document.querySelector("#reportUtility"),
   updatesPanel: document.querySelector("#updatesPanel"),
   feedPanel: document.querySelector("#feedPanel"),
@@ -888,15 +890,18 @@ function render() {
 
   const reportMode = activeRole === "report";
   const hospitalMode = activeRole === "hospital";
+  const insuranceMode = activeRole === "insurance";
   document.body.classList.toggle("report-mode", reportMode);
   document.body.classList.toggle("hospital-mode", hospitalMode);
+  document.body.classList.toggle("insurance-mode", insuranceMode);
   els.feedPanel.classList.toggle("hidden", reportMode);
-  els.updatesPanel.classList.toggle("hidden", reportMode);
+  els.updatesPanel.classList.toggle("hidden", reportMode || insuranceMode);
   els.reportPanel.classList.toggle("hidden", !reportMode);
   els.reportUtility.classList.toggle("hidden", !reportMode);
-  els.metrics.classList.toggle("hidden", reportMode || hospitalMode);
+  els.metrics.classList.toggle("hidden", reportMode || hospitalMode || insuranceMode);
   els.hospitalHeaderActions?.classList.toggle("hidden", !hospitalMode);
-  els.connectionState?.classList.toggle("hidden", hospitalMode);
+  els.insuranceHeaderActions?.classList.toggle("hidden", !insuranceMode);
+  els.connectionState?.classList.toggle("hidden", hospitalMode || insuranceMode);
 
   if (activeRole === "hospital") {
     els.roleTitle.textContent = "Hospital Dashboard";
@@ -908,7 +913,7 @@ function render() {
   } else if (activeRole === "insurance") {
     els.roleTitle.textContent = "Insurance Dashboard";
     els.roleSubtitle.textContent =
-      "All impact levels, EV driver activity, technician support, and case progress updates.";
+      "Insurance dashboard for all EV impact levels, driver activity, support logs, and claim review updates.";
     els.feedTitle.textContent = "Insurance Notifications";
     els.feedSummary.textContent =
       "Insurance receives every impact level and all related case updates.";
@@ -931,6 +936,7 @@ function render() {
 
   renderMetrics(visible, updates, reportMode);
   updateHospitalHeader(visible, updates);
+  updateInsuranceHeader();
 
   els.alertFeed.innerHTML =
     reportMode
@@ -1307,6 +1313,21 @@ function updateHospitalHeader(visible = visibleAlerts(), updates = visibleNotifi
   const now = new Date();
   if (els.hospitalUpdatedBadge) {
     els.hospitalUpdatedBadge.innerHTML = `
+      <span>Live</span>
+      <strong>Updated ${formatTime(now)}</strong>
+      <small>${formatDate(now)}</small>
+    `;
+  }
+}
+
+function updateInsuranceHeader() {
+  if (activeRole !== "insurance") {
+    return;
+  }
+
+  const now = new Date();
+  if (els.insuranceUpdatedBadge) {
+    els.insuranceUpdatedBadge.innerHTML = `
       <span>Live</span>
       <strong>Updated ${formatTime(now)}</strong>
       <small>${formatDate(now)}</small>
@@ -3657,6 +3678,9 @@ window.addEventListener("touchend", () => {
 window.setInterval(() => {
   if (activeRole === "hospital") {
     updateHospitalHeader();
+  }
+  if (activeRole === "insurance") {
+    updateInsuranceHeader();
   }
   if (activeRole === "report") {
     renderReportUpdatedBadge();

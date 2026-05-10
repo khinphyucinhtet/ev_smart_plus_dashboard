@@ -158,6 +158,12 @@ button {
   flex: 0 0 auto;
 }
 
+.insurance-header-actions {
+  display: grid;
+  justify-items: end;
+  flex: 0 0 auto;
+}
+
 .updated-badge {
   display: grid;
   gap: 3px;
@@ -263,13 +269,24 @@ body.hospital-mode h1 {
   font-size: clamp(32px, 3.6vw, 42px);
 }
 
+body.insurance-mode h1 {
+  font-size: clamp(32px, 3.6vw, 42px);
+}
+
 body.hospital-mode .eyebrow {
   display: none;
 }
 
+body.insurance-mode .eyebrow {
+  display: none;
+}
+
 body.hospital-mode #roleSubtitle,
+body.insurance-mode #roleSubtitle,
 body.hospital-mode .panel-head p,
+body.insurance-mode .panel-head p,
 body.hospital-mode .detail,
+body.insurance-mode .detail,
 body.hospital-mode .card-title span {
   font-size: 14px;
 }
@@ -278,7 +295,15 @@ body.hospital-mode .panel-head h2 {
   font-size: 24px;
 }
 
+body.insurance-mode .panel-head h2 {
+  font-size: 24px;
+}
+
 body.hospital-mode .card-title strong {
+  font-size: 18px;
+}
+
+body.insurance-mode .card-title strong {
   font-size: 18px;
 }
 
@@ -287,7 +312,16 @@ body.hospital-mode .chip {
   font-size: 13px;
 }
 
+body.insurance-mode .chip {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
 body.hospital-mode .detail {
+  line-height: 1.45;
+}
+
+body.insurance-mode .detail {
   line-height: 1.45;
 }
 
@@ -295,7 +329,15 @@ body.hospital-mode .topbar {
   margin-bottom: 12px;
 }
 
+body.insurance-mode .topbar {
+  margin-bottom: 12px;
+}
+
 body.hospital-mode #roleSubtitle {
+  white-space: nowrap;
+}
+
+body.insurance-mode #roleSubtitle {
   white-space: nowrap;
 }
 
@@ -3430,11 +3472,20 @@ body.hospital-mode .metrics {
     width: 100%;
   }
 
+  .insurance-header-actions {
+    justify-items: start;
+    width: 100%;
+  }
+
   .hospital-action-buttons {
     justify-content: flex-start;
   }
 
   body.hospital-mode #roleSubtitle {
+    white-space: normal;
+  }
+
+  body.insurance-mode #roleSubtitle {
     white-space: normal;
   }
 }
