@@ -535,7 +535,7 @@
             </div>
           </article>
 
-          <article class="report-insights-card insights-full-card">
+          <article class="report-insights-card insights-full-card report-suggestions-shell">
             <div class="insights-head">
               <div>
                 <h3>AI Report &amp; Suggestions</h3>
@@ -543,10 +543,65 @@
               </div>
               <span class="report-preview-period">Report Period: <strong id="reportPreviewPeriod">Past 7 Days</strong></span>
             </div>
+
+            <div id="reportSuggestionTabs" class="suggestion-tabs" role="tablist" aria-label="AI report suggestion tabs">
+              <button class="suggestion-tab active" type="button" data-suggestion-tab="summary">Executive Summary</button>
+              <button class="suggestion-tab" type="button" data-suggestion-tab="risk">Risk Intelligence</button>
+              <button class="suggestion-tab" type="button" data-suggestion-tab="operations">Operational Plan</button>
+              <button class="suggestion-tab" type="button" data-suggestion-tab="resources">Resource Allocation</button>
+              <button class="suggestion-tab" type="button" data-suggestion-tab="future">Future Prediction</button>
+              <button class="suggestion-tab" type="button" data-suggestion-tab="policy">Policy &amp; Enhancement</button>
+            </div>
+
             <div class="insights-toolbar insights-toolbar-compact">
               <p id="strategicSummary" class="strategic-summary">AI-generated statistical recommendations based on EVSmart+ accident hotspots, severity levels, peak hours, and regional risk patterns.</p>
               <span id="generateStatus" class="generate-status">Ready to generate</span>
             </div>
+
+            <div id="strategicRecommendations" class="report-suggestions-grid">
+              <article id="reportExecutiveCard" class="suggestion-card suggestion-card-large"></article>
+              <article id="reportFindingsCard" class="suggestion-card"></article>
+              <article id="reportCausesCard" class="suggestion-card"></article>
+              <article id="reportSolutionsCard" class="suggestion-card"></article>
+              <article id="reportResourcesCard" class="suggestion-card"></article>
+              <article id="reportPredictionCard" class="suggestion-card suggestion-card-danger"></article>
+            </div>
+
+            <div class="advanced-insights-strip">
+              <div class="advanced-insights-label">
+                <span class="advanced-insights-icon">AI</span>
+                <strong>Advanced Insights</strong>
+              </div>
+              <div class="advanced-insights-grid">
+                <div class="advanced-insight-item">
+                  <span>Risk Trend</span>
+                  <strong>Increasing</strong>
+                  <small>+18% vs previous 7 days</small>
+                </div>
+                <div class="advanced-insight-item">
+                  <span>Hotspot Movement</span>
+                  <strong>Stable</strong>
+                  <small>No significant change</small>
+                </div>
+                <div class="advanced-insight-item">
+                  <span>Response Readiness</span>
+                  <strong>Good</strong>
+                  <small>Average response 12.4 min</small>
+                </div>
+                <div class="advanced-insight-item">
+                  <span>Enforcement Impact</span>
+                  <strong>Moderate</strong>
+                  <small>15% improvement</small>
+                </div>
+                <div class="advanced-insight-item">
+                  <span>Public Advisory Reach</span>
+                  <strong>High</strong>
+                  <small>82% coverage</small>
+                </div>
+              </div>
+              <button id="viewFullAnalyticsBtn" class="advanced-insight-btn" type="button">View Full Analytics</button>
+            </div>
+
             <div class="analysis-output-card suggestions-summary-card">
               <div class="analysis-output-rail">
                 <div class="analysis-output-icon">AI</div>
@@ -557,22 +612,22 @@
                 <p class="strategic-summary strategic-summary-tight">Government-focused recommendation logic is generated from the selected hotspot, regional severity distribution, and current peak-hour risk concentration.</p>
               </div>
             </div>
-            <div class="report-preview-meta report-preview-meta-compact">
-              <div class="preview-meta-item">
-                <span>Generated Time</span>
-                <strong id="reportPreviewTime">Awaiting generation</strong>
-              </div>
-              <div class="preview-meta-item">
-                <span>Dataset Scope</span>
-                <strong id="reportDatasetScope">21 regions</strong>
-              </div>
-              <div class="preview-meta-item">
-                <span>Data Points</span>
-                <strong id="reportDataPoints">Awaiting generation</strong>
-              </div>
-            </div>
-            <div id="strategicRecommendations" class="strategic-insight-grid suggestions-grid"></div>
+
             <div class="report-preview-card report-preview-card-hidden">
+              <div class="report-preview-meta report-preview-meta-compact">
+                <div class="preview-meta-item">
+                  <span>Generated Time</span>
+                  <strong id="reportPreviewTime">Awaiting generation</strong>
+                </div>
+                <div class="preview-meta-item">
+                  <span>Dataset Scope</span>
+                  <strong id="reportDatasetScope">21 regions</strong>
+                </div>
+                <div class="preview-meta-item">
+                  <span>Data Points</span>
+                  <strong id="reportDataPoints">Awaiting generation</strong>
+                </div>
+              </div>
               <div class="report-preview-grid">
                 <div class="preview-block">
                   <span>Key Findings</span>
@@ -595,6 +650,111 @@
                   <p id="reportPrediction" class="preview-paragraph">Awaiting AI analysis</p>
                 </div>
               </div>
+            </div>
+          </article>
+
+          <article class="report-insights-card sample-report-shell">
+            <div class="insights-head">
+              <div>
+                <h3>Sample Report (Report Builder &amp; Preview)</h3>
+                <p>Configure a region-specific reporting package and preview a government-ready EV accident report before export.</p>
+              </div>
+            </div>
+
+            <div class="sample-report-layout">
+              <aside class="sample-report-builder">
+                <div class="sample-builder-block">
+                  <span class="sample-builder-step">1. Select Region / State</span>
+                  <select id="sampleReportRegionSelect" class="sample-builder-select">
+                    <option value="all">All Selangor Regions</option>
+                    <option value="shah-alam">Shah Alam</option>
+                    <option value="klang">Klang</option>
+                    <option value="gombak">Gombak</option>
+                    <option value="petaling-jaya">Petaling Jaya</option>
+                    <option value="subang-jaya">Subang Jaya</option>
+                    <option value="rawang">Rawang</option>
+                    <option value="hulu-langat">Hulu Langat</option>
+                    <option value="kajang">Kajang</option>
+                    <option value="putrajaya">Putrajaya</option>
+                    <option value="sabak-bernam">Sabak Bernam</option>
+                  </select>
+                </div>
+
+                <div class="sample-builder-block">
+                  <span class="sample-builder-step">2. Select Date Range</span>
+                  <div class="sample-range-group" role="tablist" aria-label="Sample report date range">
+                    <button class="sample-range-btn active" type="button" data-sample-range="7">Past 7 Days</button>
+                    <button class="sample-range-btn" type="button" data-sample-range="30">Past 30 Days</button>
+                    <button class="sample-range-btn" type="button" data-sample-range="monthly">Monthly</button>
+                    <button class="sample-range-btn" type="button" data-sample-range="custom">Custom</button>
+                  </div>
+                  <div id="sampleDateDisplay" class="sample-date-display">04 May 2026 - 10 May 2026</div>
+                </div>
+
+                <div class="sample-builder-block">
+                  <span class="sample-builder-step">3. Data &amp; Content Options</span>
+                  <div class="sample-option-list">
+                    <label><input type="checkbox" class="sample-content-option" value="overview" checked /> Incident Overview &amp; Trends</label>
+                    <label><input type="checkbox" class="sample-content-option" value="impact" checked /> Impact Level Breakdown</label>
+                    <label><input type="checkbox" class="sample-content-option" value="temporal" checked /> Peak Hours &amp; Day Analysis</label>
+                    <label><input type="checkbox" class="sample-content-option" value="risk" checked /> Risk &amp; Severity Analysis</label>
+                    <label><input type="checkbox" class="sample-content-option" value="predictions" checked /> AI Predictions &amp; Recommendations</label>
+                    <label><input type="checkbox" class="sample-content-option" value="government" checked /> Government Suggestions</label>
+                    <label><input type="checkbox" class="sample-content-option" value="resource" checked /> Resource &amp; Response Plan</label>
+                  </div>
+                </div>
+
+                <div class="sample-builder-block">
+                  <span class="sample-builder-step">4. Report Format</span>
+                  <div class="sample-format-group" role="tablist" aria-label="Sample report format">
+                    <button class="sample-format-btn active" type="button" data-report-format="pdf">PDF Report</button>
+                    <button class="sample-format-btn" type="button" data-report-format="excel">Excel Data</button>
+                    <button class="sample-format-btn" type="button" data-report-format="powerpoint">PowerPoint</button>
+                  </div>
+                </div>
+
+                <button id="generateSampleReportBtn" class="generate-sample-report-btn" type="button">Generate Report</button>
+              </aside>
+
+              <section class="sample-report-preview-shell">
+                <div class="sample-preview-toolbar">
+                  <div class="preview-page-controls">
+                    <button id="previewPrevBtn" class="preview-nav-btn" type="button" aria-label="Previous report page">‹</button>
+                    <span id="previewPageIndicator" class="preview-page-indicator">Pages: 1 / 12</span>
+                    <button id="previewNextBtn" class="preview-nav-btn" type="button" aria-label="Next report page">›</button>
+                  </div>
+                  <div class="preview-zoom-controls">
+                    <button id="previewZoomOutBtn" class="preview-nav-btn" type="button" aria-label="Zoom out">-</button>
+                    <span id="previewZoomValue" class="preview-zoom-value">100%</span>
+                    <button id="previewZoomInBtn" class="preview-nav-btn" type="button" aria-label="Zoom in">+</button>
+                  </div>
+                  <div class="preview-toolbar-actions">
+                    <button id="previewDownloadPdfBtn" class="report-action-btn primary" type="button">Download PDF</button>
+                    <button id="previewShareBtn" class="report-action-btn" type="button">Share Report</button>
+                    <button id="previewPrintBtn" class="report-action-btn" type="button">Print Report</button>
+                  </div>
+                </div>
+
+                <div id="sampleReportPrintable" class="sample-report-printable">
+                  <div id="sampleReportPage" class="sample-report-page sample-report-scale-100"></div>
+                </div>
+              </section>
+
+              <aside class="sample-report-pages">
+                <div class="sample-pages-head">Sample Report Pages</div>
+                <div id="sampleReportPageList" class="sample-page-list"></div>
+                <div class="sample-report-includes">
+                  <strong>Report Includes</strong>
+                  <ul>
+                    <li>Detailed charts and analytics</li>
+                    <li>AI-powered risk predictions</li>
+                    <li>Strategic recommendations</li>
+                    <li>Government enhancement suggestions</li>
+                    <li>Resource allocation plan</li>
+                    <li>Actionable insights</li>
+                  </ul>
+                </div>
+              </aside>
             </div>
           </article>
         </div>
@@ -624,6 +784,8 @@
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin=""
     ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script type="module" src="app.js"></script>
   </body>
 </html>

@@ -37,11 +37,35 @@ let strategicInsightsLoading = false;
 let strategicLoadingTimer = null;
 let activeTrendRange = "7";
 let activeTrendRegion = "all";
+let activeSuggestionTab = "summary";
+let sampleReportState = {
+  region: "shah-alam",
+  range: "7",
+  format: "pdf",
+  page: 1,
+  zoom: 100,
+  generatedAt: null,
+  reportId: "EVR-2026-0510-001",
+};
 let pullRefreshStartY = 0;
 let pullRefreshActive = false;
 let lastPullRefreshAt = 0;
 const hospitalReportTitle = "Hospital report submitted";
 const chartDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const sampleReportPages = [
+  "Executive Summary",
+  "Incident Overview",
+  "Impact Level Analysis",
+  "Temporal Analysis",
+  "Hotspot & Location Analysis",
+  "Risk & Severity Analysis",
+  "AI Predictions",
+  "Recommendations",
+  "Government Suggestions",
+  "Resource & Response Plan",
+  "Action Plan & Timeline",
+  "Appendices & Data Tables",
+];
 const reportZones = {
   "shah-alam": {
     title: "Shah Alam",
@@ -610,11 +634,34 @@ const els = {
   reportPotentialCauses: document.querySelector("#reportPotentialCauses"),
   reportRecommendedActions: document.querySelector("#reportRecommendedActions"),
   reportDeploymentPlan: document.querySelector("#reportDeploymentPlan"),
+  reportSuggestionTabs: document.querySelector("#reportSuggestionTabs"),
+  reportExecutiveCard: document.querySelector("#reportExecutiveCard"),
+  reportFindingsCard: document.querySelector("#reportFindingsCard"),
+  reportCausesCard: document.querySelector("#reportCausesCard"),
+  reportSolutionsCard: document.querySelector("#reportSolutionsCard"),
+  reportResourcesCard: document.querySelector("#reportResourcesCard"),
+  reportPredictionCard: document.querySelector("#reportPredictionCard"),
+  viewFullAnalyticsBtn: document.querySelector("#viewFullAnalyticsBtn"),
   exportPdfBtn: document.querySelector("#exportPdfBtn"),
   shareReportBtn: document.querySelector("#shareReportBtn"),
   sendHospitalBtn: document.querySelector("#sendHospitalBtn"),
   generateBriefingBtn: document.querySelector("#generateBriefingBtn"),
   viewDetailedReportBtn: document.querySelector("#viewDetailedReportBtn"),
+  sampleReportRegionSelect: document.querySelector("#sampleReportRegionSelect"),
+  sampleDateDisplay: document.querySelector("#sampleDateDisplay"),
+  generateSampleReportBtn: document.querySelector("#generateSampleReportBtn"),
+  sampleReportPage: document.querySelector("#sampleReportPage"),
+  sampleReportPrintable: document.querySelector("#sampleReportPrintable"),
+  sampleReportPageList: document.querySelector("#sampleReportPageList"),
+  previewPrevBtn: document.querySelector("#previewPrevBtn"),
+  previewNextBtn: document.querySelector("#previewNextBtn"),
+  previewPageIndicator: document.querySelector("#previewPageIndicator"),
+  previewZoomOutBtn: document.querySelector("#previewZoomOutBtn"),
+  previewZoomInBtn: document.querySelector("#previewZoomInBtn"),
+  previewZoomValue: document.querySelector("#previewZoomValue"),
+  previewDownloadPdfBtn: document.querySelector("#previewDownloadPdfBtn"),
+  previewShareBtn: document.querySelector("#previewShareBtn"),
+  previewPrintBtn: document.querySelector("#previewPrintBtn"),
 };
 
 document.querySelectorAll(".role-btn").forEach((button) => {
@@ -699,6 +746,67 @@ els.focusRegionSelect?.addEventListener("change", () => {
 els.viewAllDistrictsBtn?.addEventListener("click", () => {
   els.regionChips?.scrollIntoView({ behavior: "smooth", block: "nearest" });
 });
+document.querySelectorAll("[data-suggestion-tab]").forEach((button) => {
+  button.addEventListener("click", () => {
+    activeSuggestionTab = button.dataset.suggestionTab || "summary";
+    document.querySelectorAll("[data-suggestion-tab]").forEach((item) => {
+      item.classList.toggle("active", item.dataset.suggestionTab === activeSuggestionTab);
+    });
+    renderStrategicInsights();
+  });
+});
+document.querySelectorAll("[data-sample-range]").forEach((button) => {
+  button.addEventListener("click", () => {
+    sampleReportState.range = button.dataset.sampleRange || "7";
+    document.querySelectorAll("[data-sample-range]").forEach((item) => {
+      item.classList.toggle("active", item.dataset.sampleRange === sampleReportState.range);
+    });
+    updateSampleDateDisplay();
+    renderSampleReportPreview();
+  });
+});
+document.querySelectorAll("[data-report-format]").forEach((button) => {
+  button.addEventListener("click", () => {
+    sampleReportState.format = button.dataset.reportFormat || "pdf";
+    document.querySelectorAll("[data-report-format]").forEach((item) => {
+      item.classList.toggle("active", item.dataset.reportFormat === sampleReportState.format);
+    });
+  });
+});
+document.querySelectorAll(".sample-content-option").forEach((input) => {
+  input.addEventListener("change", () => {
+    renderSampleReportPreview();
+  });
+});
+els.sampleReportRegionSelect?.addEventListener("change", () => {
+  sampleReportState.region = els.sampleReportRegionSelect.value || "shah-alam";
+  renderSampleReportPreview();
+});
+els.viewFullAnalyticsBtn?.addEventListener("click", () => {
+  openAdvancedInsightsModal();
+});
+els.generateSampleReportBtn?.addEventListener("click", () => {
+  generateSampleReport();
+});
+els.previewPrevBtn?.addEventListener("click", () => {
+  sampleReportState.page = Math.max(1, sampleReportState.page - 1);
+  renderSampleReportPreview();
+});
+els.previewNextBtn?.addEventListener("click", () => {
+  sampleReportState.page = Math.min(sampleReportPages.length, sampleReportState.page + 1);
+  renderSampleReportPreview();
+});
+els.previewZoomOutBtn?.addEventListener("click", () => {
+  sampleReportState.zoom = Math.max(80, sampleReportState.zoom - 20);
+  renderSampleReportPreview();
+});
+els.previewZoomInBtn?.addEventListener("click", () => {
+  sampleReportState.zoom = Math.min(120, sampleReportState.zoom + 20);
+  renderSampleReportPreview();
+});
+els.previewDownloadPdfBtn?.addEventListener("click", downloadSampleReportPdf);
+els.previewShareBtn?.addEventListener("click", shareSampleReport);
+els.previewPrintBtn?.addEventListener("click", printSampleReport);
 
 els.reportModalClose.addEventListener("click", closeReportModal);
 els.reportModalOk.addEventListener("click", closeReportModal);
@@ -843,6 +951,7 @@ function render() {
   bindSelection();
   if (reportMode) {
     initializeSelangorMap();
+    initializeSampleReportControls();
     if (!reportGeneratedAt) {
       refreshReportData({ showBanner: false });
     } else {
@@ -2456,6 +2565,178 @@ function strategicCardsMarkup(cards) {
     .join("");
 }
 
+function strategicInsightProfile(zone) {
+  const content = strategicContentFor(zone);
+  const metrics = buildReportMetricProfile(activeTrendRegion === "all" ? "all" : activeZone, activeTrendRange, {
+    summaryMode: true,
+  });
+  const configs = {
+    summary: {
+      summary:
+        "AI-generated statistical recommendations based on EVSmart+ accident hotspots, severity levels, peak hours, and regional risk patterns.",
+      executive:
+        "Shah Alam and Klang remain the highest-risk clusters with severe accident concentration during evening peak hours. Immediate response and targeted enforcement can help reduce risk in the next reporting cycle.",
+      findings: content.findings,
+      causes: content.causes,
+      solutions: content.actions,
+      resources: content.deploymentPlan,
+      prediction: content.prediction,
+    },
+    risk: {
+      summary:
+        "Risk intelligence is highlighting the strongest pressure corridors, severity split, and likely escalation windows across the selected reporting range.",
+      executive:
+        "High-risk EV accident density remains concentrated around Shah Alam and Klang, while Gombak, Petaling Jaya, and Subang Jaya continue to require medium-risk surveillance across commuter corridors.",
+      findings: [
+        "High-alert districts continue clustering around the western Selangor commuter belt.",
+        "Critical severity remains most visible during the evening 5 PM - 9 PM window.",
+        "Low-risk districts remain suitable for lighter routine patrol coverage.",
+      ],
+      causes: content.causes,
+      solutions: [
+        "Prioritize high-visibility monitoring on red-band districts first.",
+        "Keep amber-band corridors under rotating enforcement coverage.",
+        "Issue targeted public alerts before evening congestion builds.",
+      ],
+      resources: content.deploymentPlan,
+      prediction: content.prediction,
+    },
+    operations: {
+      summary:
+        "Operational planning now emphasizes where patrol attention, warning deployments, and ambulance support should be shifted within the next reporting cycle.",
+      executive:
+        "Operations should focus on rapid evening response handoffs, corridor visibility, and keeping approach roads open near the highest-risk districts.",
+      findings: content.findings,
+      causes: content.causes,
+      solutions: [
+        `Maintain visibility patrols during ${zone.window} peak-risk windows.`,
+        "Coordinate warning signage and public advisories before the evening rush window.",
+        "Stage field-note collection to verify corridor bottlenecks after peak periods.",
+      ],
+      resources: content.deploymentPlan,
+      prediction: `${zone.title} will continue to demand operational attention if the evening load remains elevated.`,
+    },
+    resources: {
+      summary:
+        "Resource allocation guidance is prioritizing ambulance standby, corridor access, and lighter patrol distribution across lower-risk districts.",
+      executive:
+        "Ambulance and responder assets should remain concentrated near Shah Alam and Klang, while southern and western low-risk districts retain lighter routine coverage.",
+      findings: content.findings,
+      causes: content.causes,
+      solutions: content.actions,
+      resources: content.deploymentPlan,
+      prediction: content.prediction,
+    },
+    future: {
+      summary:
+        "Future prediction uses current severity share, peak-hour concentration, and hotspot stability to estimate next-cycle EV emergency pressure.",
+      executive:
+        "If current congestion and commuter flow patterns persist, Shah Alam is expected to remain the dominant night-risk cluster while neighboring medium-risk districts continue to absorb spillover pressure.",
+      findings: content.findings,
+      causes: content.causes,
+      solutions: content.actions,
+      resources: content.deploymentPlan,
+      prediction: `${content.prediction} Confidence remains highest when evening pressure and connector congestion continue together.`,
+    },
+    policy: {
+      summary:
+        "Policy and enhancement recommendations focus on signage, public advisory reach, charging-route improvements, and stronger corridor-level prevention tactics.",
+      executive:
+        "Government enhancements should prioritize corridor signage, public advisories, and traffic management near charging-route access roads to reduce repeated evening EV crash concentration.",
+      findings: content.findings,
+      causes: content.causes,
+      solutions: [
+        "Increase standby coverage near Shah Alam and Klang corridors.",
+        "Improve EV charging station traffic flow around busy districts.",
+        "Coordinate public advisories and enforcement messaging before evening rush hour.",
+      ],
+      resources: content.deploymentPlan,
+      prediction: content.prediction,
+    },
+  };
+  const selected = configs[activeSuggestionTab] || configs.summary;
+  return { ...content, ...selected, metrics };
+}
+
+function suggestionExecutiveCardMarkup(profile) {
+  const { metrics } = profile;
+  return `
+    <div class="suggestion-card-head">
+      <div class="suggestion-card-title">
+        <span class="suggestion-card-icon">ES</span>
+        <strong>Executive Summary</strong>
+      </div>
+    </div>
+    <p class="suggestion-card-copy">${escapeHtml(profile.executive)}</p>
+    <div class="suggestion-metrics">
+      <div class="suggestion-metric-box">
+        <span>Total Incidents</span>
+        <strong>${metrics.totalIncidents}</strong>
+        <small>${metrics.totalDelta}</small>
+      </div>
+      <div class="suggestion-metric-box">
+        <span>High Severity (L4/L5)</span>
+        <strong>${metrics.highSeverity}</strong>
+        <small>${metrics.highMeta}</small>
+      </div>
+      <div class="suggestion-metric-box">
+        <span>Critical Share</span>
+        <strong>${metrics.criticalShare}%</strong>
+        <small>${metrics.criticalDelta}</small>
+      </div>
+      <div class="suggestion-metric-box">
+        <span>Peak Period</span>
+        <strong>${escapeHtml(metrics.peakPeriod)}</strong>
+        <small>${escapeHtml(metrics.peakLabel)}</small>
+      </div>
+      <div class="suggestion-metric-box">
+        <span>Top Hotspot</span>
+        <strong>${escapeHtml(metrics.topHotspot)}</strong>
+        <small>${escapeHtml(metrics.topHotspotMeta)}</small>
+      </div>
+    </div>
+  `;
+}
+
+function suggestionListCardMarkup(title, icon, items, severity = "medium") {
+  return `
+    <div class="suggestion-card-head">
+      <div class="suggestion-card-title">
+        <span class="suggestion-card-icon">${escapeHtml(icon)}</span>
+        <strong>${escapeHtml(title)}</strong>
+      </div>
+    </div>
+    <ul class="suggestion-card-list">
+      ${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+    </ul>
+  `;
+}
+
+function suggestionPredictionCardMarkup(profile) {
+  return `
+    <div class="suggestion-card-head">
+      <div class="suggestion-card-title">
+        <span class="suggestion-card-icon">RP</span>
+        <strong>Risk Prediction (Next 24 Hours)</strong>
+      </div>
+    </div>
+    <p class="suggestion-card-copy">${escapeHtml(profile.prediction)}</p>
+    <div class="prediction-badge-row">
+      <span>Risk Level</span>
+      <span class="risk-level-badge">${escapeHtml(profile.metrics.riskLevel)}</span>
+    </div>
+    <div class="confidence-progress">
+      <div class="confidence-progress-top">
+        <span>Confidence</span>
+        <strong>${profile.metrics.confidence}%</strong>
+      </div>
+      <div class="confidence-progress-bar">
+        <div class="confidence-progress-fill" style="width:${profile.metrics.confidence}%"></div>
+      </div>
+    </div>
+  `;
+}
+
 function renderStrategicInsights() {
   const zone = reportZones[activeZone] || reportZones["shah-alam"];
   const loadingLines = [
@@ -2466,45 +2747,70 @@ function renderStrategicInsights() {
 
   if (els.strategicLoadingStream) {
     els.strategicLoadingStream.innerHTML = loadingLines
-      .map((line, index) => `<div class="analysis-loading-item ${strategicInsightsLoading || strategicInsightsReady ? "active" : ""}" style="transition-delay:${index * 120}ms">${escapeHtml(line)}</div>`)
+      .map(
+        (line, index) =>
+          `<div class="analysis-loading-item ${strategicInsightsLoading || strategicInsightsReady ? "active" : ""}" style="transition-delay:${index * 120}ms">${escapeHtml(line)}</div>`,
+      )
       .join("");
   }
 
-  if (strategicInsightsLoading) {
-    els.strategicSummary.textContent = "AI analysis is processing the latest regional hotspot signals for the government emergency dashboard.";
-    els.strategicRecommendations.innerHTML = strategicCardsMarkup(strategicPlaceholderCards());
-    renderReportPreview({
-      findings: ["AI analysis in progress."],
-      causes: ["Collecting severity and peak-hour indicators."],
-      actions: ["Strategic actions will appear after analysis completes."],
-      deploymentPlan: ["Resource deployment guidance is being generated."],
-      prediction: "Analyzing projected night-risk pressure...",
-    });
-    return;
+  const profile = strategicInsightProfile(zone);
+  els.strategicSummary.textContent = strategicInsightsLoading
+    ? "AI analysis is processing the latest regional hotspot signals for the government emergency dashboard."
+    : profile.summary;
+
+  if (els.reportExecutiveCard) {
+    els.reportExecutiveCard.innerHTML = suggestionExecutiveCardMarkup(profile);
+  }
+  if (els.reportFindingsCard) {
+    els.reportFindingsCard.innerHTML = suggestionListCardMarkup(
+      "Key Findings",
+      "KF",
+      profile.findings,
+      "high",
+    );
+  }
+  if (els.reportCausesCard) {
+    els.reportCausesCard.innerHTML = suggestionListCardMarkup(
+      "Potential Causes",
+      "PC",
+      profile.causes,
+      "medium",
+    );
+  }
+  if (els.reportSolutionsCard) {
+    els.reportSolutionsCard.innerHTML = suggestionListCardMarkup(
+      "Recommended Solutions",
+      "RS",
+      profile.solutions,
+      "high",
+    );
+  }
+  if (els.reportResourcesCard) {
+    els.reportResourcesCard.innerHTML = suggestionListCardMarkup(
+      "Resource Deployment Plan",
+      "RD",
+      profile.resources,
+      "medium",
+    );
+  }
+  if (els.reportPredictionCard) {
+    els.reportPredictionCard.innerHTML = suggestionPredictionCardMarkup(profile);
   }
 
-  if (!strategicInsightsReady) {
-    els.strategicSummary.textContent = "Ready to generate a government-focused statistical report based on the latest hotspot trends.";
-    els.strategicRecommendations.innerHTML = strategicCardsMarkup(strategicPlaceholderCards());
-    renderReportPreview({
-      findings: ["Generate AI analysis to compile cross-district hotspot signals."],
-      causes: ["Severity and peak-hour drivers will appear here."],
-      actions: ["Recommended solutions will appear after AI generation."],
-      deploymentPlan: ["Deployment planning will be generated from the selected region."],
-      prediction: "Awaiting AI analysis",
-    });
-    if (els.generateStatus) {
-      els.generateStatus.textContent = "Ready to generate";
-    }
-    return;
-  }
+  renderReportPreview({
+    findings: profile.findings,
+    causes: profile.causes,
+    actions: profile.solutions,
+    deploymentPlan: profile.resources,
+    prediction: profile.prediction,
+    metrics: profile.metrics,
+  });
 
-  const content = strategicContentFor(zone);
-  els.strategicSummary.textContent = content.summary;
-  els.strategicRecommendations.innerHTML = strategicCardsMarkup(content.cards);
-  renderReportPreview(content);
   if (els.generateStatus) {
-    els.generateStatus.textContent = `Generated ${formatTime(reportGeneratedAt || new Date())}`;
+    els.generateStatus.textContent = strategicInsightsLoading
+      ? "Analyzing..."
+      : `Updated ${formatTime(reportGeneratedAt || new Date())}`;
   }
 }
 
@@ -2519,7 +2825,8 @@ function renderReportPreview(content) {
     els.reportDatasetScope.textContent = `${zoneCount} region${zoneCount === 1 ? "" : "s"}`;
   }
   if (els.reportDataPoints) {
-    const totalCases = analyticsZones().reduce((sum, zone) => sum + zone.incidentsCount, 0);
+    const totalCases = content.metrics?.totalIncidents
+      || analyticsZones().reduce((sum, zone) => sum + zone.incidentsCount, 0);
     els.reportDataPoints.textContent = `${totalCases} incidents`;
   }
   if (els.reportPrediction) {
@@ -2537,6 +2844,591 @@ function renderReportPreview(content) {
   if (els.reportDeploymentPlan) {
     els.reportDeploymentPlan.innerHTML = content.deploymentPlan.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
   }
+}
+
+function reportRangeMultiplier(range, regionKey = "all") {
+  const all = regionKey === "all";
+  const lookup = all
+    ? { "7": 1.78, "30": 5.1, monthly: 7.4, custom: 2.2, yearly: 14.8 }
+    : { "7": 1, "30": 3.2, monthly: 4.4, custom: 1.5, yearly: 8.6 };
+  return lookup[range] || lookup["7"];
+}
+
+function zonesForReportRegion(regionKey) {
+  if (regionKey !== "all" && reportZones[regionKey]) {
+    return [reportZones[regionKey]];
+  }
+  return Object.values(reportZones);
+}
+
+function buildReportMetricProfile(regionKey = "all", range = "7", { summaryMode = false } = {}) {
+  const zones = zonesForReportRegion(regionKey);
+  const focusZone =
+    (regionKey !== "all" && reportZones[regionKey]) ||
+    zones.slice().sort(compareZonesByPriority)[0] ||
+    reportZones["shah-alam"];
+  const totalBase = zones.reduce((sum, zone) => sum + zone.incidentsCount, 0);
+  const multiplier = reportRangeMultiplier(range, regionKey);
+  const totalIncidents = Math.max(
+    focusZone.incidentsCount,
+    Math.round(totalBase * multiplier),
+  );
+  const highSeverity =
+    regionKey === "all"
+      ? Math.round(totalIncidents * 0.296)
+      : Math.max(1, Math.round(totalIncidents * (focusZone.criticalPct / 100)));
+  const criticalShare =
+    regionKey === "all"
+      ? 36.1
+      : Number((focusZone.criticalPct).toFixed(1));
+  const topHotspot = zones.slice().sort(compareZonesByPriority)[0] || focusZone;
+  const confidence = regionKey === "all" ? 94 : clamp(88 + Math.round(focusZone.criticalPct / 8), 88, 97);
+  const totalDelta = regionKey === "all" ? "+12.4% vs prev. 7 days" : "+20% vs prev. 7 days";
+  const criticalDelta = regionKey === "all" ? "+4.3% vs prev. 7 days" : "+5% vs prev. 7 days";
+  return {
+    totalIncidents,
+    highSeverity,
+    criticalShare,
+    peakPeriod:
+      regionKey === "all"
+        ? "Evening, 5 PM - 9 PM"
+        : focusZone.window,
+    peakLabel:
+      regionKey === "all"
+        ? "Peak statewide pressure"
+        : focusZone.window.includes("PM")
+        ? "Evening Peak"
+        : "Daytime Peak",
+    topHotspot: topHotspot.title,
+    topHotspotMeta: `${topHotspot.incidentsCount} incidents`,
+    riskLevel: riskLabel(focusZone.level).toUpperCase(),
+    confidence,
+    totalDelta,
+    highMeta: regionKey === "all" ? "30% of total incidents" : `${focusZone.criticalPct}% of total`,
+    criticalDelta,
+    regionLabel: regionKey === "all" ? "All Selangor Regions" : `${focusZone.title}, Selangor`,
+    focusZone,
+    zones,
+    summaryMode,
+  };
+}
+
+function initializeSampleReportControls() {
+  if (els.sampleReportRegionSelect && !els.sampleReportRegionSelect.dataset.initialized) {
+    els.sampleReportRegionSelect.value = sampleReportState.region;
+    els.sampleReportRegionSelect.dataset.initialized = "true";
+  }
+  if (els.sampleReportPageList && !els.sampleReportPageList.dataset.initialized) {
+    els.sampleReportPageList.dataset.initialized = "true";
+    els.sampleReportPageList.innerHTML = sampleReportPages
+      .map(
+        (title, index) => `
+          <button class="sample-page-item" type="button" data-sample-page="${index + 1}">
+            <span class="sample-page-number">${index + 1}</span>
+            <span>${escapeHtml(title)}</span>
+          </button>
+        `,
+      )
+      .join("");
+    els.sampleReportPageList.querySelectorAll("[data-sample-page]").forEach((button) => {
+      button.addEventListener("click", () => {
+        sampleReportState.page = Number(button.dataset.samplePage || 1);
+        renderSampleReportPreview();
+      });
+    });
+  }
+  updateSampleDateDisplay();
+  renderSampleReportPreview();
+}
+
+function updateSampleDateDisplay() {
+  if (!els.sampleDateDisplay) {
+    return;
+  }
+  els.sampleDateDisplay.textContent = sampleDateRangeLabel(sampleReportState.range);
+}
+
+function sampleDateRangeLabel(range) {
+  const today = new Date(2026, 4, 10);
+  let start = new Date(today);
+  if (range === "30") {
+    start.setDate(today.getDate() - 29);
+  } else if (range === "monthly") {
+    start = new Date(today.getFullYear(), today.getMonth(), 1);
+  } else if (range === "custom") {
+    start.setDate(today.getDate() - 13);
+  } else {
+    start.setDate(today.getDate() - 6);
+  }
+  return `${formatShortDate(start)} - ${formatShortDate(today)}`;
+}
+
+function formatShortDate(date) {
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function selectedSampleOptions() {
+  return Array.from(document.querySelectorAll(".sample-content-option:checked")).map(
+    (input) => input.value,
+  );
+}
+
+function generateSampleReportId() {
+  const stamp = reportGeneratedAt || new Date();
+  const year = stamp.getFullYear();
+  const month = String(stamp.getMonth() + 1).padStart(2, "0");
+  const day = String(stamp.getDate()).padStart(2, "0");
+  return `EVR-${year}-${month}${day}-001`;
+}
+
+function generateSampleReport() {
+  if (!els.generateSampleReportBtn) {
+    return;
+  }
+  els.generateSampleReportBtn.classList.add("loading");
+  els.generateSampleReportBtn.textContent = "Generating...";
+  window.setTimeout(() => {
+    sampleReportState.generatedAt = new Date();
+    sampleReportState.reportId = generateSampleReportId();
+    els.generateSampleReportBtn.classList.remove("loading");
+    els.generateSampleReportBtn.textContent = "Generate Report";
+    renderSampleReportPreview();
+    showSampleToast("Report generated successfully.");
+  }, 500);
+}
+
+function renderSampleReportPreview() {
+  if (!els.sampleReportPage) {
+    return;
+  }
+  const profile = buildReportMetricProfile(sampleReportState.region, sampleReportState.range);
+  const pageTitle = sampleReportPages[sampleReportState.page - 1] || sampleReportPages[0];
+  const options = selectedSampleOptions();
+  const sectionMarkup = buildSampleReportSections(profile, options, sampleReportState.page);
+
+  els.sampleReportPage.className = `sample-report-page sample-report-scale-${sampleReportState.zoom}`;
+  els.sampleReportPage.innerHTML = `
+    <div class="sample-report-top">
+      <div class="sample-report-brand">
+        <img src="icon.png" alt="EVSmart+ logo" />
+        <div>
+          <strong>EVSmart+</strong>
+          <span>EV Emergency Analytics</span>
+        </div>
+      </div>
+      <div class="sample-report-title">
+        <h4>EV Accident Report</h4>
+        <p>Detailed Regional Analysis &amp; Strategic Recommendations</p>
+        <span class="sample-report-badge">CONFIDENTIAL - GOVERNMENT USE</span>
+      </div>
+      <div class="sample-report-meta">
+        <div>Report ID: <strong>${escapeHtml(sampleReportState.reportId)}</strong></div>
+        <div>Generated: <strong>${escapeHtml(formatDate(sampleReportState.generatedAt || new Date()))}</strong></div>
+        <div>Data Range: <strong>${escapeHtml(sampleDateRangeLabel(sampleReportState.range))}</strong></div>
+        <div>Selected Region: <strong>${escapeHtml(profile.regionLabel)}</strong></div>
+      </div>
+    </div>
+
+    <div class="sample-report-summary">
+      <div>
+        <span class="sample-section-tag">${escapeHtml(pageTitle)}</span>
+        <p>This report provides a comprehensive analysis of EV accidents in the selected region for the selected period. The analysis includes incident statistics, impact levels, temporal patterns, risk forecasting, and AI-powered strategic recommendations.</p>
+      </div>
+      <div class="sample-report-metrics">
+        <div class="sample-report-metric"><span>Total Incidents</span><strong>${profile.totalIncidents}</strong><small>${profile.totalDelta}</small></div>
+        <div class="sample-report-metric"><span>High Severity (L4/L5)</span><strong>${profile.highSeverity}</strong><small>${profile.highMeta}</small></div>
+        <div class="sample-report-metric"><span>Critical Share</span><strong>${profile.criticalShare}%</strong><small>${profile.criticalDelta}</small></div>
+        <div class="sample-report-metric"><span>Peak Period</span><strong>${escapeHtml(profile.peakPeriod)}</strong><small>${escapeHtml(profile.peakLabel)}</small></div>
+        <div class="sample-report-metric"><span>Risk Level</span><strong>${escapeHtml(profile.riskLevel)}</strong><small>Confidence: ${profile.confidence}%</small></div>
+        <div class="sample-report-metric"><span>Top Hotspot</span><strong>${escapeHtml(profile.topHotspot)}</strong><small>${escapeHtml(profile.topHotspotMeta)}</small></div>
+      </div>
+    </div>
+
+    ${sectionMarkup}
+  `;
+
+  if (els.previewPageIndicator) {
+    els.previewPageIndicator.textContent = `Pages: ${sampleReportState.page} / ${sampleReportPages.length}`;
+  }
+  if (els.previewZoomValue) {
+    els.previewZoomValue.textContent = `${sampleReportState.zoom}%`;
+  }
+  if (els.sampleReportPageList) {
+    els.sampleReportPageList.querySelectorAll("[data-sample-page]").forEach((item) => {
+      item.classList.toggle("active", Number(item.dataset.samplePage) === sampleReportState.page);
+    });
+  }
+}
+
+function buildSampleReportSections(profile, options, page) {
+  if (page === 1) {
+    const sections = [];
+    if (options.includes("overview")) {
+      sections.push(sampleIncidentOverviewSection(profile));
+    }
+    if (options.includes("impact")) {
+      sections.push(sampleImpactAnalysisSection(profile));
+    }
+    if (options.includes("predictions")) {
+      sections.push(sampleFuturePredictionSection(profile));
+    }
+    if (options.includes("government")) {
+      sections.push(sampleGovernmentSuggestionsSection(profile));
+    }
+    return sections.join("") || sampleGenericPageSection(profile, page);
+  }
+
+  if (page === 2 && options.includes("overview")) {
+    return sampleIncidentOverviewSection(profile);
+  }
+  if (page === 3 && options.includes("impact")) {
+    return sampleImpactAnalysisSection(profile);
+  }
+  if (page === 7 && options.includes("predictions")) {
+    return sampleFuturePredictionSection(profile);
+  }
+  if (page === 9 && options.includes("government")) {
+    return sampleGovernmentSuggestionsSection(profile);
+  }
+
+  return sampleGenericPageSection(profile, page);
+}
+
+function sampleIncidentOverviewSection(profile) {
+  return `
+    <section class="sample-report-section-card">
+      <h5>1. Incident Overview</h5>
+      <div class="sample-report-two-col">
+        <div class="mini-chart-card">
+          <svg class="mini-chart-svg" viewBox="0 0 420 220" aria-label="Incident trend chart">
+            ${buildMiniTrendChart(profile)}
+          </svg>
+          <p class="mini-chart-footnote"><strong>Trend Analysis:</strong> Incidents show an increasing trend with peak concentration during evening hours. High-severity incidents are concentrated during the selected peak window.</p>
+        </div>
+        <div class="mini-chart-card">
+          ${buildMiniDonut(profile)}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function sampleImpactAnalysisSection(profile) {
+  return `
+    <section class="sample-report-section-card">
+      <h5>2. Impact Level Analysis</h5>
+      <div class="mini-table-card">
+        ${buildImpactTable(profile)}
+      </div>
+    </section>
+  `;
+}
+
+function sampleFuturePredictionSection(profile) {
+  return `
+    <section class="sample-report-section-card">
+      <h5>3. Future Prediction</h5>
+      <div class="future-prediction-grid">
+        <div class="future-prediction-card">
+          <span class="sample-section-tag">Next 24 Hours</span>
+          <strong>${escapeHtml(strategicContentFor(profile.focusZone).prediction)}</strong>
+        </div>
+        <div class="future-prediction-card">
+          <span class="sample-section-tag">Next 7 Days</span>
+          <strong>Medium-to-high pressure will remain centered around ${escapeHtml(profile.focusZone.title)} and adjacent commuter corridors.</strong>
+        </div>
+        <div class="future-prediction-card">
+          <span class="sample-section-tag">High-Risk Time Window</span>
+          <strong>${escapeHtml(profile.focusZone.window)}</strong>
+        </div>
+        <div class="future-prediction-card">
+          <span class="sample-section-tag">Preventive Action</span>
+          <strong>Pre-position response assets and issue public advisories before evening peak demand.</strong>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function sampleGovernmentSuggestionsSection(profile) {
+  return `
+    <section class="sample-report-section-card">
+      <h5>4. Government Enhancement Suggestions</h5>
+      <div class="government-suggestion-card">
+        <ul>
+          <li>Increase ambulance standby around high-risk corridors.</li>
+          <li>Add temporary warning signage near accident-prone access roads.</li>
+          <li>Improve EV charging station traffic flow around busy districts.</li>
+          <li>Use public advisory alerts before evening peak hours.</li>
+          <li>Coordinate hospital and ambulance readiness during Level 4/5 patterns.</li>
+        </ul>
+      </div>
+    </section>
+  `;
+}
+
+function sampleGenericPageSection(profile, page) {
+  return `
+    <section class="sample-report-section-card">
+      <h5>${page}. ${escapeHtml(sampleReportPages[page - 1] || "Report Section")}</h5>
+      <p class="sample-report-note">This preview page focuses on ${escapeHtml(sampleReportPages[page - 1] || "the selected report section")} for ${escapeHtml(profile.regionLabel)} using the selected content options and current regional hotspot data.</p>
+    </section>
+  `;
+}
+
+function buildMiniTrendChart(profile) {
+  const spark = (profile.focusZone.spark || chartDays.map(() => 3)).map((value) =>
+    Math.max(2, Math.round(value * 1.35)),
+  );
+  const highs = spark.map((value) => Math.max(1, Math.round(value * 0.7)));
+  const width = 420;
+  const height = 220;
+  const padding = { top: 20, right: 24, bottom: 34, left: 24 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+  const max = Math.max(...spark, ...highs, 10);
+  const step = chartWidth / spark.length;
+  const linePath = highs
+    .map((value, index) => {
+      const x = padding.left + index * step + step / 2;
+      const y = padding.top + chartHeight - (value / max) * chartHeight;
+      return `${index === 0 ? "M" : "L"} ${x} ${y}`;
+    })
+    .join(" ");
+  return `
+    <defs>
+      <linearGradient id="sampleBarGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#2e7d32" />
+        <stop offset="100%" stop-color="#1f6b28" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="${width}" height="${height}" rx="18" fill="#ffffff" />
+    ${spark
+      .map((value, index) => {
+        const barHeight = (value / max) * chartHeight;
+        const x = padding.left + index * step + 10;
+        const y = padding.top + chartHeight - barHeight;
+        return `<rect x="${x}" y="${y}" width="${Math.max(18, step - 20)}" height="${barHeight}" rx="10" fill="url(#sampleBarGradient)" />`;
+      })
+      .join("")}
+    <path d="${linePath}" fill="none" stroke="#ef4444" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+    ${highs
+      .map((value, index) => {
+        const x = padding.left + index * step + step / 2;
+        const y = padding.top + chartHeight - (value / max) * chartHeight;
+        return `<circle cx="${x}" cy="${y}" r="4.5" fill="#ffffff" stroke="#ef4444" stroke-width="2.5" />`;
+      })
+      .join("")}
+    ${chartDays
+      .map((label, index) => `<text x="${padding.left + index * step + step / 2}" y="${height - 10}" text-anchor="middle" fill="#556373" font-size="12" font-weight="700">${label}</text>`)
+      .join("")}
+  `;
+}
+
+function buildMiniDonut(profile) {
+  const distribution = severityBreakdown(profile.zones);
+  const total = Object.values(distribution).reduce((sum, value) => sum + value, 0);
+  const values = [distribution[5], distribution[4], distribution[3], distribution[2], distribution[1]];
+  const colors = ["#ef4444", "#fb923c", "#facc15", "#22c55e", "#0ea5e9"];
+  let cursor = 0;
+  const segments = values
+    .map((value, index) => {
+      const start = cursor;
+      const slice = total ? (value / total) * 360 : 0;
+      cursor += slice;
+      return `${colors[index]} ${start}deg ${cursor}deg`;
+    })
+    .join(", ");
+  return `
+    <div class="mini-donut-wrap">
+      <div class="severity-donut" style="margin:0 auto;background:conic-gradient(${segments});">
+        <div class="severity-donut-center">
+          <strong>${profile.focusZone.incidentsCount}</strong>
+          <span>Total</span>
+        </div>
+      </div>
+      <div class="severity-legend-list">
+        ${[5, 4, 3, 2, 1]
+          .map((level, index) => `<div class="severity-legend-item"><span><i style="background:${colors[index]}"></i>Level ${level}</span><strong>${values[index]}</strong></div>`)
+          .join("")}
+      </div>
+    </div>
+  `;
+}
+
+function buildImpactTable(profile) {
+  const distribution = severityBreakdown(profile.zones);
+  const rows = [
+    ["Level 1", "Minor", distribution[1], "Routine monitoring"],
+    ["Level 2", "Low", distribution[2], "Driver assistance follow-up"],
+    ["Level 3", "Medium", distribution[3], "Field verification and watch-band response"],
+    ["Level 4", "High", distribution[4], "Ambulance standby and corridor prioritization"],
+    ["Level 5", "Critical", distribution[5], "Immediate multi-agency escalation"],
+  ];
+  const total = rows.reduce((sum, [, , count]) => sum + count, 0);
+  return `
+    <table class="impact-table">
+      <thead>
+        <tr>
+          <th>Impact Level</th>
+          <th>Category</th>
+          <th>Count</th>
+          <th>Percentage</th>
+          <th>Suggested Response</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows
+          .map(
+            ([level, label, count, response]) => `
+              <tr>
+                <td>${level}</td>
+                <td>${label}</td>
+                <td>${count}</td>
+                <td>${total ? Math.round((count / total) * 100) : 0}%</td>
+                <td>${escapeHtml(response)}</td>
+              </tr>
+            `,
+          )
+          .join("")}
+      </tbody>
+    </table>
+  `;
+}
+
+function openAdvancedInsightsModal() {
+  openCustomReportModal(
+    "Advanced Insights",
+    "Expanded explanation of the current advanced operational indicators and recommended government actions.",
+    [
+      {
+        label: "Risk trend explanation",
+        value:
+          "Regional pressure is increasing by roughly 18% versus the previous 7-day cycle, driven by stronger evening activity in Shah Alam and Klang.",
+        full: true,
+      },
+      {
+        label: "Hotspot movement explanation",
+        value:
+          "Hotspot movement is stable, with no major district rotation. Core high-risk clustering remains centered on the western commuter belt.",
+        full: true,
+      },
+      {
+        label: "Response readiness explanation",
+        value:
+          "Average response readiness remains good at 12.4 minutes, but corridor congestion can still delay access during the 5 PM - 9 PM window.",
+        full: true,
+      },
+      {
+        label: "Suggested government action summary",
+        value:
+          "Maintain evening visibility patrols, pre-position one standby ambulance near Klang, and issue early public advisories before peak commuter buildup.",
+        full: true,
+      },
+    ],
+  );
+}
+
+async function downloadSampleReportPdf() {
+  const printable = els.sampleReportPage;
+  if (!printable) {
+    return;
+  }
+  const html2canvasRef = window.html2canvas;
+  const jsPdfCtor = window.jspdf?.jsPDF;
+  if (!html2canvasRef || !jsPdfCtor) {
+    openCustomReportModal(
+      "PDF export unavailable",
+      "The PDF export libraries are not available, so the report can be printed from your browser instead.",
+      [{ label: "Next step", value: "Use Print Report or reload the page with the CDN scripts enabled." }],
+    );
+    return;
+  }
+  const canvas = await html2canvasRef(printable, {
+    scale: 2,
+    backgroundColor: "#ffffff",
+  });
+  const image = canvas.toDataURL("image/png");
+  const pdf = new jsPdfCtor("p", "mm", "a4");
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const ratio = Math.min(pageWidth / canvas.width, pageHeight / canvas.height);
+  const width = canvas.width * ratio;
+  const height = canvas.height * ratio;
+  pdf.addImage(image, "PNG", 0, 0, width, height);
+  pdf.save(sampleReportFileName());
+}
+
+async function shareSampleReport() {
+  const profile = buildReportMetricProfile(sampleReportState.region, sampleReportState.range);
+  const summary = `EVSmart+ report summary for ${profile.regionLabel}: ${profile.totalIncidents} incidents, ${profile.highSeverity} high-severity cases, peak period ${profile.peakPeriod}.`;
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title: "EVSmart+ Report Summary",
+        text: summary,
+      });
+      return;
+    }
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(summary);
+      showSampleToast("Report summary copied.");
+      return;
+    }
+  } catch (_) {
+    // Fallback below.
+  }
+  openCustomReportModal("Share Report", "Sharing support is unavailable in this browser.", [
+    { label: "Report summary", value: summary, full: true },
+  ]);
+}
+
+function printSampleReport() {
+  if (!els.sampleReportPage) {
+    return;
+  }
+  const popup = window.open("", "_blank", "width=980,height=900");
+  if (!popup) {
+    openCustomReportModal("Print blocked", "Allow popups to print the report preview from your browser.", [
+      { label: "Next step", value: "Enable popups, then press Print Report again." },
+    ]);
+    return;
+  }
+  popup.document.write(`<!doctype html><html><head><title>EVSmart+ Report Preview</title><style>
+    body{font-family:'Segoe UI',sans-serif;padding:24px;background:#f3f7f4}
+    .page{max-width:860px;margin:0 auto;background:#fff;border:1px solid #dfe6e2;border-radius:16px;padding:26px 28px}
+  </style></head><body><div class="page">${els.sampleReportPage.innerHTML}</div></body></html>`);
+  popup.document.close();
+  popup.focus();
+  popup.print();
+}
+
+function showSampleToast(message) {
+  let toast = document.querySelector(".sample-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.className = "sample-toast";
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add("show");
+  window.clearTimeout(showSampleToast.timer);
+  showSampleToast.timer = window.setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2200);
+}
+
+function sampleReportFileName() {
+  const region =
+    sampleReportState.region === "all"
+      ? "All_Selangor_Regions"
+      : String(reportZones[sampleReportState.region]?.title || sampleReportState.region).replaceAll(" ", "_");
+  const range = String(sampleDateRangeLabel(sampleReportState.range)).replaceAll(" ", "_");
+  return `EVSmart_Report_${region}_${range}.pdf`;
 }
 
 function buildStrategicReportText() {
