@@ -611,8 +611,8 @@ body.report-mode .report-utility {
 
 .report-map-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.75fr) minmax(280px, 0.75fr);
-  gap: 20px;
+  grid-template-columns: minmax(0, 1.75fr) minmax(300px, 0.75fr);
+  gap: 18px;
   align-items: stretch;
 }
 
@@ -817,15 +817,17 @@ body.report-mode .report-utility {
 }
 
 .top-risk-panel {
-  padding: 18px;
+  padding: 20px 18px 16px;
   border-radius: 24px;
   border: 1px solid #dde4eb;
   background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
   box-shadow: 0 16px 30px rgba(24, 34, 45, 0.07);
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  min-height: 100%;
+  gap: 12px;
+  min-height: 500px;
+  max-height: 500px;
+  overflow: hidden;
 }
 
 .top-risk-panel-head h4 {
@@ -1241,10 +1243,13 @@ body.report-mode .report-utility {
 
 .risk-distribution {
   display: grid;
-  gap: 14px;
-  max-height: 700px;
+  gap: 10px;
+  max-height: 430px;
   overflow-y: auto;
-  padding-right: 6px;
+  flex: 1 1 auto;
+  padding-top: 2px;
+  padding-right: 8px;
+  scrollbar-gutter: stable;
 }
 
 .risk-distribution::-webkit-scrollbar {
@@ -1263,8 +1268,8 @@ body.report-mode .report-utility {
 
 .risk-pill {
   width: 100%;
-  padding: 22px 18px 18px;
-  border-radius: 22px;
+  padding: 14px 16px;
+  border-radius: 18px;
   min-width: 128px;
   text-align: left;
   background: #ffffff;
@@ -1295,16 +1300,16 @@ body.report-mode .report-utility {
 
 .risk-pill-head {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .risk-pill-rankline {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -1346,16 +1351,16 @@ body.report-mode .report-utility {
 
 .risk-pill-meta {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   color: inherit;
-  padding-top: 16px;
+  padding-top: 10px;
   border-top: 1px solid #eef2f6;
 }
 
 .risk-pill-meta-row {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
 }
 
@@ -2282,9 +2287,13 @@ body.report-mode .report-utility {
 
 .report-overview-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.72fr);
+  grid-template-columns: 1fr;
   gap: 18px;
   align-items: start;
+}
+
+.report-overview-layout > .report-map-card {
+  min-width: 0;
 }
 
 .report-hero-card {
@@ -2319,13 +2328,7 @@ body.report-mode .report-utility {
 }
 
 .focused-region-panel {
-  padding: 20px;
-  border-radius: 26px;
-  border: 1px solid #dfe7e1;
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%);
-  box-shadow: 0 18px 34px rgba(24, 34, 45, 0.08);
-  display: grid;
-  gap: 16px;
+  display: none !important;
 }
 
 .focused-region-head h3 {
