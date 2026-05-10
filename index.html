@@ -259,10 +259,7 @@
           </div>
         </div>
         <div id="reportUtility" class="report-utility hidden">
-          <div class="report-utility-pill">
-            <span class="live-dot"></span>
-            <span>Live Monitoring</span>
-          </div>
+          <span id="reportUpdated" class="status-pill report-updated-pill">Updated --:--</span>
         </div>
       </header>
 
@@ -313,13 +310,11 @@
       <section id="reportPanel" class="panel hidden">
         <div class="panel-head">
           <div>
-            <h2>AI Generated Accident Hotspots</h2>
+            <h2>AI Generated Accident Report</h2>
             <p>
-              Presentation-ready regional trend view for ambulance standby planning,
-              patrol focus, and alert readiness.
+              Real-time regional risk overview and hotspot analysis for Selangor.
             </p>
           </div>
-          <span id="reportUpdated" class="status-pill">Updated --:--</span>
         </div>
 
         <div id="reportBanner" class="report-banner hidden">
@@ -330,39 +325,95 @@
           <span id="reportBannerTime">Just now</span>
         </div>
 
-        <article class="report-map-card report-hero-card">
-          <div class="report-map-head">
-            <div>
+        <div class="report-overview-layout">
+          <article class="report-map-card report-hero-card">
+            <div class="report-map-head">
+              <div>
                 <h3>Selangor State Risk Overview</h3>
                 <p>Simulated multi-day accident concentration across Selangor based on EVSmart+ incident patterns and AI hotspot grouping.</p>
-            </div>
-            <div class="risk-legend">
-              <span><i class="dot low"></i> Low</span>
-              <span><i class="dot medium"></i> Medium</span>
-              <span><i class="dot high"></i> High</span>
-            </div>
-          </div>
-          <div class="report-map-layout">
-            <div class="report-map-stack">
-              <div class="report-map">
-                <div id="selangorMap" class="leaflet-map" aria-label="Selangor regional hotspot map"></div>
               </div>
-              <div id="regionChips" class="region-chip-row"></div>
-            </div>
-            <aside class="top-risk-panel">
-              <div class="top-risk-panel-head">
-                <h4>Top Risk Districts</h4>
+              <div class="risk-legend">
+                <span><i class="dot low"></i> Low</span>
+                <span><i class="dot medium"></i> Medium</span>
+                <span><i class="dot high"></i> High</span>
               </div>
-              <div class="risk-distribution" id="riskDistribution"></div>
-            </aside>
-          </div>
-          <div class="map-footer-note">
-            Zoom and pan the map to inspect Selangor hotspots. Reload the page on desktop or pull down on mobile to refresh the simulated regional severity.
-          </div>
-          <div class="map-ai-summary">
-            <div class="mini-kicker">AI Severity Summary</div>
+            </div>
+            <div class="report-map-layout">
+              <div class="report-map-stack">
+                <div class="report-map">
+                  <div id="selangorMap" class="leaflet-map" aria-label="Selangor regional hotspot map"></div>
+                </div>
+                <div id="regionChips" class="region-chip-row"></div>
+              </div>
+              <aside class="top-risk-panel">
+                <div class="top-risk-panel-head">
+                  <h4>Top Risk Districts</h4>
+                </div>
+                <div class="risk-distribution" id="riskDistribution"></div>
+                <button id="viewAllDistrictsBtn" class="view-all-districts-btn" type="button">View All Districts</button>
+              </aside>
+            </div>
+            <div class="map-footer-note">
+              Zoom and pan the map to inspect Selangor hotspots. Reload the page on desktop or pull down on mobile to refresh the simulated regional severity.
+            </div>
+          </article>
+
+          <aside class="focused-region-panel">
+            <div class="focused-region-head">
+              <div>
+                <h3>Focused Region</h3>
+                <p>Selected hotspot details for response planning.</p>
+              </div>
+            </div>
+            <label class="focus-region-filter focus-region-filter-standalone">
+              <span>Region</span>
+              <select id="focusRegionSelect" aria-label="Focused region selector"></select>
+            </label>
+            <div class="focus-highlight focus-highlight-standalone">
+              <div class="focus-icon">AI</div>
+              <div class="focus-copy">
+                <div class="focus-copy-top">
+                  <h4 id="zoneTitle">Shah Alam</h4>
+                  <p id="zoneRiskText" class="zone-risk high-text">High alert zone</p>
+                </div>
+                <div class="focus-facts-grid focus-facts-grid-standalone">
+                  <div class="focus-fact">
+                    <span>Cases in Range</span>
+                    <strong id="zoneIncidents">14 incidents</strong>
+                  </div>
+                  <div class="focus-fact">
+                    <span>Critical Share</span>
+                    <strong id="zoneCritical">36% Level 4/5</strong>
+                  </div>
+                  <div class="focus-fact">
+                    <span>Peak Window</span>
+                    <strong id="zoneWindow">5 PM - 8 PM</strong>
+                  </div>
+                  <div class="focus-fact">
+                    <span>Potential Cause</span>
+                    <strong id="zoneCause">Evening traffic pressure and EV charging route congestion</strong>
+                  </div>
+                  <div class="focus-fact focus-fact-wide">
+                    <span>Recommended Action</span>
+                    <strong id="zoneAction">Pre-position 1 ambulance unit</strong>
+                  </div>
+                </div>
+                <p id="zoneNarrative">
+                  Frequent severe alerts are clustering around Shah Alam, so ambulance units
+                  should keep standby coverage closer to Persiaran Kayangan and nearby access roads.
+                </p>
+              </div>
+            </div>
+            <button id="viewDetailedReportBtn" class="focus-report-btn focus-report-btn-standalone" type="button">View Detailed Report</button>
+          </aside>
+        </div>
+
+        <article class="map-ai-summary map-ai-summary-card">
+          <div class="map-ai-summary-icon">AI</div>
+          <div>
+            <div class="mini-kicker">AI Insight</div>
             <p id="regionalSummary" class="regional-summary">
-              Regional EV accident clusters are currently highest around Shah Alam and Klang, while Petaling Jaya and Subang Jaya remain active but manageable with local standby optimization.
+              Regional EV accident concentration is currently strongest around Shah Alam and Klang, while Sabak Bernam and Putrajaya remain comparatively calmer and suitable for lighter standby coverage.
             </p>
           </div>
         </article>
@@ -466,137 +517,82 @@
                 </div>
                 <div id="peakHourHeatmap" class="heatmap-card"></div>
               </section>
+              <section class="trend-panel trend-weekday-panel">
+                <div class="trend-panel-head">
+                  <div class="trend-panel-badge">6</div>
+                  <div>
+                    <h4>Day of Week Trend</h4>
+                    <p>Average incident activity by day to surface the strongest operational pressure window.</p>
+                  </div>
+                </div>
+                <svg id="weekdayTrendChart" class="weekday-trend-chart" viewBox="0 0 420 240" aria-label="Day of week trend chart"></svg>
+              </section>
             </div>
-            <section class="chart-focus-card trend-panel trend-focus-panel">
-              <div class="trend-panel-head trend-panel-head-inline">
-                <div class="trend-panel-badge">6</div>
-                <div>
-                  <h4>Focused Region Insight</h4>
-                  <p>Detailed AI summary for the selected regional hotspot.</p>
-                </div>
-                <label class="focus-region-filter">
-                  <span>Focused Region</span>
-                  <select id="focusRegionSelect" aria-label="Focused region selector"></select>
-                </label>
-              </div>
-              <div class="focus-highlight">
-                <div class="focus-icon">AI</div>
-                <div class="focus-copy">
-                  <div class="focus-copy-top">
-                    <h4 id="zoneTitle">Shah Alam</h4>
-                    <p id="zoneRiskText" class="zone-risk high-text">High alert zone</p>
-                  </div>
-                  <div class="focus-facts-grid">
-                    <div class="focus-fact">
-                      <span>Cases in Range</span>
-                      <strong id="zoneIncidents">14 incidents</strong>
-                    </div>
-                    <div class="focus-fact">
-                      <span>Critical Share</span>
-                      <strong id="zoneCritical">36% Level 4/5</strong>
-                    </div>
-                    <div class="focus-fact">
-                      <span>Peak Window</span>
-                      <strong id="zoneWindow">5 PM - 8 PM</strong>
-                    </div>
-                    <div class="focus-fact">
-                      <span>Potential Cause</span>
-                      <strong id="zoneCause">Evening traffic pressure and EV charging route congestion</strong>
-                    </div>
-                    <div class="focus-fact focus-fact-wide">
-                      <span>Recommended Action</span>
-                      <strong id="zoneAction">Pre-position 1 ambulance unit</strong>
-                    </div>
-                  </div>
-                  <p id="zoneNarrative">
-                    Frequent severe alerts are clustering around Shah Alam, so ambulance units
-                    should keep standby coverage closer to Persiaran Kayangan and nearby access roads.
-                  </p>
-                </div>
-                <div class="focus-side-actions">
-                  <button id="viewDetailedReportBtn" class="focus-report-btn" type="button">View Detailed Report</button>
-                </div>
-              </div>
-            </section>
+            <div class="report-action-bar trend-action-bar">
+              <button id="exportPdfBtn" class="report-action-btn primary" type="button">Export PDF</button>
+              <button id="shareReportBtn" class="report-action-btn" type="button">Share Report</button>
+              <button id="generateBriefingBtn" class="report-action-btn" type="button">Generate Briefing</button>
+            </div>
           </article>
 
           <article class="report-insights-card insights-full-card">
             <div class="insights-head">
               <div>
-                <h3>AI Emergency Response &amp; Strategic Report</h3>
-                <p>AI-generated statistical recommendations based on EVSmart+ accident hotspots, severity levels, peak hours, and regional risk patterns.</p>
+                <h3>AI Report &amp; Suggestions</h3>
+                <p>AI-generated action plan and strategic recommendations based on hotspot, severity, peak-hour, and regional risk patterns.</p>
               </div>
+              <span class="report-preview-period">Report Period: <strong id="reportPreviewPeriod">Past 7 Days</strong></span>
             </div>
-            <div class="insights-toolbar">
-              <button id="strategicAnalysisBtn" class="strategic-analysis-btn" type="button">
-                <span class="btn-spark">AI</span>
-                <span id="strategicAnalysisBtnText">Generate AI Statistics Report</span>
-              </button>
+            <div class="insights-toolbar insights-toolbar-compact">
+              <p id="strategicSummary" class="strategic-summary">AI-generated statistical recommendations based on EVSmart+ accident hotspots, severity levels, peak hours, and regional risk patterns.</p>
               <span id="generateStatus" class="generate-status">Ready to generate</span>
             </div>
-            <div class="insight-panel insight-panel-expanded">
-              <div class="analysis-output-card">
-                <div class="analysis-output-rail">
-                  <div class="analysis-output-icon">AI</div>
-                  <div id="strategicLoadingStream" class="analysis-loading-stream"></div>
-                </div>
-                <div class="analysis-output-copy">
-                  <div class="mini-kicker">AI Analysis Output</div>
-                  <p id="strategicSummary" class="strategic-summary">Ready to generate a government-focused statistical report based on the latest hotspot trends.</p>
-                </div>
+            <div class="analysis-output-card suggestions-summary-card">
+              <div class="analysis-output-rail">
+                <div class="analysis-output-icon">AI</div>
+                <div id="strategicLoadingStream" class="analysis-loading-stream"></div>
               </div>
-              <div>
-                <div class="mini-kicker">AI Strategic Insights</div>
-                <div id="strategicRecommendations" class="strategic-insight-grid"></div>
+              <div class="analysis-output-copy">
+                <div class="mini-kicker">AI Response Summary</div>
+                <p class="strategic-summary strategic-summary-tight">Government-focused recommendation logic is generated from the selected hotspot, regional severity distribution, and current peak-hour risk concentration.</p>
               </div>
-              <div class="report-preview-card">
-                <div class="report-preview-head">
-                  <div>
-                    <div class="mini-kicker">Generated Report Preview</div>
-                    <h4>AI Strategic Briefing Draft</h4>
-                  </div>
-                  <span class="report-preview-period">Report Period: <strong id="reportPreviewPeriod">Past 7 Days</strong></span>
+            </div>
+            <div class="report-preview-meta report-preview-meta-compact">
+              <div class="preview-meta-item">
+                <span>Generated Time</span>
+                <strong id="reportPreviewTime">Awaiting generation</strong>
+              </div>
+              <div class="preview-meta-item">
+                <span>Dataset Scope</span>
+                <strong id="reportDatasetScope">21 regions</strong>
+              </div>
+              <div class="preview-meta-item">
+                <span>Data Points</span>
+                <strong id="reportDataPoints">Awaiting generation</strong>
+              </div>
+            </div>
+            <div id="strategicRecommendations" class="strategic-insight-grid suggestions-grid"></div>
+            <div class="report-preview-card report-preview-card-hidden">
+              <div class="report-preview-grid">
+                <div class="preview-block">
+                  <span>Key Findings</span>
+                  <ul id="reportKeyFindings"></ul>
                 </div>
-                <div class="report-preview-meta">
-                  <div class="preview-meta-item">
-                    <span>Generated Time</span>
-                    <strong id="reportPreviewTime">Awaiting generation</strong>
-                  </div>
-                  <div class="preview-meta-item">
-                    <span>Dataset Scope</span>
-                    <strong id="reportDatasetScope">21 regions</strong>
-                  </div>
-                  <div class="preview-meta-item">
-                    <span>Data Points</span>
-                    <strong id="reportDataPoints">Awaiting generation</strong>
-                  </div>
+                <div class="preview-block">
+                  <span>Potential Causes</span>
+                  <ul id="reportPotentialCauses"></ul>
                 </div>
-                <div class="report-preview-grid">
-                  <div class="preview-block">
-                    <span>Key Findings</span>
-                    <ul id="reportKeyFindings"></ul>
-                  </div>
-                  <div class="preview-block">
-                    <span>Potential Causes</span>
-                    <ul id="reportPotentialCauses"></ul>
-                  </div>
-                  <div class="preview-block">
-                    <span>Recommended Solutions</span>
-                    <ul id="reportRecommendedActions"></ul>
-                  </div>
-                  <div class="preview-block">
-                    <span>Resource Deployment Plan</span>
-                    <ul id="reportDeploymentPlan"></ul>
-                  </div>
-                  <div class="preview-block preview-block-wide">
-                    <span>Risk Prediction</span>
-                    <p id="reportPrediction" class="preview-paragraph">Awaiting AI analysis</p>
-                  </div>
+                <div class="preview-block">
+                  <span>Recommended Solutions</span>
+                  <ul id="reportRecommendedActions"></ul>
                 </div>
-                <div class="report-action-bar">
-                  <button id="exportPdfBtn" class="report-action-btn primary" type="button">Export PDF</button>
-                  <button id="shareReportBtn" class="report-action-btn" type="button">Share Report</button>
-                  <button id="generateBriefingBtn" class="report-action-btn" type="button">Generate Briefing</button>
+                <div class="preview-block">
+                  <span>Resource Deployment Plan</span>
+                  <ul id="reportDeploymentPlan"></ul>
+                </div>
+                <div class="preview-block preview-block-wide">
+                  <span>Risk Prediction</span>
+                  <p id="reportPrediction" class="preview-paragraph">Awaiting AI analysis</p>
                 </div>
               </div>
             </div>

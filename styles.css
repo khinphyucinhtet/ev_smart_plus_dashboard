@@ -2280,6 +2280,262 @@ body.report-mode .report-utility {
   }
 }
 
+.report-overview-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.72fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.report-hero-card {
+  margin-bottom: 0;
+}
+
+.map-ai-summary-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.map-ai-summary-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.18) 0%, rgba(46, 125, 50, 0.06) 100%);
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+}
+
+.report-updated-pill {
+  padding-inline: 14px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.focused-region-panel {
+  padding: 20px;
+  border-radius: 26px;
+  border: 1px solid #dfe7e1;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%);
+  box-shadow: 0 18px 34px rgba(24, 34, 45, 0.08);
+  display: grid;
+  gap: 16px;
+}
+
+.focused-region-head h3 {
+  margin: 0 0 6px;
+  font-size: 24px;
+}
+
+.focused-region-head p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.focus-region-filter-standalone {
+  display: grid;
+  gap: 8px;
+}
+
+.focus-highlight-standalone {
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid #e4eae6;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbf9 100%);
+  display: grid;
+  gap: 16px;
+}
+
+.focus-highlight-standalone .focus-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ef5350 0%, #ef4444 100%);
+  color: #fff;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 14px 24px rgba(239, 68, 68, 0.18);
+}
+
+.focus-highlight-standalone .focus-copy {
+  display: grid;
+  gap: 14px;
+}
+
+.focus-facts-grid-standalone {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.focus-fact {
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid #e7ece8;
+  background: #ffffff;
+  display: grid;
+  gap: 6px;
+}
+
+.focus-fact span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.focus-fact strong {
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.focus-fact-wide {
+  grid-column: 1 / -1;
+}
+
+.focus-report-btn-standalone {
+  width: 100%;
+  justify-content: center;
+}
+
+.view-all-districts-btn {
+  margin-top: auto;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(46, 125, 50, 0.2);
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbf7 100%);
+  color: var(--green-dark);
+  font-weight: 800;
+  text-align: center;
+  box-shadow: 0 8px 16px rgba(24, 34, 45, 0.04);
+}
+
+.view-all-districts-btn:hover {
+  border-color: rgba(46, 125, 50, 0.36);
+  box-shadow: 0 12px 22px rgba(46, 125, 50, 0.08);
+}
+
+.trend-analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.trend-main-panel {
+  grid-column: span 6;
+}
+
+.trend-bar-panel,
+.trend-severity-panel,
+.trend-split-panel {
+  grid-column: span 3;
+}
+
+.trend-heatmap-panel {
+  grid-column: span 5;
+}
+
+.trend-action-bar {
+  padding-top: 6px;
+  justify-content: flex-start;
+}
+
+.insights-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.insights-toolbar-compact {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.suggestions-summary-card {
+  border-color: #dfe8e2;
+}
+
+.report-preview-meta-compact {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.suggestions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.report-preview-card-hidden {
+  display: none;
+}
+
+.strategic-points {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  display: grid;
+  gap: 8px;
+  line-height: 1.55;
+}
+
+.strategic-points li::marker {
+  color: currentColor;
+}
+
+.strategic-recommendation.prediction {
+  border-color: rgba(220, 38, 38, 0.24);
+  background: linear-gradient(180deg, #fffefe 0%, #fff4f4 100%);
+  box-shadow: 0 14px 28px rgba(220, 38, 38, 0.08);
+}
+
+.strategic-recommendation.prediction .strategic-recommendation-icon {
+  background: linear-gradient(135deg, rgba(220, 38, 38, 0.14) 0%, rgba(239, 68, 68, 0.04) 100%);
+  color: #dc2626;
+}
+
+.trend-weekday-panel {
+  grid-column: span 4;
+}
+
+.weekday-trend-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.weekday-bar {
+  fill: url(#weekdayBarGradient);
+}
+
+body.report-mode .metrics,
+body.report-mode #sidebarTimelineCard,
+body.report-mode .sidebar .note {
+  display: none !important;
+}
+
+@media (max-width: 1280px) {
+  .report-overview-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .focused-region-panel {
+    order: 2;
+  }
+}
+
 @media print {
   body {
     display: block;
@@ -2339,8 +2595,10 @@ body.report-mode .report-utility {
   }
 
   .report-bottom-stack,
+  .report-overview-layout,
   .report-map-layout,
   .focus-highlight,
+  .focus-facts-grid-standalone,
   .analysis-output-card,
   .severity-donut-wrap {
     grid-template-columns: 1fr;
@@ -2349,8 +2607,10 @@ body.report-mode .report-utility {
   .trend-analytics-grid,
   .trend-stat-strip,
   .report-preview-meta,
+  .report-preview-meta-compact,
   .report-preview-grid,
   .strategic-insight-grid,
+  .suggestions-grid,
   .risk-split-grid {
     grid-template-columns: 1fr;
   }
@@ -2360,6 +2620,7 @@ body.report-mode .report-utility {
   .trend-severity-panel,
   .trend-split-panel,
   .trend-heatmap-panel,
+  .trend-weekday-panel,
   .trend-focus-panel {
     grid-column: auto;
   }
@@ -2367,7 +2628,9 @@ body.report-mode .report-utility {
   .report-map-head,
   .trend-top,
   .trend-head,
-  .trend-head-actions {
+  .trend-head-actions,
+  .insights-head,
+  .insights-toolbar-compact {
     display: block;
   }
 
@@ -2379,6 +2642,10 @@ body.report-mode .report-utility {
   }
 
   .focus-facts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .focus-facts-grid-standalone {
     grid-template-columns: 1fr;
   }
 

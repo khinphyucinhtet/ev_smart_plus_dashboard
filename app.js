@@ -528,6 +528,7 @@ const els = {
   feedSummary: document.querySelector("#feedSummary"),
   alertFeed: document.querySelector("#alertFeed"),
   notificationFeed: document.querySelector("#notificationFeed"),
+  metrics: document.querySelector(".metrics"),
   metricLabel1: document.querySelector("#metricLabel1"),
   metricLabel2: document.querySelector("#metricLabel2"),
   metricLabel3: document.querySelector("#metricLabel3"),
@@ -570,6 +571,7 @@ const els = {
   severityDistribution: document.querySelector("#severityDistribution"),
   riskSplitStats: document.querySelector("#riskSplitStats"),
   peakHourHeatmap: document.querySelector("#peakHourHeatmap"),
+  weekdayTrendChart: document.querySelector("#weekdayTrendChart"),
   trendRegionFilter: document.querySelector("#trendRegionFilter"),
   focusRegionSelect: document.querySelector("#focusRegionSelect"),
   trendTotalIncidents: document.querySelector("#trendTotalIncidents"),
@@ -588,6 +590,7 @@ const els = {
   regionChips: document.querySelector("#regionChips"),
   regionalSummary: document.querySelector("#regionalSummary"),
   riskDistribution: document.querySelector("#riskDistribution"),
+  viewAllDistrictsBtn: document.querySelector("#viewAllDistrictsBtn"),
   reportModalOverlay: document.querySelector("#reportModalOverlay"),
   reportModalClose: document.querySelector("#reportModalClose"),
   reportModalOk: document.querySelector("#reportModalOk"),
@@ -693,6 +696,9 @@ els.focusRegionSelect?.addEventListener("change", () => {
     renderReportZone();
   }
 });
+els.viewAllDistrictsBtn?.addEventListener("click", () => {
+  els.regionChips?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+});
 
 els.reportModalClose.addEventListener("click", closeReportModal);
 els.reportModalOk.addEventListener("click", closeReportModal);
@@ -782,8 +788,9 @@ function render() {
   els.updatesPanel.classList.toggle("hidden", reportMode);
   els.reportPanel.classList.toggle("hidden", !reportMode);
   els.reportUtility.classList.toggle("hidden", !reportMode);
+  els.metrics.classList.toggle("hidden", reportMode);
   els.sidebarMonitor.classList.toggle("hidden", !reportMode);
-  els.sidebarTimelineCard.classList.toggle("hidden", !reportMode);
+  els.sidebarTimelineCard.classList.toggle("hidden", reportMode);
   els.sidebarClockCard.classList.toggle("hidden", !reportMode);
 
   if (activeRole === "hospital") {
@@ -905,6 +912,7 @@ function renderReportZone() {
   bindRegionChips();
   bindRiskCards();
   renderTrendChart();
+  renderWeekdayTrendChart();
   updateMapVisuals();
 }
 
@@ -1061,7 +1069,8 @@ function regionChipsMarkup() {
 function riskDistributionMarkup() {
   const zones = Object.values(reportZones)
     .slice()
-    .sort(compareZonesByPriority);
+    .sort(compareZonesByPriority)
+    .slice(0, 5);
   return zones
     .map(
       (zone, index) => `
@@ -2007,6 +2016,7 @@ function renderTrendMetrics(zone) {
   renderSeverityDistribution();
   renderPeakHourHeatmap();
   renderRiskSplit();
+  renderWeekdayTrendChart();
   if (els.avgImpactLevel) {
     els.avgImpactLevel.textContent = averageImpactLevel(zone);
   }
@@ -2022,6 +2032,60 @@ function renderTrendMetrics(zone) {
   if (els.delayRisk) {
     els.delayRisk.textContent = zone.level === "high" ? "Medium" : zone.level === "medium" ? "Moderate" : "Low";
   }
+}
+
+function renderWeekdayTrendChart() {
+  const svg = els.weekdayTrendChart;
+  if (!svg) {
+    return;
+  }
+
+  const zones = analyticsZones();
+  const values = chartDays.map((_, index) =>
+    zones.reduce((sum, zone) => sum + (zone.spark[index] ?? 0), 0),
+  );
+  const scaledValues = values.map((value) =>
+    Math.max(3, Math.round(value * (activeTrendRegion === "all" ? 0.42 : 1))),
+  );
+  const maxValue = Math.max(...scaledValues, 10);
+  const width = 420;
+  const height = 240;
+  const padding = { top: 22, right: 20, bottom: 38, left: 24 };
+  const chartWidth = width - padding.left - padding.right;
+  const chartHeight = height - padding.top - padding.bottom;
+  const stepX = chartWidth / scaledValues.length;
+
+  const bars = scaledValues
+    .map((value, index) => {
+      const barHeight = (value / maxValue) * chartHeight;
+      const x = padding.left + index * stepX + 12;
+      const y = padding.top + chartHeight - barHeight;
+      const barWidth = Math.max(22, stepX - 24);
+      return `
+        <rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" rx="12" class="weekday-bar" />
+        <text x="${x + barWidth / 2}" y="${y - 8}" text-anchor="middle" class="chart-bar-value">${value}</text>
+        <text x="${x + barWidth / 2}" y="${height - 10}" text-anchor="middle" class="chart-label">${escapeHtml(
+          chartDays[index],
+        )}</text>
+      `;
+    })
+    .join("");
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="weekdayBarGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#39a357" />
+        <stop offset="100%" stop-color="#176334" />
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="${width}" height="${height}" rx="22" class="chart-bg" />
+    ${Array.from({ length: 4 }, (_, index) => {
+      const value = Math.round((maxValue / 4) * (4 - index));
+      const y = padding.top + (chartHeight / 4) * index;
+      return `<line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" class="chart-grid" />`;
+    }).join("")}
+    ${bars}
+  `;
 }
 
 function renderTrendChart() {
@@ -2244,11 +2308,37 @@ function renderPeakHourHeatmap() {
 
 function strategicPlaceholderCards() {
   return [
-    { title: "Critical Hotspot", icon: "HOT", severity: "high", text: "Highest-risk hotspot summary will appear after AI generation." },
-    { title: "Potential Cause", icon: "CAUSE", severity: "medium", text: "Likely contributing factors will be identified from trend and severity signals." },
-    { title: "Resource Planning", icon: "PLAN", severity: "high", text: "Ambulance positioning and responder allocation recommendations will appear here." },
-    { title: "Public Safety Recommendation", icon: "SAFE", severity: "medium", text: "Traffic advisory and warning-sign guidance will be generated here." },
-    { title: "Low-Risk Monitoring", icon: "LOW", severity: "low", text: "Stable regions suitable for routine patrol coverage will be listed here." },
+    {
+      title: "Key Findings",
+      icon: "KF",
+      severity: "high",
+      points: ["Highest-risk hotspot summary will appear after AI generation."],
+    },
+    {
+      title: "Potential Causes",
+      icon: "PC",
+      severity: "medium",
+      points: ["Likely contributing factors will be identified from trend and severity signals."],
+    },
+    {
+      title: "Recommended Solutions",
+      icon: "RS",
+      severity: "high",
+      points: ["Ambulance positioning and responder allocation recommendations will appear here."],
+    },
+    {
+      title: "Resource Deployment Plan",
+      icon: "RD",
+      severity: "medium",
+      points: ["Patrol and route-cover planning will be generated here."],
+    },
+    {
+      title: "Risk Prediction (Next 24 Hours)",
+      icon: "RP",
+      severity: "high",
+      points: ["Projected night-risk pressure will be shown after AI generation."],
+      emphasis: "prediction",
+    },
   ];
 }
 
@@ -2269,11 +2359,55 @@ function strategicContentFor(zone) {
   return {
     summary: `Based on the latest EVSmart+ accident dataset, ${leadZone.title} and ${secondZone.title} show the strongest Level 4 accident concentration during evening peak hours. ${mediumZones.length ? `Medium-risk regions such as ${mediumZones.join(", ")} require active monitoring,` : "This selected region still requires active monitoring,"} while low-risk areas such as ${calmLabel} can remain under normal patrol coverage.`,
     cards: [
-      { title: "Critical Hotspot", icon: "1", severity: "high", text: `${leadZone.title} remains the highest-risk region.` },
-      { title: "Potential Cause", icon: "2", severity: "medium", text: "Evening traffic pressure, connector road congestion, and EV charging route movement." },
-      { title: "Resource Planning", icon: "3", severity: "high", text: `Increase ambulance standby near ${[leadZone.title, secondZone.title].filter(Boolean).join(" and ")}.` },
-      { title: "Public Safety Recommendation", icon: "4", severity: "medium", text: "Add temporary warning signage and traffic advisory during peak hours." },
-      { title: "Low-Risk Monitoring", icon: "5", severity: "low", text: `${calmLabel} remain stable and suitable for lighter coverage.` },
+      {
+        title: "Key Findings",
+        icon: "KF",
+        severity: "high",
+        points: [
+          `${leadZone.title}${secondZone.title !== leadZone.title ? ` and ${secondZone.title}` : ""} remain the strongest evening crash clusters.`,
+          `${secondZone.title} records ${secondZone.incidentsCount} incidents with ${secondZone.criticalPct}% critical-share severity.`,
+          `${highestZones[2] ? `${highestZones[2].title} continues to sit inside the medium-risk watch band.` : "Cross-district signals remain manageable outside the lead hotspot."}`,
+        ],
+      },
+      {
+        title: "Potential Causes",
+        icon: "PC",
+        severity: "medium",
+        points: [
+          "Evening traffic pressure on primary commuter connectors.",
+          "EV charging-route congestion near busy access roads.",
+          "Peak-hour spillover between medium and high-risk districts.",
+        ],
+      },
+      {
+        title: "Recommended Solutions",
+        icon: "RS",
+        severity: "high",
+        points: [
+          `Increase standby coverage near ${[leadZone.title, secondZone.title].filter(Boolean).join(" and ")} corridors.`,
+          `Maintain visibility patrols during ${zone.window} peak-risk windows.`,
+          "Coordinate public advisories before the evening rush hour.",
+        ],
+      },
+      {
+        title: "Resource Deployment Plan",
+        icon: "RD",
+        severity: "medium",
+        points: [
+          `Pre-position 1 ambulance unit near ${zone.title}.`,
+          `Keep a support route open toward ${secondZone.title}.`,
+          "Assign lighter patrol coverage to lower-risk districts.",
+        ],
+      },
+      {
+        title: "Risk Prediction (Next 24 Hours)",
+        icon: "RP",
+        severity: "high",
+        points: [
+          `${leadZone.title} is likely to remain the highest night-risk cluster over the next 24 hours if evening congestion persists.`,
+        ],
+        emphasis: "prediction",
+      },
     ],
     findings: [
       `${leadZone.title}${secondZone.title !== leadZone.title ? ` and ${secondZone.title}` : ""} remain the strongest evening crash clusters.`,
@@ -2303,13 +2437,19 @@ function strategicCardsMarkup(cards) {
   return cards
     .map(
       (card) => `
-        <article class="strategic-recommendation ${card.severity}">
+        <article class="strategic-recommendation ${card.severity}${card.emphasis ? ` ${card.emphasis}` : ""}">
           <div class="strategic-recommendation-top">
             <span class="strategic-recommendation-icon">${escapeHtml(card.icon)}</span>
             <span class="strategic-recommendation-badge ${escapeHtml(card.severity)}">${escapeHtml(severityWord(card.severity))}</span>
           </div>
           <strong>${escapeHtml(card.title)}</strong>
-          <p>${escapeHtml(card.text)}</p>
+          ${
+            Array.isArray(card.points)
+              ? `<ul class="strategic-points">${card.points
+                  .map((point) => `<li>${escapeHtml(point)}</li>`)
+                  .join("")}</ul>`
+              : `<p>${escapeHtml(card.text || "")}</p>`
+          }
         </article>
       `,
     )
@@ -2403,7 +2543,7 @@ function buildStrategicReportText() {
   const zone = reportZones[activeZone] || reportZones["shah-alam"];
   const content = strategicContentFor(zone);
   return [
-    "EVSmart+ AI Emergency Response & Strategic Report",
+    "EVSmart+ AI Report & Suggestions",
     `Report Period: ${trendRangeLabel(activeTrendRange)}`,
     `Generated Time: ${formatDate(reportGeneratedAt || new Date())}`,
     `Dataset Scope: ${Object.keys(reportZones).length} regions`,
@@ -2437,7 +2577,7 @@ function exportStrategicReportPdf() {
     return;
   }
   popup.document.write(`<!doctype html>
-  <html><head><title>EVSmart+ Strategic Report</title><style>
+  <html><head><title>EVSmart+ AI Report & Suggestions</title><style>
   body{font-family:'Segoe UI',sans-serif;padding:32px;color:#17212b;background:#fff}
   h1,h2,h3,p{margin:0}.head{display:flex;justify-content:space-between;gap:24px;margin-bottom:24px}
   .brand{color:#166534;font-weight:900;letter-spacing:.04em;text-transform:uppercase;font-size:12px;margin-bottom:10px}
@@ -2446,7 +2586,7 @@ function exportStrategicReportPdf() {
   .card{border:1px solid #dfe7e1;border-radius:18px;padding:16px;background:#fff}.card span{display:block;color:#5b6b7c;font-size:12px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em}.card strong{font-size:18px;line-height:1.45}
   ul{margin:10px 0 0 20px;padding:0;line-height:1.6}.section{margin-top:24px}
   </style></head><body>
-  <div class="head"><div><div class="brand">EVSmart+ Strategic Briefing</div><h1 class="title">AI Emergency Response & Strategic Report</h1><p class="muted">${escapeHtml(content.summary)}</p></div><div class="pill">${escapeHtml(trendRangeLabel(activeTrendRange))}</div></div>
+  <div class="head"><div><div class="brand">EVSmart+ AI Report</div><h1 class="title">AI Report & Suggestions</h1><p class="muted">${escapeHtml(content.summary)}</p></div><div class="pill">${escapeHtml(trendRangeLabel(activeTrendRange))}</div></div>
   <div class="meta">
     <div class="card"><span>Focused Region</span><strong>${escapeHtml(zone.title)}</strong></div>
     <div class="card"><span>Generated Time</span><strong>${escapeHtml(formatDate(reportGeneratedAt || new Date()))}</strong></div>
