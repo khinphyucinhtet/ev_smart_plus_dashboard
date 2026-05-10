@@ -229,11 +229,6 @@
         <small>AI-generated hotspot view</small>
       </button>
 
-      <section id="sidebarClockCard" class="sidebar-card sidebar-clock hidden">
-        <strong id="sidebarClockTime">--:--</strong>
-        <span id="sidebarClockDate">-- --- ----</span>
-      </section>
-
       <div class="note">
         Static HTML dashboard. Host this folder directly on GitHub Pages,
         Vercel, Netlify, or any normal web server.
@@ -252,7 +247,10 @@
           </div>
         </div>
         <div id="reportUtility" class="report-utility hidden">
-          <span id="reportUpdated" class="status-pill report-updated-pill">Updated --:--</span>
+          <span id="reportUpdated" class="status-pill report-updated-pill">
+            <strong>Updated --:--</strong>
+            <small>-- --- ----</small>
+          </span>
         </div>
       </header>
 
@@ -308,6 +306,7 @@
               Real-time regional risk overview and hotspot analysis for Selangor.
             </p>
           </div>
+          <span class="trend-live-pill report-live-pill">Live</span>
         </div>
 
         <div id="reportBanner" class="report-banner hidden">
@@ -343,7 +342,6 @@
                   <h4>Top Risk Districts</h4>
                 </div>
                 <div class="risk-distribution" id="riskDistribution"></div>
-                <button id="viewAllDistrictsBtn" class="view-all-districts-btn" type="button">View All Districts</button>
               </aside>
             </div>
             <div class="map-footer-note">
@@ -401,16 +399,6 @@
           </aside>
         </div>
 
-        <article class="map-ai-summary map-ai-summary-card">
-          <div class="map-ai-summary-icon">AI</div>
-          <div>
-            <div class="mini-kicker">AI Insight</div>
-            <p id="regionalSummary" class="regional-summary">
-              Regional EV accident concentration is currently strongest around Shah Alam and Klang, while Sabak Bernam and Putrajaya remain comparatively calmer and suitable for lighter standby coverage.
-            </p>
-          </div>
-        </article>
-
         <div class="report-bottom-stack">
           <article class="report-summary-card trend-full-card">
             <div class="trend-head">
@@ -420,7 +408,6 @@
                 <p>Analyze incident trends, severity patterns, and hotspot behavior across all 21 regions.</p>
               </div>
               <div class="trend-head-actions">
-                <span class="trend-live-pill">Live</span>
                 <div class="trend-filter-group" role="tablist" aria-label="Trend range">
                   <button class="trend-range-btn active" type="button" data-trend-range="7">7 Days</button>
                   <button class="trend-range-btn" type="button" data-trend-range="30">30 Days</button>

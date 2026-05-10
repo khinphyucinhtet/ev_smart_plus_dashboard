@@ -571,9 +571,6 @@ const els = {
   feedPanel: document.querySelector("#feedPanel"),
   reportPanel: document.querySelector("#reportPanel"),
   sidebarMonitor: document.querySelector("#sidebarMonitor"),
-  sidebarClockCard: document.querySelector("#sidebarClockCard"),
-  sidebarClockTime: document.querySelector("#sidebarClockTime"),
-  sidebarClockDate: document.querySelector("#sidebarClockDate"),
   reportUpdated: document.querySelector("#reportUpdated"),
   zoneTitle: document.querySelector("#zoneTitle"),
   zoneRiskText: document.querySelector("#zoneRiskText"),
@@ -610,9 +607,7 @@ const els = {
   reportBannerText: document.querySelector("#reportBannerText"),
   reportBannerTime: document.querySelector("#reportBannerTime"),
   regionChips: document.querySelector("#regionChips"),
-  regionalSummary: document.querySelector("#regionalSummary"),
   riskDistribution: document.querySelector("#riskDistribution"),
-  viewAllDistrictsBtn: document.querySelector("#viewAllDistrictsBtn"),
   reportModalOverlay: document.querySelector("#reportModalOverlay"),
   reportModalClose: document.querySelector("#reportModalClose"),
   reportModalOk: document.querySelector("#reportModalOk"),
@@ -740,9 +735,6 @@ els.focusRegionSelect?.addEventListener("change", () => {
     activeZone = selected;
     renderReportZone();
   }
-});
-els.viewAllDistrictsBtn?.addEventListener("click", () => {
-  els.regionChips?.scrollIntoView({ behavior: "smooth", block: "nearest" });
 });
 document.querySelectorAll("[data-suggestion-tab]").forEach((button) => {
   button.addEventListener("click", () => {
@@ -895,8 +887,7 @@ function render() {
   els.reportPanel.classList.toggle("hidden", !reportMode);
   els.reportUtility.classList.toggle("hidden", !reportMode);
   els.metrics.classList.toggle("hidden", reportMode);
-  els.sidebarMonitor.classList.toggle("hidden", !reportMode);
-  els.sidebarClockCard.classList.toggle("hidden", !reportMode);
+  els.sidebarMonitor?.classList.add("hidden");
 
   if (activeRole === "hospital") {
     els.roleTitle.textContent = "Hospital Dashboard";
@@ -1002,17 +993,13 @@ function renderReportZone() {
   if (els.zoneCause) {
     els.zoneCause.textContent = likelyCauseForZone(zone);
   }
-  els.reportUpdated.textContent = reportGeneratedAt
-    ? `Updated ${formatTime(reportGeneratedAt)}`
-    : "Updated --:--";
+  renderReportUpdatedBadge();
   els.regionChips.innerHTML = regionChipsMarkup();
-  els.regionalSummary.textContent = buildRegionalSummary();
   els.riskDistribution.innerHTML = riskDistributionMarkup();
   els.generateStatus.textContent = reportGeneratedAt
     ? `Auto-updated at ${formatTime(reportGeneratedAt)}`
     : "Auto-refresh ready";
   renderTrendMetrics(zone);
-  renderSidebarClock();
   renderStrategicInsights();
   bindRegionChips();
   bindRiskCards();
@@ -1174,8 +1161,17 @@ function regionChipsMarkup() {
 function riskDistributionMarkup() {
   const zones = Object.values(reportZones)
     .slice()
-    .sort(compareZonesByPriority)
-    .slice(0, 5);
+    .sort((a, b) => {
+      const incidentDiff = b.incidentsCount - a.incidentsCount;
+      if (incidentDiff !== 0) {
+        return incidentDiff;
+      }
+      const criticalDiff = b.criticalPct - a.criticalPct;
+      if (criticalDiff !== 0) {
+        return criticalDiff;
+      }
+      return a.title.localeCompare(b.title);
+    });
   return zones
     .map(
       (zone, index) => `
@@ -1458,6 +1454,25 @@ function formatTime(date) {
   return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
+function formatDisplayDate(date) {
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function renderReportUpdatedBadge() {
+  if (!els.reportUpdated) {
+    return;
+  }
+  const now = new Date();
+  els.reportUpdated.innerHTML = `
+    <strong>Updated ${formatTime(now)}</strong>
+    <small>${formatDisplayDate(now)}</small>
+  `;
+}
+
 function pad(value) {
   return String(value).padStart(2, "0");
 }
@@ -1659,16 +1674,6 @@ function buildRegionalSummary() {
     .map((zone) => zone.title)
     .join(" and ");
   return `Regional EV accident concentration is currently strongest around ${highest.title} and ${second.title}, while ${calmer} remain comparatively calmer and suitable for lighter standby coverage.`;
-}
-
-function renderSidebarClock() {
-  const now = reportGeneratedAt || new Date();
-  els.sidebarClockTime.textContent = formatTime(now);
-  els.sidebarClockDate.textContent = now.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 }
 
 function severityWord(level) {
@@ -3571,6 +3576,12 @@ window.addEventListener(
 window.addEventListener("touchend", () => {
   pullRefreshActive = false;
 });
+
+window.setInterval(() => {
+  if (activeRole === "report") {
+    renderReportUpdatedBadge();
+  }
+}, 1000);
 
 syncRoleQuery();
 render();
