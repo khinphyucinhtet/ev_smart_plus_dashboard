@@ -151,6 +151,74 @@ button {
   flex: 1 1 360px;
 }
 
+.hospital-header-actions {
+  display: grid;
+  gap: 10px;
+  justify-items: end;
+  flex: 0 0 auto;
+}
+
+.updated-badge {
+  display: grid;
+  gap: 3px;
+  text-align: right;
+  padding: 10px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(46, 125, 50, 0.16);
+  background: var(--green-soft);
+  color: var(--green-dark);
+  box-shadow: 0 10px 22px rgba(46, 125, 50, 0.08);
+}
+
+.updated-badge strong {
+  font-weight: 850;
+}
+
+.updated-badge small {
+  color: #2e7d32;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hospital-action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.hospital-action-btn {
+  padding: 9px 13px;
+  border-radius: 12px;
+  border: 1px solid rgba(46, 125, 50, 0.24);
+  background: #f6fbf7;
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.hospital-action-btn.danger {
+  border-color: rgba(198, 40, 40, 0.24);
+  background: #fff5f5;
+  color: var(--danger);
+}
+
+.panel-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.panel-title-row h2 {
+  margin-bottom: 0;
+}
+
+.hospital-inline-status {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
 .topbar-subrow {
   display: flex;
   gap: 16px;
@@ -177,6 +245,38 @@ p {
 h1 {
   margin-bottom: 8px;
   font-size: clamp(30px, 5vw, 46px);
+}
+
+body.hospital-mode h1 {
+  font-size: clamp(34px, 4vw, 46px);
+}
+
+body.hospital-mode .eyebrow {
+  font-size: 11px;
+}
+
+body.hospital-mode #roleSubtitle,
+body.hospital-mode .panel-head p,
+body.hospital-mode .detail,
+body.hospital-mode .card-title span {
+  font-size: 14px;
+}
+
+body.hospital-mode .panel-head h2 {
+  font-size: 24px;
+}
+
+body.hospital-mode .card-title strong {
+  font-size: 18px;
+}
+
+body.hospital-mode .chip {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+body.hospital-mode .detail {
+  line-height: 1.45;
 }
 
 #roleSubtitle,
@@ -2472,6 +2572,10 @@ body.report-mode .metrics {
   display: none !important;
 }
 
+body.hospital-mode .metrics {
+  display: none !important;
+}
+
 .report-suggestions-shell,
 .sample-report-shell {
   gap: 18px;
@@ -3299,6 +3403,15 @@ body.report-mode .metrics {
     text-align: center;
     justify-content: center;
     padding: 16px;
+  }
+
+  .hospital-header-actions {
+    justify-items: start;
+    width: 100%;
+  }
+
+  .hospital-action-buttons {
+    justify-content: flex-start;
   }
 }
 

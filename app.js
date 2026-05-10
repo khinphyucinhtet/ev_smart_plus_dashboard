@@ -566,6 +566,11 @@ const els = {
   metricMeta3: document.querySelector("#metricMeta3"),
   metricMeta4: document.querySelector("#metricMeta4"),
   connectionState: document.querySelector("#connectionState"),
+  hospitalHeaderActions: document.querySelector("#hospitalHeaderActions"),
+  hospitalUpdatedBadge: document.querySelector("#hospitalUpdatedBadge"),
+  hospitalSelectAllBtn: document.querySelector("#hospitalSelectAllBtn"),
+  hospitalDeleteBtn: document.querySelector("#hospitalDeleteBtn"),
+  hospitalInlineStatus: document.querySelector("#hospitalInlineStatus"),
   reportUtility: document.querySelector("#reportUtility"),
   updatesPanel: document.querySelector("#updatesPanel"),
   feedPanel: document.querySelector("#feedPanel"),
@@ -664,6 +669,9 @@ document.querySelectorAll("[data-role]").forEach((button) => {
     render();
   });
 });
+
+els.hospitalSelectAllBtn?.addEventListener("click", toggleHospitalSelection);
+els.hospitalDeleteBtn?.addEventListener("click", deleteSelectedHospitalAlerts);
 
 els.strategicAnalysisBtn?.addEventListener("click", () => {
   if (strategicInsightsLoading) {
@@ -880,12 +888,17 @@ function render() {
   });
 
   const reportMode = activeRole === "report";
+  const hospitalMode = activeRole === "hospital";
   document.body.classList.toggle("report-mode", reportMode);
+  document.body.classList.toggle("hospital-mode", hospitalMode);
   els.feedPanel.classList.toggle("hidden", reportMode);
   els.updatesPanel.classList.toggle("hidden", reportMode);
   els.reportPanel.classList.toggle("hidden", !reportMode);
   els.reportUtility.classList.toggle("hidden", !reportMode);
-  els.metrics.classList.toggle("hidden", reportMode);
+  els.metrics.classList.toggle("hidden", reportMode || hospitalMode);
+  els.hospitalHeaderActions?.classList.toggle("hidden", !hospitalMode);
+  els.connectionState?.classList.toggle("hidden", hospitalMode);
+  els.hospitalInlineStatus?.classList.toggle("hidden", !hospitalMode);
 
   if (activeRole === "hospital") {
     els.roleTitle.textContent = "Hospital Dashboard";
@@ -919,6 +932,7 @@ function render() {
   });
 
   renderMetrics(visible, updates, reportMode);
+  updateHospitalHeader();
 
   els.alertFeed.innerHTML =
     reportMode
@@ -935,6 +949,7 @@ function render() {
       : updates.slice(0, 8).map(notificationCard).join("");
 
   bindSelection();
+  updateHospitalControls(visible);
   if (reportMode) {
     initializeSelangorMap();
     initializeSampleReportControls();
@@ -1286,6 +1301,78 @@ function bindSelection() {
   });
 }
 
+function updateHospitalHeader() {
+  if (activeRole !== "hospital") {
+    return;
+  }
+
+  const now = new Date();
+  if (els.hospitalUpdatedBadge) {
+    els.hospitalUpdatedBadge.innerHTML = `
+      <strong>Updated ${formatTime(now)}</strong>
+      <small>${formatDisplayDate(now)}</small>
+    `;
+  }
+
+  if (els.hospitalInlineStatus && els.connectionState) {
+    els.hospitalInlineStatus.textContent = els.connectionState.textContent || "Connecting";
+    els.hospitalInlineStatus.classList.toggle(
+      "error",
+      els.connectionState.classList.contains("error"),
+    );
+  }
+}
+
+function updateHospitalControls(visible = visibleAlerts()) {
+  if (activeRole !== "hospital") {
+    return;
+  }
+
+  const visibleIds = visible.map(alertId).filter(Boolean);
+  const allSelected =
+    visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+
+  if (els.hospitalSelectAllBtn) {
+    els.hospitalSelectAllBtn.textContent = allSelected ? "Clear Selection" : "Select All";
+  }
+}
+
+function toggleHospitalSelection() {
+  const visibleIds = visibleAlerts().map(alertId).filter(Boolean);
+  const allSelected =
+    visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+
+  selectedIds.clear();
+  if (!allSelected) {
+    visibleIds.forEach((id) => selectedIds.add(id));
+  }
+
+  render();
+}
+
+async function deleteSelectedHospitalAlerts() {
+  const selectedAlerts = visibleAlerts().filter((item) => selectedIds.has(alertId(item)));
+
+  if (selectedAlerts.length === 0) {
+    window.alert("Please select at least one notification.");
+    return;
+  }
+
+  if (!window.confirm("Delete selected hospital notifications?")) {
+    return;
+  }
+
+  try {
+    await Promise.all(
+      selectedAlerts.map((item) => remove(ref(database, `alerts/${item.id || alertId(item)}`))),
+    );
+    selectedIds.clear();
+    render();
+  } catch (error) {
+    window.alert(`Unable to delete selected notifications: ${error.message}`);
+  }
+}
+
 function impactLevel(item) {
   const level = Number(item.impact_level || 1);
   return Math.min(5, Math.max(1, Number.isFinite(level) ? level : 1));
@@ -1564,6 +1651,7 @@ function buildReportFields(alertItem, notificationItem) {
 function showError(message) {
   els.connectionState.textContent = "Firebase error";
   els.connectionState.classList.add("error");
+  updateHospitalHeader();
   els.alertFeed.innerHTML = `<div class="empty error">${escapeHtml(message)}</div>`;
 }
 
@@ -3576,6 +3664,9 @@ window.addEventListener("touchend", () => {
 });
 
 window.setInterval(() => {
+  if (activeRole === "hospital") {
+    updateHospitalHeader();
+  }
   if (activeRole === "report") {
     renderReportUpdatedBadge();
   }
