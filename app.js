@@ -2489,11 +2489,11 @@ function renderTopRiskChart() {
     return;
   }
   const zones = analyticsTopZones(10);
-  const width = 420;
-  const height = 320;
-  const padding = { top: 18, right: 36, bottom: 24, left: 122 };
+  const width = 500;
+  const height = 380;
+  const padding = { top: 24, right: 50, bottom: 34, left: 132 };
   const maxValue = Math.max(...zones.map((zone) => zone.incidentsCount), 10);
-  const rowHeight = 27;
+  const rowHeight = 31;
   const barWidth = width - padding.left - padding.right;
 
   const rows = zones
@@ -2501,10 +2501,10 @@ function renderTopRiskChart() {
       const y = padding.top + index * rowHeight;
       const barLen = (zone.incidentsCount / maxValue) * barWidth;
       return `
-        <text x="${padding.left - 10}" y="${y + 13}" text-anchor="end" class="mini-bar-label">${escapeHtml(zone.title)}</text>
-        <rect x="${padding.left}" y="${y + 2}" width="${barWidth}" height="11" rx="6" class="mini-bar-track" />
-        <rect x="${padding.left}" y="${y + 2}" width="${barLen}" height="11" rx="6" fill="${zoneStroke(zone.level)}" />
-        <text x="${padding.left + barLen + 7}" y="${y + 12}" class="mini-bar-value">${zone.incidentsCount}</text>
+        <text x="${padding.left - 12}" y="${y + 16}" text-anchor="end" class="mini-bar-label">${escapeHtml(zone.title)}</text>
+        <rect x="${padding.left}" y="${y + 4}" width="${barWidth}" height="14" rx="7" class="mini-bar-track" />
+        <rect x="${padding.left}" y="${y + 4}" width="${barLen}" height="14" rx="7" fill="${zoneStroke(zone.level)}" />
+        <text x="${padding.left + barLen + 8}" y="${y + 16}" class="mini-bar-value">${zone.incidentsCount}</text>
       `;
     })
     .join("");
