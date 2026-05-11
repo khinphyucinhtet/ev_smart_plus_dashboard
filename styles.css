@@ -4521,7 +4521,7 @@ body.report-mode .report-overview-layout {
 
 body.report-mode .report-bottom-stack {
   margin-top: 14px;
-  gap: 14px;
+  gap: 46px;
 }
 
 body.report-mode .trend-full-card {
