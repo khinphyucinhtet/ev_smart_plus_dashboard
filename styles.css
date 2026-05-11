@@ -4824,15 +4824,25 @@ body.report-mode .region-chip {
 }
 
 body.report-mode .top-risk-panel {
-  padding: 24px 16px 16px;
+  position: relative;
+  padding: 24px 16px 12px;
+  border-color: #d4dee7;
+  border-bottom-color: #cbd8e1;
+  box-shadow:
+    0 16px 30px rgba(24, 34, 45, 0.07),
+    inset 0 -1px 0 rgba(46, 125, 50, 0.08);
 }
 
 body.report-mode .top-risk-panel-head {
-  margin-bottom: 4px;
+  margin-bottom: 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e5ebef;
 }
 
 body.report-mode .risk-distribution {
-  padding-top: 18px;
+  padding-top: 14px;
+  padding-bottom: 4px;
+  scrollbar-gutter: stable;
 }
 
 body.report-mode .trend-bar-panel {
