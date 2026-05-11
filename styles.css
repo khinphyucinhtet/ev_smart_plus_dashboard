@@ -4344,20 +4344,6 @@ body.report-mode .trend-action-bar {
   flex-wrap: wrap;
 }
 
-.download-report-btn {
-  color: #2e7d32;
-  background: #e8f5e9;
-  border-color: rgba(46, 125, 50, 0.18);
-  opacity: 0.58;
-}
-
-.download-report-btn.ready {
-  color: #fff;
-  background: linear-gradient(135deg, #2e7d32 0%, #1f8b46 100%);
-  border-color: rgba(46, 125, 50, 0.24);
-  opacity: 1;
-}
-
 .government-report-preview {
   padding: 18px;
   border-radius: 14px;

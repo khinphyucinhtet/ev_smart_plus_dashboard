@@ -603,7 +603,6 @@ const els = {
   trendRegionFilter: document.querySelector("#trendRegionFilter"),
   aiReportRegionSelect: document.querySelector("#aiReportRegionSelect"),
   generateAiReportBtn: document.querySelector("#generateAiReportBtn"),
-  downloadAiReportBtn: document.querySelector("#downloadAiReportBtn"),
   aiSummaryText: document.querySelector("#aiSummaryText"),
   aiCausesText: document.querySelector("#aiCausesText"),
   aiSolutionsText: document.querySelector("#aiSolutionsText"),
@@ -744,7 +743,6 @@ els.shareReportBtn?.addEventListener("click", shareStrategicReport);
 els.sendHospitalBtn?.addEventListener("click", sendStrategicReportToHospital);
 els.generateBriefingBtn?.addEventListener("click", generateStrategicBriefing);
 els.generateAiReportBtn?.addEventListener("click", generateAiReport);
-els.downloadAiReportBtn?.addEventListener("click", downloadGeneratedAiReport);
 els.trendRegionFilter?.addEventListener("change", () => {
   const selected = els.trendRegionFilter.value || "all";
   activeTrendRegion = selected;
@@ -2780,10 +2778,6 @@ function renderAiSuggestions() {
       ? `Report ready for ${generatedAiReportProfile.regionLabel}`
       : `Ready to generate for ${profile.regionLabel}`;
   }
-  if (els.downloadAiReportBtn) {
-    els.downloadAiReportBtn.disabled = !hasGenerated;
-    els.downloadAiReportBtn.classList.toggle("ready", hasGenerated);
-  }
   if (!hasGenerated && els.aiReportPreview) {
     els.aiReportPreview.classList.add("hidden");
   }
@@ -2794,7 +2788,10 @@ function generateAiReport({ skipDownload = false } = {}) {
   renderGeneratedReportPreview(generatedAiReportProfile);
   renderAiSuggestions();
   if (!skipDownload) {
-    window.setTimeout(downloadGeneratedAiReport, 120);
+    window.setTimeout(() => {
+      downloadGeneratedAiReport();
+      showSampleToast("AI report generated and downloaded.");
+    }, 120);
   }
 }
 
