@@ -4654,7 +4654,7 @@ body.report-mode .trend-bar-panel {
 body.report-mode .trend-bar-panel .top-risk-chart {
   flex: 1 1 auto;
   height: auto;
-  margin-top: 6px;
+  margin-top: 0;
 }
 
 body.report-mode .risk-scope-note {
@@ -4863,20 +4863,20 @@ body.report-mode .trend-bar-panel {
 body.report-mode .trend-bar-panel .top-risk-chart {
   width: 106%;
   max-width: none;
-  min-height: 520px;
-  margin-top: 6px;
+  min-height: 430px;
+  margin-top: 0;
   margin-left: -3%;
 }
 
 body.report-mode .mini-bar-label,
 body.report-mode .mini-bar-value {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 900;
 }
 
 body.report-mode .trend-main-panel,
 body.report-mode .trend-severity-panel {
-  padding-bottom: 14px;
+  padding-bottom: 12px;
 }
 
 body.report-mode .trend-main-panel .trend-stat-strip {
