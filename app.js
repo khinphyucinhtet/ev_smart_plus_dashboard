@@ -2837,76 +2837,6 @@ function downloadGeneratedAiReport() {
   }
   const body = els.reportPreviewBody?.innerHTML || "";
   const profile = generatedAiReportProfile;
-  const reportSections = Array.from(
-    els.reportPreviewBody?.querySelectorAll(".government-report-section") || [],
-  ).map((section) => ({
-    title: section.querySelector("h5")?.textContent || "",
-    copy: section.querySelector("p")?.textContent || "",
-  }));
-  const safeRegion = profile.regionLabel.replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "");
-  const JsPdf = window.jspdf?.jsPDF || window.jsPDF;
-
-  if (JsPdf && reportSections.length) {
-    const pdf = new JsPdf({ orientation: "portrait", unit: "pt", format: "a4" });
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 42;
-    const maxWidth = pageWidth - margin * 2;
-    let y = 44;
-
-    const addPageIfNeeded = (heightNeeded = 40) => {
-      if (y + heightNeeded <= pageHeight - margin) {
-        return;
-      }
-      pdf.addPage();
-      y = margin;
-    };
-
-    pdf.setFillColor(244, 248, 245);
-    pdf.rect(0, 0, pageWidth, pageHeight, "F");
-    pdf.setFillColor(255, 255, 255);
-    pdf.roundedRect(28, 26, pageWidth - 56, pageHeight - 52, 12, 12, "F");
-    pdf.setTextColor(46, 125, 50);
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(10);
-    pdf.text("EVSmart+ Emergency Analytics System", margin, y);
-    y += 22;
-    pdf.setTextColor(24, 34, 45);
-    pdf.setFontSize(20);
-    pdf.text("Government AI Accident Report", margin, y);
-    y += 18;
-    pdf.setTextColor(100, 116, 139);
-    pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(10);
-    pdf.text(`${profile.regionLabel} | ${trendRangeLabel(profile.range)} | ${formatDate(profile.generatedAt)}`, margin, y);
-    y += 24;
-    pdf.setDrawColor(223, 231, 225);
-    pdf.line(margin, y, pageWidth - margin, y);
-    y += 20;
-
-    reportSections.forEach((section) => {
-      const wrappedCopy = pdf.splitTextToSize(section.copy, maxWidth);
-      const blockHeight = 24 + wrappedCopy.length * 13 + 18;
-      addPageIfNeeded(blockHeight);
-      pdf.setDrawColor(229, 235, 230);
-      pdf.setFillColor(251, 253, 252);
-      pdf.roundedRect(margin - 6, y - 12, maxWidth + 12, blockHeight, 8, 8, "FD");
-      pdf.setTextColor(27, 94, 32);
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(12);
-      pdf.text(section.title, margin, y);
-      y += 18;
-      pdf.setTextColor(66, 83, 71);
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(10);
-      pdf.text(wrappedCopy, margin, y);
-      y += wrappedCopy.length * 13 + 18;
-    });
-
-    pdf.save(`EVSmart_AI_Report_${safeRegion}_${profile.range}.pdf`);
-    return;
-  }
-
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>EVSmart+ AI Report</title><style>
     body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f7f5;color:#18222d;padding:28px}
     .report{max-width:900px;margin:0 auto;background:#fff;border:1px solid #dfe7e1;border-radius:14px;padding:24px}
@@ -2918,6 +2848,7 @@ function downloadGeneratedAiReport() {
   </style></head><body><main class="report"><div class="head"><span>EVSmart+ Emergency Analytics System</span><h1>Government AI Accident Report</h1><div class="meta">${escapeHtml(profile.regionLabel)} | ${escapeHtml(trendRangeLabel(profile.range))} | ${escapeHtml(formatDate(profile.generatedAt))}</div></div>${body}</main></body></html>`;
   const blob = new Blob([html], { type: "text/html" });
   const link = document.createElement("a");
+  const safeRegion = profile.regionLabel.replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "");
   link.href = URL.createObjectURL(blob);
   link.download = `EVSmart_AI_Report_${safeRegion}_${profile.range}.html`;
   document.body.appendChild(link);
