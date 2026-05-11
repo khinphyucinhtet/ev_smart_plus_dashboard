@@ -4642,6 +4642,10 @@ body.report-mode .trend-panel {
   padding: 16px;
 }
 
+body.report-mode .trend-analytics-grid {
+  align-items: start;
+}
+
 body.report-mode .trend-bar-panel {
   display: flex;
   flex-direction: column;
@@ -4649,7 +4653,7 @@ body.report-mode .trend-bar-panel {
 
 body.report-mode .trend-bar-panel .top-risk-chart {
   flex: 1 1 auto;
-  height: 100%;
+  height: auto;
   margin-top: 14px;
 }
 
@@ -4778,7 +4782,9 @@ body.report-mode .government-report-preview {
 
   body.report-mode .trend-bar-panel .top-risk-chart {
     height: auto;
+    width: 100%;
     min-height: 360px;
+    margin-left: 0;
   }
 
   body.report-mode .risk-overview-donut {
@@ -4830,17 +4836,44 @@ body.report-mode .risk-distribution {
 }
 
 body.report-mode .trend-bar-panel {
-  min-height: 620px;
+  min-height: 0;
 }
 
 body.report-mode .trend-bar-panel .top-risk-chart {
-  min-height: 520px;
-  margin-top: 18px;
+  width: 106%;
+  max-width: none;
+  min-height: 500px;
+  margin-top: 14px;
+  margin-left: -3%;
 }
 
 body.report-mode .mini-bar-label,
 body.report-mode .mini-bar-value {
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+body.report-mode .trend-main-panel,
+body.report-mode .trend-severity-panel {
+  padding-bottom: 14px;
+}
+
+body.report-mode .trend-main-panel .trend-stat-strip {
+  gap: 10px;
+  margin-top: 12px;
+}
+
+body.report-mode .trend-main-panel .trend-stat-card {
+  padding: 11px 12px;
+}
+
+body.report-mode .trend-main-panel .trend-stat-card strong {
+  margin-bottom: 4px;
+}
+
+body.report-mode .trend-severity-panel .chart-insight {
+  margin-top: 10px;
+  padding: 9px 11px;
 }
 
 body.report-mode .ai-report-controls {
