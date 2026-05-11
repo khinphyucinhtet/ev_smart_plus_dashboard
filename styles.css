@@ -4468,9 +4468,9 @@ body.report-mode .trend-action-bar {
 
 /* Accidents Report scoped spacing refinements. */
 body.report-mode .topbar {
-  min-height: 82px;
+  min-height: 126px;
   padding-right: 238px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 body.report-mode .report-utility {
@@ -4516,11 +4516,11 @@ body.report-mode #reportUpdated.updated-badge small {
 }
 
 body.report-mode .report-overview-layout {
-  margin-bottom: 26px;
+  margin-bottom: 46px;
 }
 
 body.report-mode .report-bottom-stack {
-  margin-top: 4px;
+  margin-top: 14px;
   gap: 14px;
 }
 
@@ -4577,7 +4577,8 @@ body.report-mode .trend-region-filter select {
 }
 
 body.report-mode .top-risk-panel {
-  padding: 14px;
+  gap: 18px;
+  padding: 18px 14px 14px;
   border-radius: 18px;
 }
 
@@ -4588,6 +4589,7 @@ body.report-mode .top-risk-panel-head h4 {
 
 body.report-mode .risk-distribution {
   gap: 9px;
+  padding-top: 8px;
   padding-right: 6px;
 }
 
@@ -4633,11 +4635,29 @@ body.report-mode .risk-pill-meta-value {
 }
 
 body.report-mode .top-risk-chart {
-  min-height: 360px;
+  min-height: 430px;
 }
 
 body.report-mode .trend-panel {
   padding: 16px;
+}
+
+body.report-mode .trend-bar-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+body.report-mode .trend-bar-panel .top-risk-chart {
+  flex: 1 1 auto;
+  height: 100%;
+  margin-top: 14px;
+}
+
+body.report-mode .risk-scope-note {
+  margin-top: 6px;
+  color: #5f6f68;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 body.report-mode #riskSplitStats.risk-split-grid {
@@ -4645,19 +4665,21 @@ body.report-mode #riskSplitStats.risk-split-grid {
 }
 
 body.report-mode .risk-overview-card {
-  grid-template-columns: 158px minmax(0, 1fr);
-  gap: 18px;
-  min-height: 210px;
+  grid-template-columns: 182px minmax(0, 1fr);
+  gap: 22px;
+  min-height: 278px;
   align-items: center;
+  margin-top: 22px;
+  padding: 8px 4px 2px;
 }
 
 body.report-mode .risk-overview-donut {
-  width: 150px;
-  height: 150px;
+  width: 174px;
+  height: 174px;
 }
 
 body.report-mode .risk-overview-center {
-  inset: 32px;
+  inset: 38px;
 }
 
 body.report-mode .risk-overview-center strong {
@@ -4665,14 +4687,14 @@ body.report-mode .risk-overview-center strong {
 }
 
 body.report-mode .risk-overview-list {
-  gap: 10px;
+  gap: 12px;
 }
 
 body.report-mode .risk-overview-row {
-  min-height: 64px;
+  min-height: 72px;
   grid-template-columns: 1fr auto;
   align-content: center;
-  padding: 11px 13px;
+  padding: 13px 15px;
   border-radius: 13px;
 }
 
@@ -4752,6 +4774,11 @@ body.report-mode .government-report-preview {
   body.report-mode .ai-suggestion-output,
   body.report-mode .risk-overview-card {
     grid-template-columns: 1fr;
+  }
+
+  body.report-mode .trend-bar-panel .top-risk-chart {
+    height: auto;
+    min-height: 360px;
   }
 
   body.report-mode .risk-overview-donut {

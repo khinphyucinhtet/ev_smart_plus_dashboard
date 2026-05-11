@@ -2490,10 +2490,10 @@ function renderTopRiskChart() {
   }
   const zones = analyticsTopZones(10);
   const width = 500;
-  const height = 380;
-  const padding = { top: 24, right: 50, bottom: 34, left: 132 };
+  const height = 460;
+  const padding = { top: 36, right: 54, bottom: 44, left: 134 };
   const maxValue = Math.max(...zones.map((zone) => zone.incidentsCount), 10);
-  const rowHeight = 31;
+  const rowHeight = 38;
   const barWidth = width - padding.left - padding.right;
 
   const rows = zones
@@ -2501,10 +2501,10 @@ function renderTopRiskChart() {
       const y = padding.top + index * rowHeight;
       const barLen = (zone.incidentsCount / maxValue) * barWidth;
       return `
-        <text x="${padding.left - 12}" y="${y + 16}" text-anchor="end" class="mini-bar-label">${escapeHtml(zone.title)}</text>
-        <rect x="${padding.left}" y="${y + 4}" width="${barWidth}" height="14" rx="7" class="mini-bar-track" />
-        <rect x="${padding.left}" y="${y + 4}" width="${barLen}" height="14" rx="7" fill="${zoneStroke(zone.level)}" />
-        <text x="${padding.left + barLen + 8}" y="${y + 16}" class="mini-bar-value">${zone.incidentsCount}</text>
+        <text x="${padding.left - 12}" y="${y + 18}" text-anchor="end" class="mini-bar-label">${escapeHtml(zone.title)}</text>
+        <rect x="${padding.left}" y="${y + 5}" width="${barWidth}" height="16" rx="8" class="mini-bar-track" />
+        <rect x="${padding.left}" y="${y + 5}" width="${barLen}" height="16" rx="8" fill="${zoneStroke(zone.level)}" />
+        <text x="${padding.left + barLen + 9}" y="${y + 19}" class="mini-bar-value">${zone.incidentsCount}</text>
       `;
     })
     .join("");
@@ -2712,6 +2712,11 @@ function buildAiSuggestionProfile(regionKey = activeReportRegionKey(), range = a
   const totalIncidents = dataset.totals.reduce((sum, value) => sum + value, 0);
   const highSeverity = dataset.high.reduce((sum, value) => sum + value, 0);
   const peakIndex = dataset.totals.indexOf(Math.max(...dataset.totals));
+  const firstTotal = dataset.totals[0] || 0;
+  const lastTotal = dataset.totals[dataset.totals.length - 1] || 0;
+  const trendDelta = Math.abs(lastTotal - firstTotal);
+  const trendDirection =
+    lastTotal > firstTotal ? "upward" : lastTotal < firstTotal ? "downward" : "stable";
   const severity = severityBreakdown(zones);
   const severityTop = Object.entries(severity)
     .sort(([, a], [, b]) => b - a)[0]?.[0] || "3";
@@ -2741,6 +2746,8 @@ function buildAiSuggestionProfile(regionKey = activeReportRegionKey(), range = a
     highSeverity,
     peakLabel: dataset.labels[peakIndex] || "Peak period",
     peakValue: dataset.totals[peakIndex] || 0,
+    trendDirection,
+    trendDelta,
     severityTop,
     riskCounts,
     governmentActions:
@@ -2798,25 +2805,31 @@ function renderGeneratedReportPreview(profile) {
     .slice(0, 10)
     .map((zone) => `${zone.title} (${zone.incidentsCount} cases)`)
     .join(", ");
-  const trendLine = `${profile.totalIncidents} incidents were simulated for ${trendRangeLabel(profile.range)}, with ${profile.highSeverity} Level 4/5 cases and the strongest chart point on ${profile.peakLabel}.`;
-  const severityLine = `Level ${profile.severityTop} incidents are currently the most common in the selected dataset, while Level 4/5 cases remain the emergency coordination threshold.`;
-  const peakLine = `${profile.focusZone.window} is the key response window, with evening congestion remaining the strongest contributor where applicable.`;
-  const riskLine = `The selected scope contains ${profile.riskCounts.high} high-risk, ${profile.riskCounts.medium} medium-risk, and ${profile.riskCounts.low} low-risk districts.`;
+  const dataSource =
+    "Generated using EVSmart+ live incident monitoring, severity classification, hotspot analytics, and user-submitted EV emergency reports.";
+  const trendLine = `For ${trendRangeLabel(profile.range)}, EVSmart+ recorded ${profile.totalIncidents} dashboard incidents in the selected scope, including ${profile.highSeverity} Level 4/5 cases. The trend movement is ${profile.trendDirection}, with a ${profile.trendDelta}-case difference between the opening and latest chart point. The strongest activity appears on ${profile.peakLabel}, and the most affected districts are ${topDistricts || profile.focusZone.title}. This pattern helps government teams understand whether accident pressure is spreading across the corridor or concentrating around a small number of districts.`;
+  const severityLine = `The impact severity profile shows Level ${profile.severityTop} as the most common classification in the current dataset. Lower levels indicate routine monitoring and roadside support, while Level 4 and Level 5 cases represent emergency-impact conditions that can increase ambulance dispatch load, hospital preparation pressure, and responder coordination requirements. The ${profile.highSeverity} high-severity cases should therefore remain the main planning signal for emergency readiness.`;
+  const peakLine = `${profile.focusZone.window} is the key response window for the selected region scope. This timing is consistent with rush-hour movement, EV charging-route congestion, compressed lane changes, and higher density travel corridors. Government operators should treat this period as the priority monitoring window because delayed ambulance movement during peak traffic can increase response risk and hospital handover pressure.`;
+  const riskLine = `The selected scope contains ${profile.riskCounts.high} high-risk, ${profile.riskCounts.medium} medium-risk, and ${profile.riskCounts.low} low-risk districts. The strongest risk contribution comes from ${topDistricts || profile.focusZone.title}, while medium-risk districts should remain under active monitoring to prevent spillover pressure. Low-risk districts can continue with routine patrol coverage, but they should still remain visible in the dashboard because EV incident reports can shift quickly when traffic flow changes.`;
+  const executiveLine = `${profile.summary} Overall, the selected region shows a clear relationship between district-level hotspot activity, severity concentration, and peak-hour traffic pressure. The dashboard indicates that response planning should focus on the highest-risk corridors first while maintaining lighter monitoring for calmer districts. This report is intended as an operational intelligence summary for ambulance standby planning, hospital readiness coordination, and public advisory preparation.`;
+  const operationalLine = `${profile.governmentActions} Ambulance allocation should prioritize districts with repeated high-severity concentration, while EV roadside support teams should remain prepared for charging-route or connector-road incidents. Temporary signage, traffic monitoring, and pre-peak public advisories can reduce confusion around busy access roads and improve response readiness before the main pressure period begins.`;
+  const dataIntelligenceLine =
+    "EVSmart+ continuously receives live user-generated EV incident reports and updates dashboard analytics as new cases are submitted. Severity classification is produced through EVSmart+ monitoring logic, while hotspot trends are analyzed through district-level incident aggregation, peak-hour grouping, and risk category distribution. This allows the report to reflect changing accident conditions rather than a fixed static summary.";
   const sections = [
-    ["1. Executive Summary", profile.summary],
-    ["2. Incident Trend Overview", trendLine],
-    ["3. Impact Severity Breakdown", severityLine],
-    ["4. Peak Time Analysis", peakLine],
-    ["5. Regional Risk Overview", riskLine],
-    ["6. Most Affected Districts", `The most affected districts in this report scope are ${topDistricts || profile.focusZone.title}.`],
-    ["7. Potential Causes", profile.causes],
-    ["8. Potential Solutions", profile.solutions],
-    ["9. Future Prediction", profile.prediction],
-    ["10. Government Action Suggestions", profile.governmentActions],
+    ["1. Executive Summary", executiveLine],
+    ["2. Incident Trend Analysis", trendLine],
+    ["3. Severity Breakdown", severityLine],
+    ["4. Peak Hour Analysis", peakLine],
+    ["5. Regional Overview", riskLine],
+    ["6. Operational Recommendation", operationalLine],
+    ["7. EVSmart+ Data Intelligence", dataIntelligenceLine],
+    ["8. Potential Causes", profile.causes],
+    ["9. Potential Solutions", profile.solutions],
+    ["10. Future Prediction", profile.prediction],
   ];
 
   els.aiReportPreview.classList.add("hidden");
-  els.reportPreviewMetaLine.textContent = `${profile.regionLabel} | ${trendRangeLabel(profile.range)} | Generated ${formatDate(profile.generatedAt)}`;
+  els.reportPreviewMetaLine.textContent = `Selected Region: ${profile.regionLabel} | Report Period: ${trendRangeLabel(profile.range)} | Generated Date & Time: ${formatDate(profile.generatedAt)} | Data Source: ${dataSource}`;
   els.reportPreviewRiskBadge.textContent = `${riskLabel(profile.focusZone.level)} Risk`;
   els.reportPreviewRiskBadge.className = `report-risk-badge ${profile.focusZone.level}`;
   els.reportPreviewBody.innerHTML = sections
@@ -2837,15 +2850,17 @@ function downloadGeneratedAiReport() {
   }
   const body = els.reportPreviewBody?.innerHTML || "";
   const profile = generatedAiReportProfile;
-  const html = `<!doctype html><html><head><meta charset="utf-8"><title>EVSmart+ AI Report</title><style>
+  const dataSource =
+    "Generated using EVSmart+ live incident monitoring, severity classification, hotspot analytics, and user-submitted EV emergency reports.";
+  const html = `<!doctype html><html><head><meta charset="utf-8"><title>EVSmart+ AI Accident Report Summary</title><style>
     body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f7f5;color:#18222d;padding:28px}
-    .report{max-width:900px;margin:0 auto;background:#fff;border:1px solid #dfe7e1;border-radius:14px;padding:24px}
-    .head{border-bottom:1px solid #e5ebe6;padding-bottom:14px;margin-bottom:16px}
+    .report{max-width:940px;margin:0 auto;background:#fff;border:1px solid #dfe7e1;border-radius:16px;padding:28px}
+    .head{border-bottom:1px solid #e5ebe6;padding-bottom:16px;margin-bottom:18px}
     .head span{display:block;color:#2e7d32;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
-    h1{font-size:24px;margin:6px 0;color:#18222d} .meta{color:#667085;font-size:13px}
-    section{border:1px solid #e5ebe6;border-radius:10px;padding:13px 14px;margin:10px 0;background:#fbfdfc}
-    h5{font-size:15px;margin:0 0 7px;color:#1b5e20} p{font-size:13px;line-height:1.55;margin:0}
-  </style></head><body><main class="report"><div class="head"><span>EVSmart+ Emergency Analytics System</span><h1>Government AI Accident Report</h1><div class="meta">${escapeHtml(profile.regionLabel)} | ${escapeHtml(trendRangeLabel(profile.range))} | ${escapeHtml(formatDate(profile.generatedAt))}</div></div>${body}</main></body></html>`;
+    h1{font-size:25px;margin:6px 0 12px;color:#18222d}.meta{display:grid;gap:5px;color:#52635a;font-size:13px;line-height:1.45}
+    .meta strong{color:#18222d}section{border:1px solid #e5ebe6;border-radius:12px;padding:15px 16px;margin:11px 0;background:#fbfdfc}
+    h5{font-size:15px;margin:0 0 8px;color:#1b5e20}p{font-size:13px;line-height:1.7;margin:0;color:#425347}
+  </style></head><body><main class="report"><div class="head"><span>EVSmart+ Emergency Analytics System</span><h1>AI Accident Report Summary</h1><div class="meta"><div><strong>Selected Region:</strong> ${escapeHtml(profile.regionLabel)}</div><div><strong>Report Period:</strong> ${escapeHtml(trendRangeLabel(profile.range))}</div><div><strong>Generated Date & Time:</strong> ${escapeHtml(formatDate(profile.generatedAt))}</div><div><strong>Data Source:</strong> ${escapeHtml(dataSource)}</div></div></div>${body}</main></body></html>`;
   const blob = new Blob([html], { type: "text/html" });
   const link = document.createElement("a");
   const safeRegion = profile.regionLabel.replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "");
