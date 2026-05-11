@@ -2488,12 +2488,12 @@ function renderTopRiskChart() {
   if (!svg) {
     return;
   }
-  const zones = analyticsTopZones(5);
+  const zones = analyticsTopZones(10);
   const width = 420;
-  const height = 240;
-  const padding = { top: 24, right: 38, bottom: 26, left: 128 };
+  const height = 320;
+  const padding = { top: 18, right: 36, bottom: 24, left: 122 };
   const maxValue = Math.max(...zones.map((zone) => zone.incidentsCount), 10);
-  const rowHeight = 36;
+  const rowHeight = 27;
   const barWidth = width - padding.left - padding.right;
 
   const rows = zones
@@ -2501,10 +2501,10 @@ function renderTopRiskChart() {
       const y = padding.top + index * rowHeight;
       const barLen = (zone.incidentsCount / maxValue) * barWidth;
       return `
-        <text x="${padding.left - 10}" y="${y + 16}" text-anchor="end" class="mini-bar-label">${escapeHtml(zone.title)}</text>
-        <rect x="${padding.left}" y="${y}" width="${barWidth}" height="14" rx="7" class="mini-bar-track" />
-        <rect x="${padding.left}" y="${y}" width="${barLen}" height="14" rx="7" fill="${zoneStroke(zone.level)}" />
-        <text x="${padding.left + barLen + 8}" y="${y + 12}" class="mini-bar-value">${zone.incidentsCount}</text>
+        <text x="${padding.left - 10}" y="${y + 13}" text-anchor="end" class="mini-bar-label">${escapeHtml(zone.title)}</text>
+        <rect x="${padding.left}" y="${y + 2}" width="${barWidth}" height="11" rx="6" class="mini-bar-track" />
+        <rect x="${padding.left}" y="${y + 2}" width="${barLen}" height="11" rx="6" fill="${zoneStroke(zone.level)}" />
+        <text x="${padding.left + barLen + 7}" y="${y + 12}" class="mini-bar-value">${zone.incidentsCount}</text>
       `;
     })
     .join("");
@@ -2661,9 +2661,10 @@ function activeReportRegionKey() {
 }
 
 function selectedAiReportOptions() {
-  return Array.from(document.querySelectorAll(".ai-report-option:checked")).map(
+  const options = Array.from(document.querySelectorAll(".ai-report-option:checked")).map(
     (input) => input.value,
   );
+  return options.length ? options : ["trend", "severity", "risk", "actions"];
 }
 
 function buildAiSuggestionProfile(regionKey = activeReportRegionKey(), range = activeTrendRange) {
@@ -2703,9 +2704,9 @@ function buildAiSuggestionProfile(regionKey = activeReportRegionKey(), range = a
       : "routine patrol coverage should continue, with lighter monitoring and basic public reminders near common travel routes";
   const predictionText =
     riskLevel === "high"
-      ? "medium-to-high accident pressure may continue if evening traffic flow remains unchanged"
+      ? "medium-to-high accident pressure"
       : riskLevel === "medium"
-      ? "moderate accident pressure may continue during the selected peak window"
+      ? "moderate accident pressure"
       : "overall accident pressure is expected to remain controlled with occasional local spikes";
   const dataset = buildTrendDataset(range);
   const totalIncidents = dataset.totals.reduce((sum, value) => sum + value, 0);
@@ -2732,7 +2733,10 @@ function buildAiSuggestionProfile(regionKey = activeReportRegionKey(), range = a
     summary: `${scopeText}, especially during ${focusZone.window}. Based on the selected ${trendRangeLabel(range).toLowerCase()} data, the district pattern ${severityText}.`,
     causes: `The accident concentration may be influenced by ${causeText}, especially around ${focusZone.window.toLowerCase()} when movement becomes more compressed.`,
     solutions: `Government response planning can be improved by ensuring ${solutionText}.`,
-    prediction: `The selected area may continue experiencing ${predictionText} during ${focusZone.window.toLowerCase()} if traffic flow and corridor pressure remain unchanged.`,
+    prediction:
+      riskLevel === "low"
+        ? `The selected area is expected to remain controlled, with only occasional local spikes during ${focusZone.window.toLowerCase()} if routine monitoring continues.`
+        : `The selected area may continue experiencing ${predictionText} during ${focusZone.window.toLowerCase()} if traffic flow and corridor pressure remain unchanged.`,
     totalIncidents,
     highSeverity,
     peakLabel: dataset.labels[peakIndex] || "Peak period",
@@ -2790,9 +2794,8 @@ function renderGeneratedReportPreview(profile) {
   if (!els.aiReportPreview || !els.reportPreviewBody) {
     return;
   }
-  const options = selectedAiReportOptions();
   const topDistricts = profile.zones
-    .slice(0, 5)
+    .slice(0, 10)
     .map((zone) => `${zone.title} (${zone.incidentsCount} cases)`)
     .join(", ");
   const trendLine = `${profile.totalIncidents} incidents were simulated for ${trendRangeLabel(profile.range)}, with ${profile.highSeverity} Level 4/5 cases and the strongest chart point on ${profile.peakLabel}.`;
@@ -2801,18 +2804,18 @@ function renderGeneratedReportPreview(profile) {
   const riskLine = `The selected scope contains ${profile.riskCounts.high} high-risk, ${profile.riskCounts.medium} medium-risk, and ${profile.riskCounts.low} low-risk districts.`;
   const sections = [
     ["1. Executive Summary", profile.summary],
-    ["2. Incident Trend Overview", options.includes("trend") ? trendLine : "Trend overview was not selected in the report content options."],
-    ["3. Impact Severity Breakdown", options.includes("severity") ? severityLine : "Severity breakdown was not selected in the report content options."],
+    ["2. Incident Trend Overview", trendLine],
+    ["3. Impact Severity Breakdown", severityLine],
     ["4. Peak Time Analysis", peakLine],
-    ["5. Regional Risk Overview", options.includes("risk") ? riskLine : "Risk overview was not selected in the report content options."],
+    ["5. Regional Risk Overview", riskLine],
     ["6. Most Affected Districts", `The most affected districts in this report scope are ${topDistricts || profile.focusZone.title}.`],
     ["7. Potential Causes", profile.causes],
     ["8. Potential Solutions", profile.solutions],
     ["9. Future Prediction", profile.prediction],
-    ["10. Government Action Suggestions", options.includes("actions") ? profile.governmentActions : "Government action suggestions were not selected in the report content options."],
+    ["10. Government Action Suggestions", profile.governmentActions],
   ];
 
-  els.aiReportPreview.classList.remove("hidden");
+  els.aiReportPreview.classList.add("hidden");
   els.reportPreviewMetaLine.textContent = `${profile.regionLabel} | ${trendRangeLabel(profile.range)} | Generated ${formatDate(profile.generatedAt)}`;
   els.reportPreviewRiskBadge.textContent = `${riskLabel(profile.focusZone.level)} Risk`;
   els.reportPreviewRiskBadge.className = `report-risk-badge ${profile.focusZone.level}`;

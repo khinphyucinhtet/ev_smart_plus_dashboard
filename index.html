@@ -404,7 +404,6 @@
                   <button class="trend-range-btn" type="button" data-trend-range="yearly">Yearly</button>
                 </div>
                 <label class="trend-region-filter">
-                  <span>Region</span>
                   <select id="trendRegionFilter" aria-label="Trend region filter"></select>
                 </label>
               </div>
@@ -451,10 +450,10 @@
                   <div class="trend-panel-badge">2</div>
                   <div>
                     <h4>Most Affected Districts</h4>
-                    <p>Show top 5 districts by incident count.</p>
+                    <p>Show top 10 districts by incident count.</p>
                   </div>
                 </div>
-                <svg id="topRiskChart" class="top-risk-chart" viewBox="0 0 420 240" aria-label="Top five risk districts chart"></svg>
+                <svg id="topRiskChart" class="top-risk-chart" viewBox="0 0 420 320" aria-label="Top ten risk districts chart"></svg>
               </section>
               <section class="trend-panel trend-severity-panel">
                 <div class="trend-panel-head">
@@ -521,28 +520,12 @@
                   <button class="compact-range-btn" type="button" data-ai-report-range="yearly">Yearly</button>
                 </div>
               </div>
-              <div class="report-control-field report-options-field">
-                <span>Report Content Options</span>
-                <div class="report-option-list">
-                  <label><input type="checkbox" class="ai-report-option" value="trend" checked /> Trend overview</label>
-                  <label><input type="checkbox" class="ai-report-option" value="severity" checked /> Severity breakdown</label>
-                  <label><input type="checkbox" class="ai-report-option" value="risk" checked /> Risk overview</label>
-                  <label><input type="checkbox" class="ai-report-option" value="actions" checked /> Government actions</label>
-                </div>
-              </div>
             </div>
 
             <div id="aiSuggestionOutput" class="ai-suggestion-output">
               <section>
-                <span>Selected Region Summary</span>
-                <p id="aiSummaryText">Select a region and date range to prepare a government-focused summary.</p>
-              </section>
-              <section>
-                <span>Potential Causes</span>
+                <span>Potential Causes &amp; Solutions</span>
                 <p id="aiCausesText">Potential causes will appear here in paragraph format.</p>
-              </section>
-              <section>
-                <span>Potential Solutions</span>
                 <p id="aiSolutionsText">Potential solutions will appear here in paragraph format.</p>
               </section>
               <section>
