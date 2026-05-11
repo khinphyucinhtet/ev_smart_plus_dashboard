@@ -2490,10 +2490,12 @@ function renderTopRiskChart() {
   }
   const zones = analyticsTopZones(10);
   const width = 500;
-  const height = 540;
-  const padding = { top: 52, right: 56, bottom: 56, left: 136 };
+  const height = 560;
+  const padding = { top: 34, right: 58, bottom: 54, left: 142 };
   const maxValue = Math.max(...zones.map((zone) => zone.incidentsCount), 10);
-  const rowHeight = 43;
+  const rowHeight = 46;
+  const barHeight = 21;
+  const barRadius = 10.5;
   const barWidth = width - padding.left - padding.right;
 
   const rows = zones
@@ -2501,10 +2503,10 @@ function renderTopRiskChart() {
       const y = padding.top + index * rowHeight;
       const barLen = (zone.incidentsCount / maxValue) * barWidth;
       return `
-        <text x="${padding.left - 12}" y="${y + 20}" text-anchor="end" class="mini-bar-label">${escapeHtml(zone.title)}</text>
-        <rect x="${padding.left}" y="${y + 6}" width="${barWidth}" height="18" rx="9" class="mini-bar-track" />
-        <rect x="${padding.left}" y="${y + 6}" width="${barLen}" height="18" rx="9" fill="${zoneStroke(zone.level)}" />
-        <text x="${padding.left + barLen + 9}" y="${y + 21}" class="mini-bar-value">${zone.incidentsCount}</text>
+        <text x="${padding.left - 12}" y="${y + 22}" text-anchor="end" class="mini-bar-label">${escapeHtml(zone.title)}</text>
+        <rect x="${padding.left}" y="${y + 7}" width="${barWidth}" height="${barHeight}" rx="${barRadius}" class="mini-bar-track" />
+        <rect x="${padding.left}" y="${y + 7}" width="${barLen}" height="${barHeight}" rx="${barRadius}" fill="${zoneStroke(zone.level)}" />
+        <text x="${padding.left + barLen + 9}" y="${y + 23}" class="mini-bar-value">${zone.incidentsCount}</text>
       `;
     })
     .join("");
@@ -2512,7 +2514,7 @@ function renderTopRiskChart() {
   svg.innerHTML = `
     <rect x="0" y="0" width="${width}" height="${height}" rx="20" class="chart-bg" />
     ${rows}
-    <text x="${width / 2}" y="${height - 10}" text-anchor="middle" class="chart-label">Incidents</text>
+    <text x="${width / 2}" y="${height - 18}" text-anchor="middle" class="chart-label">Incidents</text>
   `;
 }
 
