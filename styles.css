@@ -4838,7 +4838,7 @@ body.report-mode .top-risk-panel::after {
   position: absolute;
   left: 16px;
   right: 16px;
-  bottom: 14px;
+  bottom: 10px;
   height: 1px;
   background: #e5ebef;
   pointer-events: none;
@@ -4851,8 +4851,8 @@ body.report-mode .top-risk-panel-head {
 }
 
 body.report-mode .risk-distribution {
-  padding-top: 14px;
-  padding-bottom: 34px;
+  padding-top: 8px;
+  padding-bottom: 20px;
   scrollbar-gutter: stable;
 }
 
