@@ -4785,3 +4785,117 @@ body.report-mode .government-report-preview {
     margin: 0 auto;
   }
 }
+
+/* Accidents Report overview card and control alignment polish. */
+body.report-mode .report-map-card.report-hero-card {
+  padding: 28px;
+  border: 1px solid #dfe8e2;
+  border-radius: 28px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdfc 100%);
+  box-shadow: 0 20px 45px rgba(24, 34, 45, 0.08);
+}
+
+body.report-mode .report-map-head {
+  margin-bottom: 26px;
+}
+
+body.report-mode .report-map-layout {
+  gap: 26px;
+}
+
+body.report-mode .report-map {
+  min-height: 455px;
+}
+
+body.report-mode .region-chip-row {
+  margin-top: 18px;
+  padding: 4px 0 2px;
+  gap: 12px;
+}
+
+body.report-mode .region-chip {
+  padding: 12px 14px;
+}
+
+body.report-mode .top-risk-panel {
+  padding: 24px 16px 16px;
+}
+
+body.report-mode .top-risk-panel-head {
+  margin-bottom: 4px;
+}
+
+body.report-mode .risk-distribution {
+  padding-top: 18px;
+}
+
+body.report-mode .trend-bar-panel {
+  min-height: 620px;
+}
+
+body.report-mode .trend-bar-panel .top-risk-chart {
+  min-height: 520px;
+  margin-top: 18px;
+}
+
+body.report-mode .mini-bar-label,
+body.report-mode .mini-bar-value {
+  font-size: 10px;
+}
+
+body.report-mode .ai-report-controls {
+  grid-template-columns: minmax(280px, 0.62fr) minmax(430px, auto);
+  justify-content: space-between;
+  gap: 28px;
+}
+
+body.report-mode .ai-report-controls .report-control-field:first-child {
+  max-width: 620px;
+}
+
+body.report-mode .ai-report-controls .report-control-field:nth-child(2) {
+  justify-self: end;
+  min-width: 430px;
+}
+
+body.report-mode .ai-report-controls .report-control-field:nth-child(2) > span {
+  text-align: left;
+}
+
+body.report-mode .ai-report-controls .compact-range-group {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+}
+
+@media (max-width: 1100px) {
+  body.report-mode .ai-report-controls {
+    grid-template-columns: 1fr;
+  }
+
+  body.report-mode .ai-report-controls .report-control-field:first-child,
+  body.report-mode .ai-report-controls .report-control-field:nth-child(2) {
+    max-width: none;
+    min-width: 0;
+    justify-self: stretch;
+  }
+
+  body.report-mode .ai-report-controls .compact-range-group {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 900px) {
+  body.report-mode .report-map-card.report-hero-card {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  body.report-mode .report-map {
+    min-height: 420px;
+  }
+
+  body.report-mode .trend-bar-panel {
+    min-height: auto;
+  }
+}
