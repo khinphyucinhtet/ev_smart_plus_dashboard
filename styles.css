@@ -4853,14 +4853,14 @@ body.report-mode .trend-bar-panel {
 body.report-mode .trend-bar-panel .top-risk-chart {
   width: 106%;
   max-width: none;
-  min-height: 398px;
+  min-height: 470px;
   margin-top: 0;
   margin-left: -3%;
 }
 
 body.report-mode .mini-bar-label,
 body.report-mode .mini-bar-value {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 900;
 }
 
