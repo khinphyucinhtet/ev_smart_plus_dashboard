@@ -541,8 +541,103 @@ const reportZones = {
       "Putrajaya remains comparatively calm, but civic-center routes should still keep one clear response path open for scattered EV support incidents.",
     spark: [1, 1, 1, 2, 2, 2, 3],
   },
+  "seri-kembangan": {
+    title: "Seri Kembangan",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 3,
+    criticalPct: 15,
+    action: "Monitor township arteries linking Bukit Jalil and southbound commuter flow",
+    window: "7 AM - 10 AM",
+    level: "medium",
+    displayRiskLevel: "medium",
+    center: [3.0328, 101.7056],
+    polygon: [
+      [3.058, 101.662],
+      [3.066, 101.723],
+      [3.034, 101.748],
+      [2.999, 101.739],
+      [2.989, 101.69],
+      [3.012, 101.659],
+    ],
+    narrative:
+      "Seri Kembangan is a smaller-volume corridor, but repeated commuter merging and township access movements still justify medium-risk monitoring near the Serdang and Mines links.",
+    spark: [1, 2, 2, 3, 2, 3, 3],
+  },
+  "bukit-jalil": {
+    title: "Bukit Jalil",
+    riskText: "Watch closely",
+    riskClass: "medium-text",
+    incidentsCount: 3,
+    criticalPct: 14,
+    action: "Keep venue-access and ring-road detour routing ready",
+    window: "4 PM - 7 PM",
+    level: "medium",
+    displayRiskLevel: "medium",
+    center: [3.0574, 101.6901],
+    polygon: [
+      [3.085, 101.656],
+      [3.091, 101.717],
+      [3.061, 101.733],
+      [3.034, 101.722],
+      [3.024, 101.679],
+      [3.046, 101.651],
+    ],
+    narrative:
+      "Bukit Jalil remains a compact planning zone, yet event traffic, ring-road turns, and charging-stop circulation still support medium-risk ambulance awareness during evening peaks.",
+    spark: [1, 1, 2, 2, 3, 3, 3],
+  },
+  "setia-alam": {
+    title: "Setia Alam",
+    riskText: "Low risk / monitor",
+    riskClass: "low-text",
+    incidentsCount: 2,
+    criticalPct: 2,
+    action: "Keep township feeder monitoring light with routine standby coverage",
+    window: "11 AM - 1 PM",
+    level: "low",
+    center: [3.1112, 101.4608],
+    polygon: [
+      [3.14, 101.418],
+      [3.15, 101.49],
+      [3.114, 101.515],
+      [3.084, 101.501],
+      [3.075, 101.445],
+      [3.099, 101.412],
+    ],
+    narrative:
+      "Setia Alam remains in the low-risk band, with scattered daytime township cases that mainly require routine route visibility rather than full standby escalation.",
+    spark: [1, 1, 1, 2, 1, 2, 2],
+  },
 };
 let activeZone = "shah-alam";
+
+const preferredDistrictOrder = [
+  "Shah Alam",
+  "Klang",
+  "Gombak",
+  "Petaling Jaya",
+  "Subang Jaya",
+  "Rawang",
+  "Hulu Langat",
+  "Ampang Jaya",
+  "Kuala Langat",
+  "Hulu Selangor",
+  "Selayang",
+  "Puchong",
+  "Sungai Buloh",
+  "Kajang",
+  "Cyberjaya",
+  "Sepang",
+  "Kuala Selangor",
+  "Banting",
+  "Batu Caves",
+  "Putrajaya",
+  "Sabak Bernam",
+  "Seri Kembangan",
+  "Bukit Jalil",
+  "Setia Alam",
+];
 
 syncZoneRiskPresentation();
 
@@ -1130,7 +1225,7 @@ function riskClassForLevel(level) {
 
 function syncZoneRiskPresentation() {
   Object.values(reportZones).forEach((zone) => {
-    const level = riskBandFromZone(zone);
+    const level = zone.displayRiskLevel || riskBandFromZone(zone);
     zone.level = level;
     zone.riskText = riskTextForLevel(level);
     zone.riskClass = riskClassForLevel(level);
@@ -1211,8 +1306,7 @@ function preferredRiskBand(id) {
 }
 
 function regionChipsMarkup() {
-  return Object.entries(reportZones)
-    .sort(([, a], [, b]) => compareZonesByPriority(a, b))
+  return orderedReportZones()
     .map(([id, zone], index) => {
       const active = id === activeZone ? " active" : "";
       const levelTag = `L${severityLevelFromZone(zone)}`;
@@ -1233,50 +1327,11 @@ function regionChipsMarkup() {
 }
 
 function riskDistributionMarkup() {
-  const preferredRiskOrder = [
-    "Shah Alam",
-    "Klang",
-    "Gombak",
-    "Petaling Jaya",
-    "Subang Jaya",
-    "Rawang",
-    "Hulu Langat",
-    "Ampang Jaya",
-    "Kuala Langat",
-    "Hulu Selangor",
-    "Selayang",
-    "Puchong",
-    "Sungai Buloh",
-    "Kajang",
-    "Cyberjaya",
-    "Sepang",
-    "Kuala Selangor",
-    "Banting",
-    "Batu Caves",
-    "Putrajaya",
-    "Sabak Bernam",
-  ];
-  const preferredRank = (title) => {
-    const index = preferredRiskOrder.indexOf(title);
-    return index === -1 ? Number.MAX_SAFE_INTEGER : index;
-  };
-  const zones = Object.values(reportZones)
-    .slice()
-    .sort((a, b) => {
-      const rankDiff = preferredRank(a.title) - preferredRank(b.title);
-      if (rankDiff !== 0) {
-        return rankDiff;
-      }
-      const incidentDiff = b.incidentsCount - a.incidentsCount;
-      if (incidentDiff !== 0) {
-        return incidentDiff;
-      }
-      return a.title.localeCompare(b.title);
-    });
-  return zones
+  const activeTitle = (reportZones[activeZone] || reportZones["shah-alam"]).title;
+  return orderedReportZones()
     .map(
-      (zone, index) => `
-        <button type="button" class="risk-pill ${zone.level}${zone.title === (reportZones[activeZone] || reportZones["shah-alam"]).title ? " active" : ""}" data-risk-zone="${escapeHtml(zone.title)}">
+      ([, zone], index) => `
+        <button type="button" class="risk-pill ${zone.level}${zone.title === activeTitle ? " active" : ""}" data-risk-zone="${escapeHtml(zone.title)}">
           <div class="risk-pill-head">
             <div class="risk-pill-rankline">
               <span class="risk-rank-text">${escapeHtml(String(index + 1))}</span>
@@ -1302,6 +1357,26 @@ function riskDistributionMarkup() {
       `,
     )
     .join("");
+}
+
+function orderedReportZones() {
+  const preferredRank = (title) => {
+    const index = preferredDistrictOrder.indexOf(title);
+    return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+  };
+  return Object.entries(reportZones)
+    .slice()
+    .sort(([, a], [, b]) => {
+      const rankDiff = preferredRank(a.title) - preferredRank(b.title);
+      if (rankDiff !== 0) {
+        return rankDiff;
+      }
+      const incidentDiff = b.incidentsCount - a.incidentsCount;
+      if (incidentDiff !== 0) {
+        return incidentDiff;
+      }
+      return a.title.localeCompare(b.title);
+    });
 }
 
 function bindRegionChips() {

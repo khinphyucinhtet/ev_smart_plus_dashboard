@@ -4811,7 +4811,8 @@ body.report-mode .region-chip {
 
 body.report-mode .top-risk-panel {
   position: relative;
-  padding: 24px 16px 12px;
+  min-height: 100%;
+  padding: 24px 16px 8px;
   border-color: #d4dee7;
   border-bottom-color: #cbd8e1;
   box-shadow:
@@ -4824,7 +4825,7 @@ body.report-mode .top-risk-panel::after {
   position: absolute;
   left: 16px;
   right: 16px;
-  bottom: 10px;
+  bottom: 6px;
   height: 1px;
   background: #e5ebef;
   pointer-events: none;
@@ -4837,8 +4838,11 @@ body.report-mode .top-risk-panel-head {
 }
 
 body.report-mode .risk-distribution {
+  min-height: 0;
+  max-height: none;
+  flex: 1 1 0;
   padding-top: 8px;
-  padding-bottom: 20px;
+  padding-bottom: 8px;
   scrollbar-gutter: stable;
 }
 
