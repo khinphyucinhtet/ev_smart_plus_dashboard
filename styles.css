@@ -4948,3 +4948,71 @@ body.report-mode .ai-report-controls .compact-range-group {
     min-height: auto;
   }
 }
+
+@media (max-width: 768px) {
+  body.report-mode .report-map-layout {
+    gap: 18px;
+  }
+
+  body.report-mode .region-chip-row {
+    margin-top: 14px;
+    gap: 10px;
+  }
+
+  body.report-mode .top-risk-panel {
+    min-height: auto;
+    height: auto;
+    overflow: visible;
+    padding: 20px 14px 16px;
+  }
+
+  body.report-mode .top-risk-panel::after {
+    bottom: 10px;
+  }
+
+  body.report-mode .top-risk-panel-head {
+    padding-bottom: 12px;
+  }
+
+  body.report-mode .risk-distribution {
+    max-height: none;
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+    padding-top: 10px;
+    padding-right: 0;
+    padding-bottom: 10px;
+  }
+}
+
+@media (max-width: 520px) {
+  body.report-mode .report-map-card.report-hero-card {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  body.report-mode .report-map {
+    min-height: 300px;
+  }
+
+  body.report-mode .region-chip-row {
+    grid-template-columns: 1fr;
+  }
+
+  body.report-mode .top-risk-panel {
+    padding: 18px 12px 14px;
+    border-radius: 18px;
+  }
+
+  body.report-mode .top-risk-panel-head h4 {
+    font-size: 20px;
+  }
+
+  body.report-mode .risk-distribution {
+    gap: 12px;
+  }
+
+  body.report-mode .risk-pill {
+    min-width: 0;
+  }
+}
