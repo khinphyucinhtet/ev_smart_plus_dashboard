@@ -4857,7 +4857,7 @@ body.report-mode .trend-bar-panel .trend-panel-head {
 body.report-mode .trend-bar-panel .top-risk-chart {
   width: 106%;
   max-width: none;
-  min-height: 500px;
+  min-height: 456px;
   margin-top: -34px;
   margin-left: -3%;
 }
@@ -4869,13 +4869,14 @@ body.report-mode .mini-bar-value {
 }
 
 body.report-mode .trend-main-panel,
+body.report-mode .trend-bar-panel,
 body.report-mode .trend-severity-panel {
-  padding-bottom: 10px;
+  padding-bottom: 4px;
 }
 
 body.report-mode .trend-main-panel .trend-stat-strip {
   gap: 10px;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 body.report-mode .trend-main-panel .trend-stat-card {
@@ -4887,8 +4888,8 @@ body.report-mode .trend-main-panel .trend-stat-card strong {
 }
 
 body.report-mode .trend-severity-panel .chart-insight {
-  margin-top: 8px;
-  padding: 9px 11px;
+  margin-top: 6px;
+  padding: 8px 11px;
 }
 
 body.report-mode .ai-report-controls {
