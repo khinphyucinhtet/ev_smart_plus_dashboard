@@ -4850,11 +4850,15 @@ body.report-mode .trend-bar-panel {
   min-height: 0;
 }
 
+body.report-mode .trend-bar-panel .trend-panel-head {
+  margin-bottom: 4px;
+}
+
 body.report-mode .trend-bar-panel .top-risk-chart {
   width: 106%;
   max-width: none;
   min-height: 500px;
-  margin-top: -22px;
+  margin-top: -34px;
   margin-left: -3%;
 }
 
